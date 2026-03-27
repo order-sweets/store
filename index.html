@@ -11,6 +11,8 @@
   --accent:#D85A30;--accent-bg:#FAECE7;--accent-text:#993C1D;
   --green:#1D9E75;--green-bg:#E1F5EE;--green-text:#0F6E56;
   --amber-bg:#FAEEDA;--amber-text:#633806;
+  --purple:#7C3AED;--purple-bg:#F3EFFE;--purple-text:#5B21B6;
+  --blue:#1D6EAE;--blue-bg:#E8F2FB;--blue-text:#1A4F7A;
   --bg:#FDFCF9;--surface:#F2F0EB;--border:rgba(0,0,0,.10);
   --border-md:rgba(0,0,0,.18);--text:#1C1B18;
   --text-muted:#7A7870;--text-hint:#B0AEA8;
@@ -19,11 +21,17 @@
 html{-webkit-text-size-adjust:100%;}
 body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;}
 .page{display:none;min-height:100vh;}.page.active{display:block;}
-
 #lock-btn{position:fixed;bottom:90px;right:16px;z-index:300;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);display:flex;align-items:center;justify-content:center;cursor:pointer;}
 #lock-btn svg{width:20px;height:20px;stroke:var(--text-muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-
 .order-wrap{max-width:680px;margin:0 auto;padding:1.25rem 1.1rem 8rem;}
+
+/* TIER BANNER */
+.tier-banner{display:flex;align-items:center;gap:10px;border-radius:var(--r);padding:9px 14px;margin-bottom:1.25rem;font-size:13px;font-weight:600;}
+.tier-banner.retail{background:var(--blue-bg);color:var(--blue-text);border:1.5px solid #9AC5E8;}
+.tier-banner.distributor{background:var(--purple-bg);color:var(--purple-text);border:1.5px solid #C4A8F5;}
+.tier-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.tier-dot.retail{background:var(--blue);}
+.tier-dot.distributor{background:var(--purple);}
 
 /* GREETING */
 .greeting-banner{background:linear-gradient(135deg,#1C1B18 0%,#3a3832 100%);border-radius:var(--r-lg);padding:1.25rem 1.5rem;margin-bottom:1.5rem;}
@@ -52,36 +60,30 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .search-result-item:hover{background:var(--surface);}
 .sri-name{font-size:14px;font-weight:500;}.sri-brand{font-size:12px;color:var(--text-muted);}.sri-price{font-size:13px;font-weight:600;color:var(--accent-text);margin-left:auto;}
 .search-no-results{padding:16px;font-size:13px;color:var(--text-hint);text-align:center;font-style:italic;}
-
 .slabel{font-size:20px;font-weight:700;color:var(--text);margin:0 0 14px;}
 
-/* ── ORDER HISTORY ── */
+/* ORDER HISTORY */
 .order-history-bar{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:1.5rem;display:none;}
 .order-history-bar.show{display:block;}
 .oh-title{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
 .oh-list{display:flex;flex-direction:column;gap:4px;}
-.oh-item{font-size:12px;color:var(--text-muted);}
-.oh-item strong{color:var(--text);}
+.oh-item{font-size:12px;color:var(--text-muted);}.oh-item strong{color:var(--text);}
 
-/* ── LIST LAYOUT — single column, full width ── */
+/* PRODUCT LIST */
 .prod-list{display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;}
 .brand-group{margin-bottom:1.75rem;}
-.brand-group-title{font-size:16px;font-weight:700;color:var(--text);padding:6px 0;border-bottom:2px solid var(--border-md);margin-bottom:12px;letter-spacing:-.1px;}
+.brand-group-title{font-size:16px;font-weight:700;color:var(--text);padding:6px 0;border-bottom:2px solid var(--border-md);margin-bottom:12px;}
 .ps-empty{font-size:14px;color:var(--text-hint);font-style:italic;padding:8px 0 24px;text-align:center;}
 
-/* ── ITEM CARD (list row) ── */
+/* ITEM CARD */
 .item-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:row;}
 .item-card.has-qty{border:2.5px solid var(--accent);background:var(--accent-bg);}
 .item-card.oos{opacity:.42;background:var(--surface);}
-
-/* Left image column */
 .card-img{width:110px;flex-shrink:0;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden;align-self:stretch;}
 @media(max-width:420px){.card-img{width:86px;}}
 .card-img img{width:100%;height:100%;object-fit:cover;}
 .card-img-placeholder{font-size:36px;line-height:1;}
-
-/* Right content column */
-.card-body{flex:1;min-width:0;padding:12px 14px 12px 14px;display:flex;flex-direction:column;}
+.card-body{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;}
 .item-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;line-height:1.3;}
 .item-desc{font-size:11px;color:var(--text-muted);margin-bottom:6px;line-height:1.4;}
 .badge-new{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:var(--amber-bg);color:var(--amber-text);margin-bottom:5px;text-transform:uppercase;}
@@ -112,8 +114,6 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .uq-btn:disabled{opacity:.28;cursor:not-allowed;}
 .uq-inp{flex:1;height:30px;min-width:0;border:1.5px solid var(--border-md);border-radius:7px;text-align:center;font-size:13px;font-weight:700;font-family:inherit;color:var(--text);background:#fff;outline:none;-webkit-appearance:none;}
 .uq-inp:focus{border-color:var(--accent);}
-
-/* ADD TO CART (variation products) */
 .add-to-cart-btn{margin-top:8px;width:100%;padding:8px;background:var(--text);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
 .add-to-cart-btn:disabled{opacity:.35;cursor:not-allowed;}
 .cart-entries{margin-top:6px;display:flex;flex-direction:column;gap:4px;}
@@ -121,7 +121,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .cart-entry-label{flex:1;min-width:0;font-weight:500;}
 .cart-entry-remove{width:18px;height:18px;background:rgba(0,0,0,.1);border:none;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-weight:700;flex-shrink:0;}
 
-/* DELIVERY */
+/* DELIVERY / PAYMENT */
 .cash-banner{background:var(--green-bg);border:2px solid var(--green);border-radius:var(--r-lg);padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:14px;}
 .cash-icon{font-size:32px;flex-shrink:0;}
 .cash-text-title{font-family:'DM Serif Display',serif;font-size:24px;font-weight:400;color:var(--green-text);}
@@ -141,7 +141,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .prog-wrap{background:rgba(0,0,0,.10);border-radius:20px;height:6px;margin-top:6px;overflow:hidden;}
 .prog-bar{height:6px;border-radius:20px;background:var(--amber-text);transition:width .3s;}
 
-/* DETAILS */
+/* FIELDS */
 .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem;}
 @media(max-width:480px){.field-grid{grid-template-columns:1fr;}.field.full{grid-column:1;}}
 .field{display:flex;flex-direction:column;gap:6px;}.field.full{grid-column:1/-1;}
@@ -174,7 +174,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .basket-row.dim{color:var(--text-muted);}
 .basket-row.tot{font-weight:700;font-size:18px;border-top:1.5px solid var(--border-md);padding-top:10px;margin-top:6px;}
 
-/* STICKY BTN */
+/* STICKY */
 .wa-sticky{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:10px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);}
 .wa-btn{width:100%;padding:17px;background:#25D366;border:none;border-radius:var(--r-lg);font-size:17px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
 .wa-btn:disabled{opacity:.32;cursor:not-allowed;}
@@ -221,7 +221,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .back-btn{display:block;width:100%;text-align:center;font-size:14px;color:var(--text-muted);margin-top:16px;cursor:pointer;background:none;border:none;font-family:inherit;padding:6px;}
 
 /* ADMIN */
-.admin-wrap{max-width:720px;margin:0 auto;padding:2rem 1.1rem 5rem;}
+.admin-wrap{max-width:760px;margin:0 auto;padding:2rem 1.1rem 5rem;}
 .admin-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:10px;}
 .admin-topbar h2{font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;}
 .admin-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
@@ -245,9 +245,16 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .primary-btn{padding:11px 20px;background:var(--text);border:none;border-radius:var(--r);font-size:14px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;}
 .primary-btn.full{width:100%;margin-top:12px;}
 .danger-btn{padding:8px 14px;background:#FCEBEB;border:none;border-radius:var(--r);font-size:13px;font-weight:600;color:#791F1F;cursor:pointer;font-family:inherit;}
+.save-prod-btn{padding:9px 20px;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r);font-size:13px;font-weight:600;color:var(--green-text);cursor:pointer;font-family:inherit;}
 .admin-brand-block{margin-bottom:1.5rem;}
 .admin-brand-name{font-size:11px;font-weight:600;color:var(--text-muted);padding:5px 0;border-bottom:1px solid var(--border);margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase;}
 .new-admin-wrap{background:var(--surface);border-radius:var(--r);padding:4px 12px;margin-bottom:1.75rem;}
+
+/* ADMIN TABS */
+.admin-tabs{display:flex;gap:4px;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:2rem;flex-wrap:wrap;}
+.admin-tab{flex:1;min-width:100px;padding:10px 14px;border:none;background:transparent;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-muted);white-space:nowrap;text-align:center;}
+.admin-tab.active{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.10);}
+.admin-tab-panel{display:none;}.admin-tab-panel.active{display:block;}
 
 /* ADMIN PRODUCT CARD */
 .prod-admin-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);margin-bottom:10px;overflow:hidden;}
@@ -261,14 +268,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .prod-admin-chevron.open{transform:rotate(180deg);}
 .prod-admin-body{display:none;padding:0 14px 14px;border-top:1px solid var(--border);}
 .prod-admin-body.open{display:block;}
-
-/* Inventory display boxes */
 .inv-display{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0;}
 .inv-box{background:var(--surface);border-radius:8px;padding:10px;text-align:center;}
 .inv-box-val{font-size:20px;font-weight:700;}
 .inv-box-lbl{font-size:10px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
-
-/* Admin edit fields inside product card */
 .admin-edit-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
 .admin-edit-section-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;}
 .admin-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -276,9 +279,33 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .admin-field{display:flex;flex-direction:column;gap:4px;}.admin-field.full{grid-column:1/-1;}
 .admin-field label{font-size:11px;color:var(--text-muted);font-weight:500;}
 .admin-field input,.admin-field select,.admin-field textarea{font-size:13px;padding:8px 10px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;color:var(--text);font-family:inherit;outline:none;width:100%;-webkit-appearance:none;}
-.save-prod-btn{margin-top:10px;padding:9px 20px;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r);font-size:13px;font-weight:600;color:var(--green-text);cursor:pointer;font-family:inherit;}
 
-/* PHOTO — compact inline row */
+/* PRICING TIER FIELDS inside admin product card */
+.tier-price-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.tier-price-block{background:var(--surface);border-radius:10px;padding:10px;}
+.tier-price-block.retail-block{background:var(--blue-bg);}
+.tier-price-block.dist-block{background:var(--purple-bg);}
+.tier-price-block-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.retail-block .tier-price-block-title{color:var(--blue-text);}
+.dist-block .tier-price-block-title{color:var(--purple-text);}
+.tier-price-block .admin-field label{font-size:10px;}
+.tier-price-block .admin-field input{font-size:13px;padding:7px 9px;}
+
+/* VISIBILITY toggles */
+.visibility-section{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
+.visibility-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;}
+.vis-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border-radius:9px;margin-bottom:6px;}
+.vis-row-label{font-size:13px;font-weight:600;}
+.vis-row-label.retail{color:var(--blue-text);}
+.vis-row-label.dist{color:var(--purple-text);}
+.toggle-switch{position:relative;width:42px;height:24px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:24px;cursor:pointer;transition:.2s;}
+.toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+.toggle-switch input:checked+.toggle-slider{background:var(--green);}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(18px);}
+
+/* PHOTO */
 .photo-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
 .photo-thumb-sm{width:40px;height:40px;border-radius:7px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0;}
 .photo-thumb-sm img{width:100%;height:100%;object-fit:cover;}
@@ -300,13 +327,19 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .sbadge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap;}
 .sbadge.ok{background:#EAF3DE;color:#27500A;}.sbadge.low{background:var(--amber-bg);color:var(--amber-text);}.sbadge.out{background:#FCEBEB;color:#791F1F;}
 
-/* CUSTOMERS */
+/* CUSTOMER CARDS */
+.tier-group-title{font-size:13px;font-weight:700;padding:8px 12px;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.tier-group-title.retail{background:var(--blue-bg);color:var(--blue-text);}
+.tier-group-title.distributor{background:var(--purple-bg);color:var(--purple-text);}
+.tier-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.tier-tag.retail{background:var(--blue-bg);color:var(--blue-text);border:1px solid #9AC5E8;}
+.tier-tag.distributor{background:var(--purple-bg);color:var(--purple-text);border:1px solid #C4A8F5;}
 .customer-card{background:#fff;border:1.5px solid var(--border-md);border-radius:var(--r-lg);margin-bottom:10px;overflow:hidden;}
 .customer-header{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;}
 .customer-header-info{flex:1;min-width:0;}
 .customer-header-name{font-size:15px;font-weight:700;}
 .customer-header-meta{font-size:12px;color:var(--text-muted);}
-.customer-header-actions{display:flex;gap:7px;}
+.customer-header-actions{display:flex;gap:7px;flex-wrap:wrap;}
 .copy-link-btn{font-size:12px;padding:6px 12px;background:var(--text);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;}
 .del-cust-btn{font-size:12px;padding:6px 10px;background:#FCEBEB;color:#791F1F;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;}
 .cust-chevron{font-size:12px;color:var(--text-hint);transition:transform .2s;}
@@ -317,7 +350,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 @media(max-width:480px){.cust-edit-grid{grid-template-columns:1fr;}}
 .cust-edit-field{display:flex;flex-direction:column;gap:4px;}.cust-edit-field.full{grid-column:1/-1;}
 .cust-edit-field label{font-size:11px;color:var(--text-muted);font-weight:500;}
-.cust-edit-field input{font-size:14px;padding:8px 10px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;color:var(--text);font-family:inherit;outline:none;width:100%;}
+.cust-edit-field input,.cust-edit-field select{font-size:14px;padding:8px 10px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;color:var(--text);font-family:inherit;outline:none;width:100%;-webkit-appearance:none;}
 .save-cust-btn{font-size:12px;padding:7px 16px;background:var(--green-bg);border:1px solid var(--green);border-radius:8px;color:var(--green-text);cursor:pointer;font-family:inherit;font-weight:600;margin-bottom:12px;}
 .outlet-section-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
 .outlet-edit-block{background:var(--surface);border-radius:10px;padding:10px;margin-bottom:8px;}
@@ -333,7 +366,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 </head>
 <body>
 
-<!-- ══ ORDER PAGE ══ -->
+<!-- ORDER PAGE -->
 <div class="page active" id="page-order">
 <div class="order-wrap">
 
@@ -346,6 +379,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     </div>
   </div>
 
+  <!-- Tier banner shown for logged-in customers -->
+  <div id="tier-banner" style="display:none" class="tier-banner retail">
+    <span class="tier-dot retail" id="tier-dot"></span>
+    <span id="tier-label-text"></span>
+  </div>
+
   <div class="hero">
     <h1>Time to Order</h1>
     <p>Classic and trending snacks, handpicked for modern taste buds!</p>
@@ -353,7 +392,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
   <div class="search-wrap">
     <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="search-input" type="text" id="search-inp" placeholder="Search products… (e.g. Nerds, bites)" oninput="onSearch()" autocomplete="off">
+    <input class="search-input" type="text" id="search-inp" placeholder="Search products…" oninput="onSearch()" autocomplete="off">
     <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
     <div class="search-dropdown" id="search-dropdown"></div>
   </div>
@@ -400,10 +439,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   </div>
 
   <p class="slabel">Payment Method</p>
-  <div class="cash-banner">
-    <div class="cash-icon">💵</div>
-    <div class="cash-text-title">Cash on Delivery</div>
-  </div>
+  <div class="cash-banner"><div class="cash-icon">💵</div><div class="cash-text-title">Cash on Delivery</div></div>
 
   <p class="slabel">Your Details</p>
   <div class="field-grid">
@@ -414,7 +450,6 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     <div class="field full" id="addr-field"><label>Delivery Address</label><input type="text" id="f-address" placeholder="Block, street, unit number"></div>
     <div class="field full"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Any allergies, special requests…"></textarea></div>
   </div>
-
 </div>
 
 <div class="wa-sticky">
@@ -423,7 +458,6 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     Send Order via WhatsApp
   </button>
 </div>
-
 <button id="lock-btn" onclick="showPage('page-login')" aria-label="Admin">
   <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
 </button>
@@ -442,7 +476,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   </div>
 </div>
 
-<!-- ORDER PLACED MODAL -->
+<!-- PLACED MODAL -->
 <div class="modal-overlay" id="placed-modal">
   <div class="placed-modal-box">
     <div class="placed-icon">✅</div>
@@ -469,7 +503,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   <div class="login-wrap">
     <div class="login-card">
       <h2>Admin Access</h2>
-      <p class="login-sub">Enter your password to manage inventory and customers.</p>
+      <p class="login-sub">Enter your password to manage products and customers.</p>
       <div class="lfield"><label>Password</label><input type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')tryLogin()"></div>
       <p class="login-err" id="login-err">Incorrect password. Please try again.</p>
       <button class="login-btn" onclick="tryLogin()">Sign In</button>
@@ -502,43 +536,66 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     <span style="font-size:13px;color:var(--text-muted)">pieces</span>
   </div>
 
-  <p class="slabel" style="font-size:20px;margin-bottom:14px">➕ Add New Product</p>
-  <div class="section-card">
-    <div class="form-grid">
-      <div class="form-field"><label>Product Name</label><input type="text" id="add-name" placeholder="e.g. Nerds Rope Rainbow"></div>
-      <div class="form-field"><label>Brand</label>
-        <input type="text" id="add-brand" list="brand-datalist" placeholder="Type or choose brand">
-        <datalist id="brand-datalist"></datalist>
-      </div>
-      <div class="form-field"><label>Piece Price ($)</label><input type="number" id="add-price" placeholder="2.80" min="0" step="0.10" inputmode="decimal"></div>
-      <div class="form-field"><label>Pieces per Case</label><input type="number" id="add-ppc" placeholder="24" min="1" inputmode="numeric"></div>
-      <div class="form-field"><label>Case Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price" placeholder="auto" min="0" step="0.10" inputmode="decimal"></div>
-      <div class="form-field"><label>Opening Stock (pieces)</label><input type="number" id="add-stock" placeholder="240" min="0" inputmode="numeric"></div>
-      <div class="form-field"><label>Weight per piece</label><input type="text" id="add-weight" placeholder="e.g. 26g"></div>
-      <div class="form-field"><label>Description</label><input type="text" id="add-desc" placeholder="Short description"></div>
-      <div class="form-field"><label>Discount %</label><input type="number" id="add-disc" placeholder="0" min="0" max="100" inputmode="numeric"></div>
-      <div class="form-field"><label>Section</label>
-        <select id="add-section"><option value="catalog">Product Selection</option><option value="new">New Arrivals</option></select>
-      </div>
-    </div>
-    <button class="primary-btn full" onclick="addProduct()">Add Product</button>
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchTab('tab-products')">📦 Products</button>
+    <button class="admin-tab" onclick="switchTab('tab-customers')">👥 Customers</button>
   </div>
 
-  <p class="slabel" style="font-size:20px;margin-bottom:14px">📦 Inventory</p>
-  <div class="new-admin-wrap" id="admin-new"></div>
-  <div id="admin-brands"></div>
-
-  <p class="slabel" style="font-size:20px;margin-bottom:14px;margin-top:2rem">👥 Customers</p>
-  <div class="section-card">
-    <h3>Add New Customer</h3>
-    <div class="form-grid">
-      <div class="form-field"><label>Customer / Company Name</label><input type="text" id="nc-name" placeholder="e.g. Nelly's Retro Snacks"></div>
-      <div class="form-field"><label>Phone (+65)</label><input type="tel" id="nc-phone" placeholder="91234567" maxlength="8" inputmode="numeric"></div>
-      <div class="form-field full"><label>Default Delivery Address</label><input type="text" id="nc-addr" placeholder="Block, street, unit number (optional)"></div>
+  <!-- PRODUCTS TAB -->
+  <div class="admin-tab-panel active" id="tab-products">
+    <p class="slabel" style="font-size:18px;margin-bottom:14px">➕ Add New Product</p>
+    <div class="section-card">
+      <div class="form-grid">
+        <div class="form-field"><label>Product Name</label><input type="text" id="add-name" placeholder="e.g. Nerds Rope Rainbow"></div>
+        <div class="form-field"><label>Brand</label>
+          <input type="text" id="add-brand" list="brand-datalist" placeholder="Type or choose brand">
+          <datalist id="brand-datalist"></datalist>
+        </div>
+        <div class="form-field"><label>Retail Piece Price ($)</label><input type="number" id="add-price" placeholder="2.80" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Distributor Piece Price ($)</label><input type="number" id="add-price-dist" placeholder="2.20" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Pieces per Case</label><input type="number" id="add-ppc" placeholder="24" min="1" inputmode="numeric"></div>
+        <div class="form-field"><label>Retail Case Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price" placeholder="auto" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Distributor Case Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price-dist" placeholder="auto" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Opening Stock (pieces)</label><input type="number" id="add-stock" placeholder="240" min="0" inputmode="numeric"></div>
+        <div class="form-field"><label>Weight per piece</label><input type="text" id="add-weight" placeholder="e.g. 26g"></div>
+        <div class="form-field"><label>Description</label><input type="text" id="add-desc" placeholder="Short description"></div>
+        <div class="form-field"><label>Discount % (applies to both tiers)</label><input type="number" id="add-disc" placeholder="0" min="0" max="100" inputmode="numeric"></div>
+        <div class="form-field"><label>Section</label>
+          <select id="add-section"><option value="catalog">Product Selection</option><option value="new">New Arrivals</option></select>
+        </div>
+        <div class="form-field"><label>Visible to Retail</label><select id="add-vis-retail"><option value="1">Yes</option><option value="0">No</option></select></div>
+        <div class="form-field"><label>Visible to Distributors</label><select id="add-vis-dist"><option value="1">Yes</option><option value="0">No</option></select></div>
+      </div>
+      <button class="primary-btn full" onclick="addProduct()">Add Product</button>
     </div>
-    <button class="primary-btn" onclick="addCustomer()">Add Customer</button>
+
+    <p class="slabel" style="font-size:18px;margin-bottom:14px">📦 Inventory</p>
+    <div class="new-admin-wrap" id="admin-new"></div>
+    <div id="admin-brands"></div>
   </div>
-  <div id="customer-list"></div>
+
+  <!-- CUSTOMERS TAB -->
+  <div class="admin-tab-panel" id="tab-customers">
+    <div class="section-card">
+      <h3>Add New Customer</h3>
+      <div class="form-grid">
+        <div class="form-field"><label>Customer / Company Name</label><input type="text" id="nc-name" placeholder="e.g. Nelly's Retro Snacks"></div>
+        <div class="form-field"><label>Phone (+65)</label><input type="tel" id="nc-phone" placeholder="91234567" maxlength="8" inputmode="numeric"></div>
+        <div class="form-field full"><label>Default Delivery Address</label><input type="text" id="nc-addr" placeholder="Block, street, unit number (optional)"></div>
+        <div class="form-field"><label>Pricing Tier</label>
+          <select id="nc-tier">
+            <option value="retail">Retail</option>
+            <option value="distributor">Distributor</option>
+          </select>
+        </div>
+      </div>
+      <button class="primary-btn" onclick="addCustomer()">Add Customer</button>
+    </div>
+
+    <div id="customer-list"></div>
+  </div>
+
 </div>
 </div>
 
@@ -547,27 +604,29 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 var ADMIN_PW='admin123';
 var MIN_ORDER=80.00;
 var WA_1='6581648864',WA_2='6597316364';
-var LS_PROD='snack-products-v4',LS_INV='snack-inv-v4',LS_CUST='snack-customers-v1',LS_PHOTOS='snack-photos-v1';
+var LS_PROD='snack-products-v5',LS_INV='snack-inv-v5',LS_CUST='snack-customers-v2',LS_PHOTOS='snack-photos-v1';
 var delMode='delivery';
 var pendingMinOrder=false;
 var sessionOrders=[];
 var cartEntries=[];
 var simpleState={};
 var entryCounter=0;
+var _pendingVar={};
+var activeTier='retail'; // current viewer's tier ('retail' | 'distributor')
 
+/* ── DEFAULT DATA ── */
 var DEFAULT_NEW=[
-  {id:'n1',name:'Placeholder Drop A',desc:'Coming soon!',price:3.50,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[]},
-  {id:'n2',name:'Placeholder Drop B',desc:'Coming soon!',price:4.00,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[]},
-  {id:'n3',name:'Placeholder Drop C',desc:'Coming soon!',price:3.00,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[]},
+  {id:'n1',name:'Placeholder Drop A',desc:'Coming soon!',price:3.50,priceDist:3.00,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[],visRetail:1,visDist:1},
+  {id:'n2',name:'Placeholder Drop B',desc:'Coming soon!',price:4.00,priceDist:3.20,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[],visRetail:1,visDist:1},
 ];
 var DEFAULT_BRANDS=[
   {brand:'Airheads',products:[
-    {id:'a1',name:'Airheads Bars',desc:'Chewy taffy candy bar',price:2.50,ppc:36,stockPieces:720,weight:'37g',discount:0,section:'catalog',variations:['Watermelon','Cherry','Blue Raspberry']},
-    {id:'a2',name:'Airheads Bites',desc:'Bite-sized chewy candy',price:3.00,ppc:24,stockPieces:480,weight:'57g',discount:0,section:'catalog',variations:[]},
+    {id:'a1',name:'Airheads Bars',desc:'Chewy taffy candy bar',price:2.50,priceDist:2.00,ppc:36,cpRetail:0,cpDist:0,stockPieces:720,weight:'37g',discount:0,section:'catalog',variations:['Watermelon','Cherry','Blue Raspberry'],visRetail:1,visDist:1},
+    {id:'a2',name:'Airheads Bites',desc:'Bite-sized chewy candy',price:3.00,priceDist:2.40,ppc:24,cpRetail:0,cpDist:0,stockPieces:480,weight:'57g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
   ]},
   {brand:'Nerds',products:[
-    {id:'nb1',name:'Nerds Grape & Strawberry',desc:'Tiny crunchy candy',price:2.80,ppc:36,stockPieces:720,weight:'46.7g',discount:0,section:'catalog',variations:[]},
-    {id:'nb2',name:'Nerds Rope Rainbow',desc:'Chewy rope covered in Nerds',price:3.20,ppc:24,stockPieces:480,weight:'26g',discount:0,section:'catalog',variations:[]},
+    {id:'nb1',name:'Nerds Grape & Strawberry',desc:'Tiny crunchy candy',price:2.80,priceDist:2.20,ppc:36,cpRetail:0,cpDist:0,stockPieces:720,weight:'46.7g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
+    {id:'nb2',name:'Nerds Rope Rainbow',desc:'Chewy rope covered in Nerds',price:3.20,priceDist:2.60,ppc:24,cpRetail:0,cpDist:0,stockPieces:480,weight:'26g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
   ]},
 ];
 
@@ -576,7 +635,6 @@ var NEW_ARRIVALS=savedP?savedP.newArrivals:DEFAULT_NEW;
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
 var customers=loadJ(LS_CUST)||[];
 var photos=loadJ(LS_PHOTOS)||{};
-var _pendingVar={};
 
 function loadJ(k){try{var s=localStorage.getItem(k);if(s)return JSON.parse(s);}catch(e){}return null;}
 function saveJ(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -585,28 +643,77 @@ function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getInv(){return loadJ(LS_INV)||{};}
 function saveInv(inv){saveJ(LS_INV,inv);}
-function getStockPieces(p){var inv=getInv();return(inv[p.id]!==undefined&&inv[p.id]!==null)?parseInt(inv[p.id],10):(parseInt(p.stockPieces,10)||0);}
-function setStockPieces(pid,v){var inv=getInv();inv[pid]=Math.max(0,v);saveInv(inv);}
-function getDiscount(p){var inv=getInv();return inv['disc_'+p.id]!==undefined?Number(inv['disc_'+p.id]):Number(p.discount||0);}
-function getCasePrice(p){var inv=getInv();if(inv['cp_'+p.id]>0)return Number(inv['cp_'+p.id]);return p.ppc>0?Math.round(p.price*p.ppc*100)/100:0;}
-function discP(p){var d=getDiscount(p);return d>0?Math.round(p.price*(1-d/100)*100)/100:p.price;}
-function discCP(p){var d=getDiscount(p);var cp=getCasePrice(p);return d>0?Math.round(cp*(1-d/100)*100)/100:cp;}
-function getPhoto(id){return photos[id]||'';}
 function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,brands:BRANDS});}
 function findProduct(id){return getAllProducts().find(function(x){return x.id===id;});}
 function genOrderId(){return'ORD-'+Math.random().toString(36).slice(2,8).toUpperCase();}
 function getSimple(id){if(!simpleState[id])simpleState[id]={pieceQty:0,caseQty:0};return simpleState[id];}
 
-/* URL PARAMS */
+/* ── PRICING HELPERS (tier-aware) ── */
+function getStockPieces(p){var inv=getInv();return(inv[p.id]!==undefined&&inv[p.id]!==null)?parseInt(inv[p.id],10):(parseInt(p.stockPieces,10)||0);}
+function setStockPieces(pid,v){var inv=getInv();inv[pid]=Math.max(0,v);saveInv(inv);}
+function getDiscount(p){var inv=getInv();return inv['disc_'+p.id]!==undefined?Number(inv['disc_'+p.id]):Number(p.discount||0);}
+function getPhoto(id){return photos[id]||'';}
+
+// Retail piece price
+function retailPiecePrice(p){
+  var inv=getInv();
+  var base=inv['rp_'+p.id]!==undefined?Number(inv['rp_'+p.id]):Number(p.price||0);
+  var d=getDiscount(p);
+  return d>0?Math.round(base*(1-d/100)*100)/100:base;
+}
+// Distributor piece price
+function distPiecePrice(p){
+  var inv=getInv();
+  var base=inv['dp_'+p.id]!==undefined?Number(inv['dp_'+p.id]):Number(p.priceDist||p.price||0);
+  var d=getDiscount(p);
+  return d>0?Math.round(base*(1-d/100)*100)/100:base;
+}
+// Retail case price
+function retailCasePrice(p){
+  var inv=getInv();
+  var rp=inv['rp_'+p.id]!==undefined?Number(inv['rp_'+p.id]):Number(p.price||0);
+  var base=inv['rcp_'+p.id]>0?Number(inv['rcp_'+p.id]):(p.ppc>0?Math.round(rp*p.ppc*100)/100:0);
+  var d=getDiscount(p);
+  return d>0?Math.round(base*(1-d/100)*100)/100:base;
+}
+// Distributor case price
+function distCasePrice(p){
+  var inv=getInv();
+  var dp=inv['dp_'+p.id]!==undefined?Number(inv['dp_'+p.id]):Number(p.priceDist||p.price||0);
+  var base=inv['dcp_'+p.id]>0?Number(inv['dcp_'+p.id]):(p.ppc>0?Math.round(dp*p.ppc*100)/100:0);
+  var d=getDiscount(p);
+  return d>0?Math.round(base*(1-d/100)*100)/100:base;
+}
+// Active-tier helpers
+function piecePrice(p){return activeTier==='distributor'?distPiecePrice(p):retailPiecePrice(p);}
+function casePrice(p){return activeTier==='distributor'?distCasePrice(p):retailCasePrice(p);}
+
+// Visibility
+function isVisible(p){
+  if(activeTier==='distributor')return p.visDist!==0;
+  return p.visRetail!==0;
+}
+
+/* ── URL PARAMS ── */
 var params=new URLSearchParams(window.location.search);
 var urlCustId=params.get('cid')||'';
 var urlCustName=params.get('customer')||'';
 var urlOutletIdx=params.get('outlet');
+
 function initGreeting(){
   var cust=null;
   if(urlCustId)cust=customers.find(function(c){return c.id===urlCustId;});
   if(!cust&&urlCustName)cust=customers.find(function(c){return c.name===decodeURIComponent(urlCustName);});
   if(cust){
+    // Set tier from customer record
+    activeTier=cust.tier||'retail';
+    // Show tier banner
+    var tb=el('tier-banner'),td=el('tier-dot'),tl=el('tier-label-text');
+    tb.style.display='flex';
+    tb.className='tier-banner '+activeTier;
+    td.className='tier-dot '+activeTier;
+    tl.textContent=activeTier==='distributor'?'Distributor Pricing':'Retail Pricing';
+
     el('greeting-banner').style.display='';
     el('cust-name-display').textContent=cust.name;
     el('f-name').value=cust.name;
@@ -650,14 +757,21 @@ window.openLightbox=function(pid){
 };
 window.closeLightbox=function(){el('lightbox').classList.remove('open');document.body.style.overflow='';};
 window.closeModal=function(id){el(id).classList.remove('open');pendingMinOrder=false;};
+window.switchTab=function(tabId){
+  document.querySelectorAll('.admin-tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.admin-tab').forEach(function(t){t.classList.remove('active');});
+  el(tabId).classList.add('active');
+  var idx=['tab-products','tab-customers'].indexOf(tabId);
+  document.querySelectorAll('.admin-tab')[idx].classList.add('active');
+};
 
-/* SEARCH */
+/* ── SEARCH ── */
 window.onSearch=function(){
   var q=el('search-inp').value.trim().toLowerCase();
   el('search-clear').style.display=q?'flex':'none';
   var dd=el('search-dropdown');
   if(!q){dd.classList.remove('open');return;}
-  var results=getAllProducts().filter(function(p){return p.name.toLowerCase().indexOf(q)!==-1||p.desc.toLowerCase().indexOf(q)!==-1;});
+  var results=getAllProducts().filter(function(p){return isVisible(p)&&(p.name.toLowerCase().indexOf(q)!==-1||p.desc.toLowerCase().indexOf(q)!==-1);});
   if(!results.length){dd.innerHTML='<div class="search-no-results">No products found for "'+esc(q)+'"</div>';dd.classList.add('open');return;}
   dd.innerHTML=results.slice(0,8).map(function(p){
     var photo=getPhoto(p.id);
@@ -666,7 +780,7 @@ window.onSearch=function(){
     return'<div class="search-result-item" onclick="scrollToProduct(\''+p.id+'\')">'
       +'<span style="font-size:22px;flex-shrink:0">'+thumb+'</span>'
       +'<div style="flex:1;min-width:0"><div class="sri-name">'+esc(p.name)+'</div><div class="sri-brand">'+(brand?esc(brand.brand):'New Arrivals')+'</div></div>'
-      +'<div class="sri-price">$'+discP(p).toFixed(2)+'</div>'
+      +'<div class="sri-price">$'+piecePrice(p).toFixed(2)+'</div>'
     +'</div>';
   }).join('');
   dd.classList.add('open');
@@ -680,32 +794,26 @@ window.scrollToProduct=function(id){
 document.addEventListener('click',function(e){if(!e.target.closest('.search-wrap'))el('search-dropdown').classList.remove('open');});
 
 /* ── CARD HTML ── */
-function unitRowsHTML(p,pieceQty,caseQty){
+function unitRowsHTML(p,pq,cq){
   var stock=getStockPieces(p);
   var oos=stock<=0;
-  var dp=discP(p),dcp=discCP(p),d=getDiscount(p);
+  var dp=piecePrice(p),dcp=casePrice(p),d=getDiscount(p);
   var discTag=d>0?'<span class="disc-badge-inline">-'+d+'%</span>':'';
-  var pq=pieceQty||0,cq=caseQty||0;
+  pq=pq||0;cq=cq||0;
   var html='<div class="unit-rows">';
-  var pieceSpec='1pc'+(p.weight?' × '+p.weight:'');
+  var pSpec='1pc'+(p.weight?' × '+p.weight:'');
   html+='<div class="unit-row'+(pq>0?' has-qty-row':'')+'" id="urow-piece-'+p.id+'">'
-    +'<div class="unit-row-top">'
-      +'<span class="unit-row-label">Piece <span class="unit-row-spec">'+esc(pieceSpec)+'</span></span>'
-      +'<span class="unit-row-price">$'+dp.toFixed(2)+discTag+'</span>'
-    +'</div>'
+    +'<div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">'+esc(pSpec)+'</span></span><span class="unit-row-price">$'+dp.toFixed(2)+discTag+'</span></div>'
     +'<div class="unit-qty-ctrl">'
       +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',-1)"'+(oos?' disabled':'')+'>−</button>'
       +'<input class="uq-inp" type="number" min="0" max="'+stock+'" value="'+pq+'" inputmode="numeric" id="uqinp-piece-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'piece\',this.value)">'
       +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',1)"'+(oos?' disabled':'')+'>+</button>'
     +'</div></div>';
   if(p.ppc>0){
-    var caseSpec=p.ppc+'pcs'+(p.weight?' × '+p.weight:'');
+    var cSpec=p.ppc+'pcs'+(p.weight?' × '+p.weight:'');
     var maxCase=Math.floor(stock/p.ppc);
     html+='<div class="unit-row'+(cq>0?' has-qty-row':'')+'" id="urow-case-'+p.id+'">'
-      +'<div class="unit-row-top">'
-        +'<span class="unit-row-label">Case <span class="unit-row-spec">'+esc(caseSpec)+'</span></span>'
-        +'<span class="unit-row-price">$'+dcp.toFixed(2)+discTag+'</span>'
-      +'</div>'
+      +'<div class="unit-row-top"><span class="unit-row-label">Case <span class="unit-row-spec">'+esc(cSpec)+'</span></span><span class="unit-row-price">$'+dcp.toFixed(2)+discTag+'</span></div>'
       +'<div class="unit-qty-ctrl">'
         +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'case\',-1)"'+(maxCase<=0?' disabled':'')+'>−</button>'
         +'<input class="uq-inp" type="number" min="0" max="'+maxCase+'" value="'+cq+'" inputmode="numeric" id="uqinp-case-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'case\',this.value)">'
@@ -720,7 +828,7 @@ function cartEntriesHTML(pid){
   var entries=cartEntries.filter(function(e){return e.pid===pid;});
   if(!entries.length)return'';
   return'<div class="cart-entries">'+entries.map(function(e){
-    var price=e.unit==='case'?discCP(p):discP(p);
+    var price=e.unit==='case'?casePrice(p):piecePrice(p);
     var label=(e.variation?'['+esc(e.variation)+'] ':'')+e.unit+(e.unit==='case'?' ('+p.ppc+'pcs)':'')+' × '+e.qty+' = $'+(price*e.qty).toFixed(2);
     return'<div class="cart-entry"><span class="cart-entry-label">'+label+'</span><button class="cart-entry-remove" onclick="removeEntry(\''+e.entryId+'\')">✕</button></div>';
   }).join('')+'</div>';
@@ -748,8 +856,7 @@ function cardHTML(p,isNew){
       +(isNew?'<span class="badge-new">New</span>':'')
       +'<div class="item-name">'+esc(p.name)+'</div>'
       +'<div class="item-desc">'+esc(p.desc)+'</div>'
-      +stockBadge
-      +varHTML
+      +stockBadge+varHTML
       +unitRowsHTML(p,st.pieceQty,st.caseQty)
       +(hasVar?'<button class="add-to-cart-btn" onclick="addVarToCart(\''+p.id+'\')"'+(oos?' disabled':'')+'>+ Add to cart</button>':'')
       +(hasVar?cartEntriesHTML(p.id):'')
@@ -758,24 +865,19 @@ function cardHTML(p,isNew){
 }
 
 function renderOrder(){
-  // New Arrivals — flat list
   var na=el('new-arrivals');
-  na.innerHTML=NEW_ARRIVALS.length
-    ? NEW_ARRIVALS.map(function(p){return cardHTML(p,true);}).join('')
-    : '<div class="ps-empty">No new arrivals.</div>';
-
-  // Product Selection — grouped by brand, brands A-Z, products A-Z within brand
+  var visNew=NEW_ARRIVALS.filter(isVisible);
+  na.innerHTML=visNew.length?visNew.map(function(p){return cardHTML(p,true);}).join(''):'<div class="ps-empty">No new arrivals.</div>';
   var bc=el('brand-catalog');
   var sorted=BRANDS.slice().sort(function(a,b){return a.brand.localeCompare(b.brand);});
-  var hasAny=sorted.some(function(b){return b.products.length>0;});
-  if(!hasAny){bc.innerHTML='<div class="ps-empty">No products available.</div>';return;}
-  bc.innerHTML=sorted.filter(function(b){return b.products.length>0;}).map(function(b){
-    var sortedProds=b.products.slice().sort(function(a,c){return a.name.localeCompare(c.name);});
-    return'<div class="brand-group">'
-      +'<div class="brand-group-title">'+esc(b.brand)+'</div>'
-      +'<div class="prod-list">'+sortedProds.map(function(p){return cardHTML(p,false);}).join('')+'</div>'
-    +'</div>';
+  var hasAny=false;
+  bc.innerHTML=sorted.map(function(b){
+    var visProd=b.products.filter(isVisible).slice().sort(function(a,c){return a.name.localeCompare(c.name);});
+    if(!visProd.length)return'';
+    hasAny=true;
+    return'<div class="brand-group"><div class="brand-group-title">'+esc(b.brand)+'</div><div class="prod-list">'+visProd.map(function(p){return cardHTML(p,false);}).join('')+'</div></div>';
   }).join('');
+  if(!hasAny)bc.innerHTML='<div class="ps-empty">No products available.</div>';
 }
 
 window.setPendingVar=function(pid,v){
@@ -783,29 +885,24 @@ window.setPendingVar=function(pid,v){
   var card=el('card-'+pid);
   if(card)card.querySelectorAll('.var-btn').forEach(function(b){b.classList.toggle('active',b.textContent===v&&_pendingVar[pid]===v);});
 };
-
 window.addVarToCart=function(pid){
   var p=findProduct(pid);if(!p)return;
   var variation=_pendingVar[pid]||'';
   if(!variation&&p.variations&&p.variations.length){alert('Please choose a flavour / type first.');return;}
-  var pieceQty=parseInt((el('uqinp-piece-'+pid)||{}).value)||0;
-  var caseQty=parseInt((el('uqinp-case-'+pid)||{}).value)||0;
-  if(!pieceQty&&!caseQty){alert('Please enter a quantity first.');return;}
-  if(pieceQty>0)cartEntries.push({pid:pid,unit:'piece',variation:variation,qty:pieceQty,entryId:'e_'+Date.now()+'_'+(entryCounter++)});
-  if(caseQty>0)cartEntries.push({pid:pid,unit:'case',variation:variation,qty:caseQty,entryId:'e_'+Date.now()+'_'+(entryCounter++)});
+  var pq=parseInt((el('uqinp-piece-'+pid)||{}).value)||0;
+  var cq=parseInt((el('uqinp-case-'+pid)||{}).value)||0;
+  if(!pq&&!cq){alert('Please enter a quantity first.');return;}
+  if(pq>0)cartEntries.push({pid:pid,unit:'piece',variation:variation,qty:pq,entryId:'e_'+Date.now()+'_'+(entryCounter++)});
+  if(cq>0)cartEntries.push({pid:pid,unit:'case',variation:variation,qty:cq,entryId:'e_'+Date.now()+'_'+(entryCounter++)});
   _pendingVar[pid]='';
-  refreshFullCard(pid);
-  renderBasket();
+  refreshFullCard(pid);renderBasket();
 };
-
 window.removeEntry=function(entryId){
   var e=cartEntries.find(function(x){return x.entryId===entryId;});
   var pid=e?e.pid:null;
   cartEntries=cartEntries.filter(function(x){return x.entryId!==entryId;});
-  if(pid)refreshFullCard(pid);
-  renderBasket();
+  if(pid)refreshFullCard(pid);renderBasket();
 };
-
 function refreshFullCard(pid){
   var p=findProduct(pid);if(!p)return;
   var isNew=NEW_ARRIVALS.some(function(x){return x.id===pid;});
@@ -813,15 +910,13 @@ function refreshFullCard(pid){
   var tmp=document.createElement('div');tmp.innerHTML=cardHTML(p,isNew);
   card.parentNode.replaceChild(tmp.firstChild,card);
 }
-
 window.chgUnit=function(pid,unit,delta){
   var p=findProduct(pid);if(!p)return;
   var hasVar=p.variations&&p.variations.length>0;
   if(hasVar){
     var inp=el('uqinp-'+unit+'-'+pid);if(!inp)return;
     var v=Math.max(0,parseInt(inp.value||0)+delta);inp.value=v;
-    var row=el('urow-'+unit+'-'+pid);if(row)row.classList.toggle('has-qty-row',v>0);
-    return;
+    var row=el('urow-'+unit+'-'+pid);if(row)row.classList.toggle('has-qty-row',v>0);return;
   }
   var st=getSimple(pid);var stock=getStockPieces(p);
   if(unit==='piece'){
@@ -839,7 +934,6 @@ window.chgUnit=function(pid,unit,delta){
   var card=el('card-'+pid);if(card)card.classList.toggle('has-qty',st.pieceQty>0||st.caseQty>0);
   renderBasket();
 };
-
 window.setUnitQty=function(pid,unit,val){
   var p=findProduct(pid);if(!p)return;
   var hasVar=p.variations&&p.variations.length>0;
@@ -852,28 +946,24 @@ window.setUnitQty=function(pid,unit,val){
   var card=el('card-'+pid);if(card)card.classList.toggle('has-qty',st.pieceQty>0||st.caseQty>0);
   renderBasket();
 };
-
 function syncSimpleToCart(pid,p){
   cartEntries=cartEntries.filter(function(e){return!(e.pid===pid&&!e.variation);});
   var st=getSimple(pid);
   if(st.pieceQty>0)cartEntries.push({pid:pid,unit:'piece',variation:'',qty:st.pieceQty,entryId:'simple_piece_'+pid});
   if(st.caseQty>0)cartEntries.push({pid:pid,unit:'case',variation:'',qty:st.caseQty,entryId:'simple_case_'+pid});
 }
-
 window.selDel=function(m){
   delMode=m;
   document.querySelectorAll('[data-del]').forEach(function(e){e.classList.toggle('sel',e.dataset.del===m);});
   el('addr-field').style.display=m==='delivery'?'':'none';
   updateDelNotice();
 };
-
 function getSub(){
   return cartEntries.reduce(function(s,e){
     var p=findProduct(e.pid);if(!p)return s;
-    return s+(e.unit==='case'?discCP(p):discP(p))*e.qty;
+    return s+(e.unit==='case'?casePrice(p):piecePrice(p))*e.qty;
   },0);
 }
-
 function renderBasket(){
   var count=cartEntries.reduce(function(s,e){return s+e.qty;},0);
   el('basket-count').textContent=count;
@@ -883,7 +973,7 @@ function renderBasket(){
   }
   el('basket-body').innerHTML=cartEntries.map(function(e){
     var p=findProduct(e.pid);if(!p)return'';
-    var price=e.unit==='case'?discCP(p):discP(p);
+    var price=e.unit==='case'?casePrice(p):piecePrice(p);
     var varStr=e.variation?' ['+esc(e.variation)+']':'';
     return'<div class="basket-item">'
       +'<div class="basket-item-info"><div class="basket-item-name">'+esc(p.name)+varStr+'</div><div class="basket-item-sub">'+(e.unit==='case'?'Case ('+p.ppc+'pcs)':'Piece')+' × '+e.qty+'</div></div>'
@@ -896,7 +986,7 @@ function renderBasket(){
   var sub=getSub();
   el('basket-lines').innerHTML=cartEntries.map(function(e){
     var p=findProduct(e.pid);if(!p)return'';
-    var price=e.unit==='case'?discCP(p):discP(p);
+    var price=e.unit==='case'?casePrice(p):piecePrice(p);
     var varStr=e.variation?' ['+esc(e.variation)+']':'';
     return'<div class="basket-row dim"><span>'+esc(p.name)+varStr+' ('+e.unit+') × '+e.qty+'</span><span>$'+(price*e.qty).toFixed(2)+'</span></div>';
   }).join('');
@@ -904,20 +994,12 @@ function renderBasket(){
   el('basket-footer').style.display='';el('wa-btn').disabled=false;
   updateDelNotice();
 }
-
 window.bChg=function(entryId,delta){
   var e=cartEntries.find(function(x){return x.entryId===entryId;});if(!e)return;
-  var nv=Math.max(0,e.qty+delta);
-  var pid=e.pid;
-  if(!nv){cartEntries=cartEntries.filter(function(x){return x.entryId!==entryId;});}
-  else{e.qty=nv;}
+  var nv=Math.max(0,e.qty+delta);var pid=e.pid;
+  if(!nv){cartEntries=cartEntries.filter(function(x){return x.entryId!==entryId;});}else{e.qty=nv;}
   var p=findProduct(pid);
-  if(p&&!(p.variations&&p.variations.length)){
-    var st=getSimple(pid);
-    if(e.unit==='piece')st.pieceQty=nv||0;
-    if(e.unit==='case')st.caseQty=nv||0;
-    refreshFullCard(pid);
-  }
+  if(p&&!(p.variations&&p.variations.length)){var st=getSimple(pid);if(e.unit==='piece')st.pieceQty=nv||0;if(e.unit==='case')st.caseQty=nv||0;refreshFullCard(pid);}
   renderBasket();
 };
 window.bSet=function(entryId,val){
@@ -926,7 +1008,6 @@ window.bSet=function(entryId,val){
   if(!nv){cartEntries=cartEntries.filter(function(x){return x.entryId!==entryId;});}else{e.qty=nv;}
   renderBasket();
 };
-
 function updateDelNotice(){
   var sub=getSub();
   var notice=el('del-notice'),dot=el('del-dot'),txt=el('del-txt'),pw=el('prog-wrap'),pb=el('prog-bar');
@@ -936,7 +1017,7 @@ function updateDelNotice(){
   else{notice.className='del-notice show is-min';dot.className='del-dot amber';txt.textContent='Add $'+rem+' more to meet the $'+MIN_ORDER+' minimum';pw.style.display='block';pb.style.width=pct+'%';}
 }
 
-/* SEND */
+/* ── SEND ── */
 function doSend(){
   var name=el('f-name').value.trim()||'(not provided)';
   var phone=el('f-phone').value.trim();
@@ -945,17 +1026,18 @@ function doSend(){
   var sub=getSub();
   var metMin=delMode!=='delivery'||sub>=MIN_ORDER;
   var orderId=genOrderId();
+  var tierLabel=activeTier==='distributor'?'Distributor':'Retail';
   var lines=[];
   cartEntries.forEach(function(e){
     var p=findProduct(e.pid);if(!p)return;
-    var price=e.unit==='case'?discCP(p):discP(p);
+    var price=e.unit==='case'?casePrice(p):piecePrice(p);
     var d=getDiscount(p);
     var varStr=e.variation?' ['+e.variation+']':'';
     lines.push('  📦 '+p.name+varStr+' · '+(e.unit==='case'?'Case('+p.ppc+'pcs)':'Piece')+(d>0?' (-'+d+'%)':'')+' × '+e.qty+' — $'+(price*e.qty).toFixed(2));
   });
   var minNote=metMin?'':'\n⚠️ Below minimum ($'+MIN_ORDER+'). Subject to approval.';
-  var delLbl=delMode==='delivery'?'Delivery':'Self-pickup (please arrange)';
-  var msg='\uD83D\uDED2 *New Order* | '+orderId+'\n\n'
+  var delLbl=delMode==='delivery'?'Delivery':'Self-pickup';
+  var msg='\uD83D\uDED2 *New Order* | '+orderId+'\n*Tier:* '+tierLabel+'\n\n'
     +'*Name:* '+name+'\n*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
     +(delMode==='delivery'?'*Address:* '+addr+'\n':'')
     +'*Delivery:* '+delLbl+'\n*Payment:* Cash on Delivery\n'
@@ -974,19 +1056,16 @@ function doSend(){
   el('placed-order-id').textContent=orderId;
   el('placed-modal').classList.add('open');
 }
-
 function updateOrderHistory(){
   var bar=el('order-history-bar'),list=el('oh-list');
   if(!sessionOrders.length){bar.classList.remove('show');return;}
   bar.classList.add('show');
   list.innerHTML=sessionOrders.map(function(o){return'<div class="oh-item"><strong>'+o.id+'</strong> — '+o.items+' line(s) · <strong>$'+o.total.toFixed(2)+'</strong></div>';}).join('');
 }
-
 window.closePlacedModal=function(another){
   el('placed-modal').classList.remove('open');
   if(another){cartEntries=[];simpleState={};_pendingVar={};renderOrder();renderBasket();window.scrollTo({top:0,behavior:'smooth'});}
 };
-
 el('wa-btn').addEventListener('click',function(){
   var sub=getSub();
   if(delMode==='delivery'&&sub<MIN_ORDER){pendingMinOrder=true;el('min-order-modal').classList.add('open');}
@@ -1012,138 +1091,165 @@ function invDisplay(p){
     +'<div class="inv-box"><div class="inv-box-val">'+total+'</div><div class="inv-box-lbl">Total Pieces</div></div>'
   +'</div>';
 }
-
-function getBrandOfProduct(id){
-  var b=BRANDS.find(function(br){return br.products.some(function(p){return p.id===id;});});
-  return b?b.brand:'';
-}
+function getBrandOfProduct(id){var b=BRANDS.find(function(br){return br.products.some(function(p){return p.id===id;});});return b?b.brand:'';}
 
 function prodAdminCard(p){
   var stock=getStockPieces(p);
   var inv=getInv();
   var disc=getDiscount(p);
-  var cp=inv['cp_'+p.id]>0?Number(inv['cp_'+p.id]):0;
-  var autoCp=p.ppc>0?(p.price*p.ppc).toFixed(2):'—';
-  var vars=p.variations||[];
   var photo=getPhoto(p.id);
   var isNew=NEW_ARRIVALS.some(function(x){return x.id===p.id;});
   var currentSection=isNew?'new':'catalog';
   var currentBrand=getBrandOfProduct(p.id);
 
+  // Stored prices
+  var rp=inv['rp_'+p.id]!==undefined?Number(inv['rp_'+p.id]):Number(p.price||0);
+  var dp=inv['dp_'+p.id]!==undefined?Number(inv['dp_'+p.id]):Number(p.priceDist||p.price||0);
+  var rcp=inv['rcp_'+p.id]>0?Number(inv['rcp_'+p.id]):0;
+  var dcp=inv['dcp_'+p.id]>0?Number(inv['dcp_'+p.id]):0;
+  var autoRcp=p.ppc>0?(rp*p.ppc).toFixed(2):'—';
+  var autoDcp=p.ppc>0?(dp*p.ppc).toFixed(2):'—';
+  var visR=p.visRetail!==0;
+  var visD=p.visDist!==0;
+  var vars=p.variations||[];
+
   return'<div class="prod-admin-card" id="pac-'+p.id+'">'
     +'<div class="prod-admin-header" onclick="togglePAC(\''+p.id+'\')">'
       +'<div class="prod-admin-thumb">'+(photo?'<img src="'+photo+'" alt="">':'📦')+'</div>'
       +'<div class="prod-admin-info"><div class="prod-admin-name">'+esc(p.name)+'</div>'
-        +'<div class="prod-admin-price">$'+p.price.toFixed(2)+'/pc'+(p.ppc?' · '+p.ppc+'pcs/case':'')+(p.weight?' · '+p.weight:'')+'</div></div>'
+        +'<div class="prod-admin-price">Retail $'+rp.toFixed(2)+' · Dist $'+dp.toFixed(2)+(p.ppc?' · '+p.ppc+'pcs/case':'')+'</div></div>'
       +'<span id="abadge-'+p.id+'">'+aBadge(stock,getThresh())+'</span>'
       +'<span class="prod-admin-chevron" id="chev-'+p.id+'">▼</span>'
     +'</div>'
     +'<div class="prod-admin-body" id="pab-'+p.id+'">'
 
-      /* ── Stock display ── */
-      +'<div id="invdsp-'+p.id+'">'+invDisplay(p)+'</div>'
+    // Inventory display
+    +'<div id="invdsp-'+p.id+'">'+invDisplay(p)+'</div>'
 
-      /* ── Photo row (compact) ── */
-      +'<div class="photo-row">'
-        +'<div class="photo-thumb-sm" id="photo-thumb-'+p.id+'">'+(photo?'<img src="'+photo+'" alt="">':'📦')+'</div>'
-        +'<input class="photo-url-inp-sm" type="text" id="photo-url-'+p.id+'" placeholder="Paste image URL…" value="'+(photo&&photo.startsWith('http')?esc(photo):'')+'">'
-        +'<button class="photo-url-btn-sm" onclick="setPhotoURL(\''+p.id+'\')">Use URL</button>'
-        +'<label class="photo-upload-label-sm">📷 Upload<input class="photo-upload-input" type="file" accept="image/*" onchange="uploadPhoto(\''+p.id+'\',this)"></label>'
-        +(photo?'<button class="photo-clear-btn-sm" onclick="clearPhoto(\''+p.id+'\')">Remove</button>':'')
-      +'</div>'
-
-      /* ── All editable fields ── */
-      +'<div class="admin-edit-section">'
-        +'<div class="admin-edit-section-title">Edit Product Details</div>'
-        +'<div class="admin-field-grid">'
-          +'<div class="admin-field full"><label>Product Name</label><input type="text" id="ename-'+p.id+'" value="'+esc(p.name)+'" placeholder="Product name"></div>'
-          +'<div class="admin-field"><label>Brand</label><input type="text" id="ebrand-'+p.id+'" list="brand-datalist" value="'+esc(currentBrand)+'" placeholder="Brand"></div>'
-          +'<div class="admin-field"><label>Section</label>'
-            +'<select id="esec-'+p.id+'">'
-              +'<option value="catalog"'+(currentSection==='catalog'?' selected':'')+'>Product Selection</option>'
-              +'<option value="new"'+(currentSection==='new'?' selected':'')+'>New Arrivals</option>'
-            +'</select>'
-          +'</div>'
-          +'<div class="admin-field"><label>Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="eprice-'+p.id+'" value="'+p.price.toFixed(2)+'"></div>'
-          +'<div class="admin-field"><label>Pieces per Case</label><input type="number" inputmode="numeric" min="0" id="eppc-'+p.id+'" value="'+(p.ppc||'')+'" placeholder="e.g. 24"></div>'
-          +'<div class="admin-field"><label>Case Price ($) <small style="color:var(--text-hint)">(auto: $'+autoCp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="ecp-'+p.id+'" value="'+(cp>0?cp:'')+'" placeholder="'+autoCp+'"></div>'
-          +'<div class="admin-field"><label>Stock (pieces)</label><input type="number" inputmode="numeric" min="0" id="estock-'+p.id+'" value="'+stock+'"></div>'
-          +'<div class="admin-field"><label>Weight per piece</label><input type="text" id="eweight-'+p.id+'" value="'+esc(p.weight||'')+'" placeholder="e.g. 26g"></div>'
-          +'<div class="admin-field"><label>Discount %</label><input type="number" inputmode="numeric" min="0" max="100" id="edisc-'+p.id+'" value="'+disc+'"></div>'
-          +'<div class="admin-field full"><label>Description</label><input type="text" id="edesc-'+p.id+'" value="'+esc(p.desc||'')+'" placeholder="Short description"></div>'
-        +'</div>'
-        +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
-          +'<button class="save-prod-btn" onclick="saveProductEdits(\''+p.id+'\')">✓ Save changes</button>'
-          +'<button class="danger-btn" onclick="deleteProduct(\''+p.id+'\')">Delete product</button>'
-        +'</div>'
-      +'</div>'
-
-      /* ── Variations ── */
-      +'<div class="var-admin-section">'
-        +'<div class="var-admin-title">Variations</div>'
-        +'<div class="var-pills" id="vpills-'+p.id+'">'
-          +vars.map(function(v,i){return'<div class="var-pill">'+esc(v)+'<button class="var-pill-remove" onclick="removeVar(\''+p.id+'\','+i+')">✕</button></div>';}).join('')
-        +'</div>'
-        +'<div class="var-add-row"><input class="var-add-inp" type="text" id="varinp-'+p.id+'" placeholder="e.g. Watermelon"><button class="var-add-btn" onclick="addVar(\''+p.id+'\')">+ Add</button></div>'
-      +'</div>'
-
+    // Photo row
+    +'<div class="photo-row">'
+      +'<div class="photo-thumb-sm" id="photo-thumb-'+p.id+'">'+(photo?'<img src="'+photo+'" alt="">':'📦')+'</div>'
+      +'<input class="photo-url-inp-sm" type="text" id="photo-url-'+p.id+'" placeholder="Paste image URL…" value="'+(photo&&photo.startsWith('http')?esc(photo):'')+'">'
+      +'<button class="photo-url-btn-sm" onclick="setPhotoURL(\''+p.id+'\')">Use URL</button>'
+      +'<label class="photo-upload-label-sm">📷 Upload<input class="photo-upload-input" type="file" accept="image/*" onchange="uploadPhoto(\''+p.id+'\',this)"></label>'
+      +(photo?'<button class="photo-clear-btn-sm" onclick="clearPhoto(\''+p.id+'\')">Remove</button>':'')
     +'</div>'
-  +'</div>';
+
+    // Edit fields
+    +'<div class="admin-edit-section">'
+      +'<div class="admin-edit-section-title">Product Details</div>'
+      +'<div class="admin-field-grid">'
+        +'<div class="admin-field full"><label>Product Name</label><input type="text" id="ename-'+p.id+'" value="'+esc(p.name)+'"></div>'
+        +'<div class="admin-field"><label>Brand</label><input type="text" id="ebrand-'+p.id+'" list="brand-datalist" value="'+esc(currentBrand)+'"></div>'
+        +'<div class="admin-field"><label>Section</label><select id="esec-'+p.id+'"><option value="catalog"'+(currentSection==='catalog'?' selected':'')+'>Product Selection</option><option value="new"'+(currentSection==='new'?' selected':'')+'>New Arrivals</option></select></div>'
+        +'<div class="admin-field"><label>Pieces per Case</label><input type="number" inputmode="numeric" min="0" id="eppc-'+p.id+'" value="'+(p.ppc||'')+'" placeholder="e.g. 24"></div>'
+        +'<div class="admin-field"><label>Stock (pieces)</label><input type="number" inputmode="numeric" min="0" id="estock-'+p.id+'" value="'+stock+'"></div>'
+        +'<div class="admin-field"><label>Weight per piece</label><input type="text" id="eweight-'+p.id+'" value="'+esc(p.weight||'')+'"></div>'
+        +'<div class="admin-field"><label>Discount % (all tiers)</label><input type="number" inputmode="numeric" min="0" max="100" id="edisc-'+p.id+'" value="'+disc+'"></div>'
+        +'<div class="admin-field full"><label>Description</label><input type="text" id="edesc-'+p.id+'" value="'+esc(p.desc||'')+'"></div>'
+      +'</div>'
+
+      // Tier pricing
+      +'<div class="tier-price-row">'
+        +'<div class="tier-price-block retail-block">'
+          +'<div class="tier-price-block-title">🏪 Retail Pricing</div>'
+          +'<div class="admin-field"><label>Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="erp-'+p.id+'" value="'+rp.toFixed(2)+'"></div>'
+          +'<div class="admin-field" style="margin-top:6px"><label>Case Price ($) <small style="color:var(--text-hint)">(auto $'+autoRcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="ercp-'+p.id+'" value="'+(rcp>0?rcp:'')+'" placeholder="'+autoRcp+'"></div>'
+        +'</div>'
+        +'<div class="tier-price-block dist-block">'
+          +'<div class="tier-price-block-title">📦 Distributor Pricing</div>'
+          +'<div class="admin-field"><label>Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="edp-'+p.id+'" value="'+dp.toFixed(2)+'"></div>'
+          +'<div class="admin-field" style="margin-top:6px"><label>Case Price ($) <small style="color:var(--text-hint)">(auto $'+autoDcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="edcp-'+p.id+'" value="'+(dcp>0?dcp:'')+'" placeholder="'+autoDcp+'"></div>'
+        +'</div>'
+      +'</div>'
+
+      // Visibility
+      +'<div class="visibility-section">'
+        +'<div class="visibility-title">Product Visibility</div>'
+        +'<div class="vis-row">'
+          +'<span class="vis-row-label retail">🏪 Visible to Retail</span>'
+          +'<label class="toggle-switch"><input type="checkbox" id="evisr-'+p.id+'"'+(visR?' checked':'')+' onchange="saveVisibility(\''+p.id+'\')"><span class="toggle-slider"></span></label>'
+        +'</div>'
+        +'<div class="vis-row">'
+          +'<span class="vis-row-label dist">📦 Visible to Distributors</span>'
+          +'<label class="toggle-switch"><input type="checkbox" id="evisd-'+p.id+'"'+(visD?' checked':'')+' onchange="saveVisibility(\''+p.id+'\')"><span class="toggle-slider"></span></label>'
+        +'</div>'
+      +'</div>'
+
+      +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
+        +'<button class="save-prod-btn" onclick="saveProductEdits(\''+p.id+'\')">✓ Save changes</button>'
+        +'<button class="danger-btn" onclick="deleteProduct(\''+p.id+'\')">Delete product</button>'
+      +'</div>'
+    +'</div>'
+
+    // Variations
+    +'<div class="var-admin-section">'
+      +'<div class="var-admin-title">Variations</div>'
+      +'<div class="var-pills" id="vpills-'+p.id+'">'
+        +vars.map(function(v,i){return'<div class="var-pill">'+esc(v)+'<button class="var-pill-remove" onclick="removeVar(\''+p.id+'\','+i+')">✕</button></div>';}).join('')
+      +'</div>'
+      +'<div class="var-add-row"><input class="var-add-inp" type="text" id="varinp-'+p.id+'" placeholder="e.g. Watermelon"><button class="var-add-btn" onclick="addVar(\''+p.id+'\')">+ Add</button></div>'
+    +'</div>'
+
+    +'</div></div>';
 }
 
 window.togglePAC=function(id){var body=el('pab-'+id),chev=el('chev-'+id);var open=body.classList.toggle('open');if(chev)chev.classList.toggle('open',open);};
+
+window.saveVisibility=function(id){
+  var p=findProduct(id);if(!p)return;
+  var vr=el('evisr-'+id);var vd=el('evisd-'+id);
+  if(vr)p.visRetail=vr.checked?1:0;
+  if(vd)p.visDist=vd.checked?1:0;
+  saveProds();renderOrder();
+};
 
 window.saveProductEdits=function(id){
   var p=findProduct(id);if(!p)return;
   var newName=(el('ename-'+id)||{}).value||'';
   var newBrand=(el('ebrand-'+id)||{}).value||'';
   var newSec=(el('esec-'+id)||{}).value||'catalog';
-  var newPrice=parseFloat((el('eprice-'+id)||{}).value)||p.price;
   var newPpc=parseInt((el('eppc-'+id)||{}).value)||0;
-  var newCp=parseFloat((el('ecp-'+id)||{}).value)||0;
   var newStock=parseInt((el('estock-'+id)||{}).value)||0;
   var newWeight=(el('eweight-'+id)||{}).value||'';
   var newDisc=Math.max(0,Math.min(100,parseInt((el('edisc-'+id)||{}).value)||0));
   var newDesc=(el('edesc-'+id)||{}).value||'';
+  var newRp=parseFloat((el('erp-'+id)||{}).value)||p.price||0;
+  var newDp=parseFloat((el('edp-'+id)||{}).value)||p.priceDist||newRp;
+  var newRcp=parseFloat((el('ercp-'+id)||{}).value)||0;
+  var newDcp=parseFloat((el('edcp-'+id)||{}).value)||0;
   if(!newName){alert('Product name cannot be empty.');return;}
   if(newSec==='catalog'&&!newBrand){alert('Please enter a brand name.');return;}
 
-  // Update core fields
-  p.name=newName;p.price=newPrice;p.ppc=newPpc;p.weight=newWeight;p.desc=newDesc;p.discount=newDisc;
+  p.name=newName;p.ppc=newPpc;p.weight=newWeight;p.desc=newDesc;p.discount=newDisc;p.price=newRp;p.priceDist=newDp;
 
-  // Update inv store
   var inv=getInv();
   inv[id]=newStock;
   inv['disc_'+id]=newDisc;
-  inv['cp_'+id]=newCp>0?newCp:0;
+  inv['rp_'+id]=newRp;
+  inv['dp_'+id]=newDp;
+  inv['rcp_'+id]=newRcp>0?newRcp:0;
+  inv['dcp_'+id]=newDcp>0?newDcp:0;
   saveInv(inv);
 
-  // Handle section/brand change
+  // Handle section / brand change
   var isNew=NEW_ARRIVALS.some(function(x){return x.id===id;});
   var oldBrand=getBrandOfProduct(id);
-  var secChanged=(isNew&&newSec==='catalog')||(!isNew&&newSec==='new');
-  var brandChanged=!isNew&&oldBrand.toLowerCase()!==newBrand.toLowerCase();
-
-  if(secChanged||brandChanged){
-    // Remove from current location
+  if((isNew&&newSec==='catalog')||(!isNew&&newSec==='new')||(!isNew&&oldBrand.toLowerCase()!==newBrand.toLowerCase())){
     if(isNew){NEW_ARRIVALS=NEW_ARRIVALS.filter(function(x){return x.id!==id;});}
     else{BRANDS.forEach(function(b){b.products=b.products.filter(function(x){return x.id!==id;});});BRANDS=BRANDS.filter(function(b){return b.products.length>0;});}
-    // Add to new location
     p.section=newSec;
     if(newSec==='new'){NEW_ARRIVALS.push(p);}
     else{var found=BRANDS.find(function(b){return b.brand.toLowerCase()===newBrand.toLowerCase();});if(found){found.products.push(p);}else{BRANDS.push({brand:newBrand,products:[p]});}}
   }
 
   saveProds();
-  // Show inline success
-  var btn=el('pab-'+id).querySelector('.save-prod-btn');
-  if(btn){var orig=btn.textContent;btn.textContent='✓ Saved!';btn.style.background='var(--green-bg)';setTimeout(function(){btn.textContent=orig;btn.style.background='';},2000);}
+  var btn=document.querySelector('#pab-'+id+' .save-prod-btn');
+  if(btn){var orig=btn.textContent;btn.textContent='✓ Saved!';setTimeout(function(){btn.textContent=orig;},2000);}
   updateBrandDatalist();updateStats();renderOrder();
-  // Re-render this card to reflect new header info
-  var t=getThresh();
-  var ph=el('prod-admin-header-info-'+id);
+  // Re-render the card header
   var hdr=el('pac-'+id);
-  if(hdr){var tmp=document.createElement('div');tmp.innerHTML=prodAdminCard(p);var nc=tmp.firstChild;var body=el('pab-'+id);if(body&&body.classList.contains('open')){var nb=nc.querySelector('.prod-admin-body');if(nb)nb.classList.add('open');}hdr.parentNode.replaceChild(nc,hdr);}
+  if(hdr){var tmp=document.createElement('div');tmp.innerHTML=prodAdminCard(p);var nc=tmp.firstChild;var ob=el('pab-'+id);if(ob&&ob.classList.contains('open')){var nb=nc.querySelector('.prod-admin-body');if(nb)nb.classList.add('open');}hdr.parentNode.replaceChild(nc,hdr);}
 };
 
 window.deleteProduct=function(id){
@@ -1153,7 +1259,6 @@ window.deleteProduct=function(id){
   BRANDS=BRANDS.filter(function(b){return b.products.length>0;});
   saveProds();renderAdmin();renderOrder();
 };
-
 window.setPhotoURL=function(id){
   var inp=el('photo-url-'+id);if(!inp)return;
   var url=inp.value.trim();if(!url){alert('Please paste an image URL first.');return;}
@@ -1168,7 +1273,6 @@ window.uploadPhoto=function(id,input){
   reader.readAsDataURL(file);
 };
 window.clearPhoto=function(id){delete photos[id];saveJ(LS_PHOTOS,photos);renderOrder();renderAdmin();};
-
 window.addVar=function(id){
   var inp=el('varinp-'+id);if(!inp)return;var v=inp.value.trim();if(!v)return;
   var p=findProduct(id);if(!p)return;p.variations=p.variations||[];p.variations.push(v);saveProds();inp.value='';
@@ -1192,43 +1296,109 @@ function updateStats(){var thresh=getThresh(),low=0,out=0,all=getAllProducts();a
 window.saveAll=function(){saveProds();var t=el('toast');t.style.display='inline-block';setTimeout(function(){t.style.display='none';},2500);renderOrder();};
 window.addProduct=function(){
   var name=el('add-name').value.trim(),brand=el('add-brand').value.trim();
-  var price=parseFloat(el('add-price').value)||0,ppc=parseInt(el('add-ppc').value)||0;
-  var casePrice=parseFloat(el('add-case-price').value)||0,stockPieces=parseInt(el('add-stock').value)||0;
+  var price=parseFloat(el('add-price').value)||0;
+  var priceDist=parseFloat(el('add-price-dist').value)||price;
+  var ppc=parseInt(el('add-ppc').value)||0;
+  var cpRetail=parseFloat(el('add-case-price').value)||0;
+  var cpDist=parseFloat(el('add-case-price-dist').value)||0;
+  var stockPieces=parseInt(el('add-stock').value)||0;
   var weight=el('add-weight').value.trim(),desc=el('add-desc').value.trim()||'';
   var disc=parseInt(el('add-disc').value)||0,section=el('add-section').value;
-  if(!name){alert('Please enter a product name.');return;}if(!price){alert('Please enter a price.');return;}
+  var visRetail=parseInt(el('add-vis-retail').value)||1;
+  var visDist=parseInt(el('add-vis-dist').value)||1;
+  if(!name){alert('Please enter a product name.');return;}if(!price){alert('Please enter a retail price.');return;}
   if(section==='catalog'&&!brand){alert('Please enter a brand name.');return;}
   var id='p_'+Date.now();
-  var inv=getInv();inv[id]=stockPieces;inv['disc_'+id]=disc;if(casePrice>0)inv['cp_'+id]=casePrice;saveInv(inv);
-  var newProd={id:id,name:name,desc:desc,price:price,ppc:ppc,stockPieces:stockPieces,weight:weight,discount:disc,section:section,variations:[]};
+  var inv=getInv();
+  inv[id]=stockPieces;inv['disc_'+id]=disc;
+  inv['rp_'+id]=price;inv['dp_'+id]=priceDist;
+  if(cpRetail>0)inv['rcp_'+id]=cpRetail;
+  if(cpDist>0)inv['dcp_'+id]=cpDist;
+  saveInv(inv);
+  var newProd={id:id,name:name,desc:desc,price:price,priceDist:priceDist,ppc:ppc,stockPieces:stockPieces,weight:weight,discount:disc,section:section,variations:[],visRetail:visRetail,visDist:visDist};
   if(section==='new'){NEW_ARRIVALS.push(newProd);}
   else{var found=BRANDS.find(function(b){return b.brand.toLowerCase()===brand.toLowerCase();});if(found){found.products.push(newProd);}else{BRANDS.push({brand:brand,products:[newProd]});}}
-  ['add-name','add-brand','add-price','add-ppc','add-case-price','add-stock','add-weight','add-desc','add-disc'].forEach(function(fid){if(el(fid))el(fid).value='';});
-  el('add-section').value='catalog';saveProds();renderAdmin();renderOrder();alert('✓ "'+name+'" added!');
+  ['add-name','add-brand','add-price','add-price-dist','add-ppc','add-case-price','add-case-price-dist','add-stock','add-weight','add-desc','add-disc'].forEach(function(fid){if(el(fid))el(fid).value='';});
+  el('add-section').value='catalog';el('add-vis-retail').value='1';el('add-vis-dist').value='1';
+  saveProds();renderAdmin();renderOrder();alert('✓ "'+name+'" added!');
 };
 
-/* CUSTOMERS */
-window.addCustomer=function(){var name=el('nc-name').value.trim(),phone=el('nc-phone').value.trim().replace(/\D/g,''),addr=el('nc-addr').value.trim();if(!name){alert('Please enter a customer name.');return;}customers.push({id:'c_'+Date.now(),name:name,phone:phone,address:addr,outlets:[]});saveJ(LS_CUST,customers);el('nc-name').value='';el('nc-phone').value='';el('nc-addr').value='';renderCustomerList();};
+/* ── CUSTOMERS ── */
+window.addCustomer=function(){
+  var name=el('nc-name').value.trim(),phone=el('nc-phone').value.trim().replace(/\D/g,''),addr=el('nc-addr').value.trim();
+  var tier=el('nc-tier').value||'retail';
+  if(!name){alert('Please enter a customer name.');return;}
+  customers.push({id:'c_'+Date.now(),name:name,phone:phone,address:addr,tier:tier,outlets:[]});
+  saveJ(LS_CUST,customers);
+  el('nc-name').value='';el('nc-phone').value='';el('nc-addr').value='';
+  renderCustomerList();
+};
 window.deleteCustomer=function(id){if(!confirm('Remove this customer?'))return;customers=customers.filter(function(c){return c.id!==id;});saveJ(LS_CUST,customers);renderCustomerList();};
-window.saveCustomerEdits=function(id){var cust=customers.find(function(c){return c.id===id;});if(!cust)return;var ni=el('cedit-name-'+id),pi=el('cedit-phone-'+id),ai=el('cedit-addr-'+id);if(ni)cust.name=ni.value.trim();if(pi)cust.phone=pi.value.trim().replace(/\D/g,'');if(ai)cust.address=ai.value.trim();saveJ(LS_CUST,customers);renderCustomerList();};
+window.saveCustomerEdits=function(id){
+  var cust=customers.find(function(c){return c.id===id;});if(!cust)return;
+  var ni=el('cedit-name-'+id),pi=el('cedit-phone-'+id),ai=el('cedit-addr-'+id),ti=el('cedit-tier-'+id);
+  if(ni)cust.name=ni.value.trim();if(pi)cust.phone=pi.value.trim().replace(/\D/g,'');if(ai)cust.address=ai.value.trim();if(ti)cust.tier=ti.value;
+  saveJ(LS_CUST,customers);renderCustomerList();
+};
 window.addOutlet=function(cid){var ni=el('oname-'+cid),ai=el('oaddr-'+cid);var on=ni.value.trim(),oa=ai.value.trim();if(!on){alert('Please enter an outlet name.');return;}var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;cust.outlets=cust.outlets||[];cust.outlets.push({name:on,address:oa});saveJ(LS_CUST,customers);ni.value='';ai.value='';renderCustomerList();};
 window.saveOutlet=function(cid,idx){var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;var ni=el('oedit-name-'+cid+'-'+idx),ai=el('oedit-addr-'+cid+'-'+idx);if(ni)cust.outlets[idx].name=ni.value.trim();if(ai)cust.outlets[idx].address=ai.value.trim();saveJ(LS_CUST,customers);renderCustomerList();};
 window.removeOutlet=function(cid,idx){var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;cust.outlets.splice(idx,1);saveJ(LS_CUST,customers);renderCustomerList();};
 window.toggleCust=function(id){var body=el('cbody-'+id),chev=el('cchev-'+id);var open=body.classList.toggle('open');if(chev)chev.classList.toggle('open',open);};
 function buildLink(cust){var base=window.location.href.split('?')[0];return base+'?cid='+encodeURIComponent(cust.id)+'&customer='+encodeURIComponent(cust.name);}
 window.copyCustomerLink=function(cid){var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;var link=buildLink(cust),btn=el('clbtn-'+cid);navigator.clipboard.writeText(link).then(function(){btn.textContent='✓ Copied!';setTimeout(function(){btn.textContent='Copy Link';},2000);}).catch(function(){var inp=document.createElement('textarea');inp.value=link;document.body.appendChild(inp);inp.select();document.execCommand('copy');document.body.removeChild(inp);btn.textContent='✓ Copied!';setTimeout(function(){btn.textContent='Copy Link';},2000);});};
+
 function renderCustomerList(){
   var list=el('customer-list');
   if(!customers.length){list.innerHTML='<p style="font-size:14px;color:var(--text-hint);font-style:italic;padding:8px 0 16px">No customers yet.</p>';return;}
-  list.innerHTML=customers.map(function(c){
+  // Group by tier
+  var retail=customers.filter(function(c){return(c.tier||'retail')==='retail';});
+  var dist=customers.filter(function(c){return c.tier==='distributor';});
+  function custCard(c){
+    var tier=c.tier||'retail';
     var outlets=c.outlets||[];
     var outH=outlets.map(function(o,i){return'<div class="outlet-edit-block"><div class="outlet-edit-lbl">Outlet '+(i+1)+'</div><div class="outlet-edit-row"><input class="outlet-edit-inp" type="text" id="oedit-name-'+c.id+'-'+i+'" value="'+esc(o.name||'')+'" placeholder="Outlet name"><input class="outlet-edit-inp" type="text" id="oedit-addr-'+c.id+'-'+i+'" value="'+esc(o.address||'')+'" placeholder="Address"><button class="save-outlet-btn" onclick="saveOutlet(\''+c.id+'\','+i+')">Save</button><button class="remove-outlet-btn2" onclick="removeOutlet(\''+c.id+'\','+i+')">Remove</button></div></div>';}).join('');
-    return'<div class="customer-card"><div class="customer-header" onclick="toggleCust(\''+c.id+'\')"><div class="customer-header-info"><div class="customer-header-name">'+esc(c.name)+'</div><div class="customer-header-meta">'+(c.phone?'+65 '+c.phone:'No phone')+(c.address?' · '+esc(c.address):'')+'</div></div><div class="customer-header-actions" onclick="event.stopPropagation()"><button class="copy-link-btn" id="clbtn-'+c.id+'" onclick="copyCustomerLink(\''+c.id+'\')">Copy Link</button><button class="del-cust-btn" onclick="deleteCustomer(\''+c.id+'\')">Remove</button></div><span class="cust-chevron" id="cchev-'+c.id+'">▼</span></div>'
-      +'<div class="customer-body" id="cbody-'+c.id+'"><div class="cust-edit-grid"><div class="cust-edit-field"><label>Name</label><input type="text" id="cedit-name-'+c.id+'" value="'+esc(c.name)+'"></div><div class="cust-edit-field"><label>Phone (+65)</label><input type="tel" id="cedit-phone-'+c.id+'" value="'+esc(c.phone||'')+'" maxlength="8" inputmode="numeric"></div><div class="cust-edit-field full"><label>Default Address</label><input type="text" id="cedit-addr-'+c.id+'" value="'+esc(c.address||'')+'"></div></div>'
-      +'<button class="save-cust-btn" onclick="saveCustomerEdits(\''+c.id+'\')">✓ Save customer details</button>'
-      +'<div class="outlet-section-title">Outlets ('+outlets.length+')</div>'+(outH||'<p style="font-size:12px;color:var(--text-hint);margin-bottom:10px;font-style:italic">No outlets yet.</p>')
-      +'<div class="add-outlet-row"><input class="outlet-name-inp" type="text" id="oname-'+c.id+'" placeholder="Outlet name (e.g. Causeway Point)"><input class="outlet-addr-inp" type="text" id="oaddr-'+c.id+'" placeholder="Address (optional)"><button class="add-outlet-btn" onclick="addOutlet(\''+c.id+'\')">+ Add Outlet</button></div></div></div>';
-  }).join('');
+    return'<div class="customer-card">'
+      +'<div class="customer-header" onclick="toggleCust(\''+c.id+'\')">'
+        +'<div class="customer-header-info">'
+          +'<div class="customer-header-name">'+esc(c.name)+' <span class="tier-tag '+tier+'">'+(tier==='distributor'?'Distributor':'Retail')+'</span></div>'
+          +'<div class="customer-header-meta">'+(c.phone?'+65 '+c.phone:'No phone')+(c.address?' · '+esc(c.address):'')+'</div>'
+        +'</div>'
+        +'<div class="customer-header-actions" onclick="event.stopPropagation()">'
+          +'<button class="copy-link-btn" id="clbtn-'+c.id+'" onclick="copyCustomerLink(\''+c.id+'\')">Copy Link</button>'
+          +'<button class="del-cust-btn" onclick="deleteCustomer(\''+c.id+'\')">Remove</button>'
+        +'</div>'
+        +'<span class="cust-chevron" id="cchev-'+c.id+'">▼</span>'
+      +'</div>'
+      +'<div class="customer-body" id="cbody-'+c.id+'">'
+        +'<div class="cust-edit-grid">'
+          +'<div class="cust-edit-field"><label>Name</label><input type="text" id="cedit-name-'+c.id+'" value="'+esc(c.name)+'"></div>'
+          +'<div class="cust-edit-field"><label>Phone (+65)</label><input type="tel" id="cedit-phone-'+c.id+'" value="'+esc(c.phone||'')+'" maxlength="8" inputmode="numeric"></div>'
+          +'<div class="cust-edit-field full"><label>Default Address</label><input type="text" id="cedit-addr-'+c.id+'" value="'+esc(c.address||'')+'"></div>'
+          +'<div class="cust-edit-field"><label>Pricing Tier</label>'
+            +'<select id="cedit-tier-'+c.id+'">'
+              +'<option value="retail"'+(tier==='retail'?' selected':'')+'>Retail</option>'
+              +'<option value="distributor"'+(tier==='distributor'?' selected':'')+'>Distributor</option>'
+            +'</select>'
+          +'</div>'
+        +'</div>'
+        +'<button class="save-cust-btn" onclick="saveCustomerEdits(\''+c.id+'\')">✓ Save customer details</button>'
+        +'<div class="outlet-section-title">Outlets ('+outlets.length+')</div>'
+        +(outH||'<p style="font-size:12px;color:var(--text-hint);margin-bottom:10px;font-style:italic">No outlets yet.</p>')
+        +'<div class="add-outlet-row"><input class="outlet-name-inp" type="text" id="oname-'+c.id+'" placeholder="Outlet name (e.g. Causeway Point)"><input class="outlet-addr-inp" type="text" id="oaddr-'+c.id+'" placeholder="Address (optional)"><button class="add-outlet-btn" onclick="addOutlet(\''+c.id+'\')">+ Add Outlet</button></div>'
+      +'</div>'
+    +'</div>';
+  }
+  var html='';
+  if(retail.length){
+    html+='<div class="tier-group-title retail"><span class="tier-dot retail" style="width:9px;height:9px;border-radius:50%;background:var(--blue);flex-shrink:0"></span>Retail Customers ('+retail.length+')</div>';
+    html+=retail.map(custCard).join('');
+  }
+  if(dist.length){
+    if(retail.length)html+='<div style="margin-top:1.5rem"></div>';
+    html+='<div class="tier-group-title distributor"><span style="width:9px;height:9px;border-radius:50%;background:var(--purple);flex-shrink:0"></span>Distributor Customers ('+dist.length+')</div>';
+    html+=dist.map(custCard).join('');
+  }
+  list.innerHTML=html;
 }
 
 window.renderAdmin=renderAdmin;
