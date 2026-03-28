@@ -228,6 +228,25 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .toast-msg{font-size:13px;padding:7px 14px;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r);color:var(--green-text);display:none;font-weight:500;}
 .ghost-btn{font-size:14px;padding:10px 18px;border:1.5px solid var(--border-md);border-radius:var(--r);background:#fff;color:var(--text);cursor:pointer;font-family:inherit;font-weight:500;}
 .out-btn{font-size:14px;padding:10px 16px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text-muted);cursor:pointer;font-family:inherit;}
+
+/* GITHUB PUBLISH */
+.gh-publish-btn{font-size:14px;padding:10px 18px;border:none;border-radius:var(--r);background:var(--text);color:#fff;cursor:pointer;font-family:inherit;font-weight:600;}
+.gh-publish-btn:disabled{opacity:.5;cursor:not-allowed;}
+.gh-publish-btn.publishing{background:var(--amber-text);}
+.gh-publish-btn.success{background:var(--green);}
+.gh-settings-panel{background:var(--surface);border-radius:var(--r-lg);padding:1.25rem;margin-bottom:1.5rem;border:1.5px solid var(--border-md);}
+.gh-settings-inner{}
+.gh-settings-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.gh-settings-desc{font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.5;}
+.gh-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:480px){.gh-field-grid{grid-template-columns:1fr;}}
+.gh-field{display:flex;flex-direction:column;gap:5px;}
+.gh-field-full{grid-column:1/-1;}
+.gh-field label{font-size:12px;color:var(--text-muted);font-weight:500;}
+.gh-field input{font-size:14px;padding:10px 11px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;color:var(--text);font-family:inherit;outline:none;-webkit-appearance:none;}
+.gh-status{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;}
+.gh-status.ok{background:var(--green-bg);color:var(--green-text);}
+.gh-status.err{background:#FCEBEB;color:#791F1F;}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:2rem;}
 .stat{background:var(--surface);border-radius:var(--r);padding:14px;}
 .stat-lbl{font-size:12px;color:var(--text-muted);margin-bottom:5px;}
@@ -536,9 +555,32 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     <h2>Admin Panel</h2>
     <div class="admin-actions">
       <span class="toast-msg" id="toast">✓ Saved!</span>
-      <button class="ghost-btn" onclick="saveAll()">💾 Save &amp; Export</button>
-      <label class="ghost-btn" style="cursor:pointer" title="Restore from a previously exported snack_store.html file">📂 Import Backup<input type="file" accept=".html" style="display:none" onchange="importBackup(this)"></label>
+      <button class="gh-publish-btn" id="gh-publish-btn" onclick="publishToGitHub()">🚀 Save &amp; Publish</button>
+      <button class="ghost-btn" onclick="saveAll()">💾 Export HTML</button>
+      <button class="ghost-btn" onclick="exportData()">📤 Export Data</button>
+      <label class="ghost-btn" style="cursor:pointer">📥 Import Data<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
+      <button class="ghost-btn" onclick="toggleGHSettings()">⚙️ GitHub</button>
       <button class="out-btn" onclick="showPage('page-order')">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- GITHUB SETTINGS PANEL -->
+  <div class="gh-settings-panel" id="gh-settings-panel" style="display:none">
+    <div class="gh-settings-inner">
+      <div class="gh-settings-title">🔗 GitHub Settings</div>
+      <p class="gh-settings-desc">Enter your GitHub details once. They are stored only in this browser and never shared.</p>
+      <div class="gh-field-grid">
+        <div class="gh-field"><label>GitHub Username</label><input type="text" id="gh-user" placeholder="e.g. order-sweets" autocomplete="off"></div>
+        <div class="gh-field"><label>Repository Name</label><input type="text" id="gh-repo" placeholder="e.g. test" autocomplete="off"></div>
+        <div class="gh-field"><label>File path in repo</label><input type="text" id="gh-path" placeholder="e.g. index.html" autocomplete="off"></div>
+        <div class="gh-field"><label>Branch</label><input type="text" id="gh-branch" placeholder="main" autocomplete="off"></div>
+        <div class="gh-field gh-field-full"><label>Personal Access Token <span style="font-weight:400;color:var(--text-hint)">(stored in this browser only)</span></label><input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="primary-btn" onclick="saveGHSettings()">Save Settings</button>
+        <button class="ghost-btn" onclick="toggleGHSettings()">Close</button>
+      </div>
+      <div class="gh-status" id="gh-status" style="display:none"></div>
     </div>
   </div>
 
@@ -800,7 +842,17 @@ window.showPage=function(id){
 };
 window.tryLogin=function(){
   var pw=el('pw-input').value;
-  if(pw===ADMIN_PW){el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';renderAdmin();renderCustomerList();window.showPage('page-admin');}
+  if(pw===ADMIN_PW){
+    el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';
+    // Pre-fill GitHub settings
+    var s=loadGHSettings();
+    if(el('gh-user'))el('gh-user').value=s.user||'';
+    if(el('gh-repo'))el('gh-repo').value=s.repo||'';
+    if(el('gh-path'))el('gh-path').value=s.path||'index.html';
+    if(el('gh-branch'))el('gh-branch').value=s.branch||'main';
+    if(el('gh-token'))el('gh-token').value=s.token||'';
+    renderAdmin();renderCustomerList();window.showPage('page-admin');
+  }
   else{el('pw-input').classList.add('err-i');el('login-err').style.display='block';}
 };
 window.openLightbox=function(pid){
@@ -1362,6 +1414,99 @@ function renderAdmin(){
 }
 function updateBrandDatalist(){var dl=el('brand-datalist');if(!dl)return;dl.innerHTML=BRANDS.map(function(b){return'<option value="'+esc(b.brand)+'">'+esc(b.brand)+'</option>';}).join('');}
 function updateStats(){var thresh=getThresh(),low=0,out=0,all=getAllProducts();all.forEach(function(p){var s=getStockPieces(p);var cases=p.ppc>0?Math.floor(s/p.ppc):s;if(s<=0)out++;else if(cases<=thresh)low++;});el('stat-total').textContent=all.length;el('stat-low').textContent=low;el('stat-out').textContent=out;}
+/* ── GITHUB INTEGRATION ── */
+var LS_GH='snack-gh-settings';
+
+function loadGHSettings(){return loadJ(LS_GH)||{};}
+
+window.toggleGHSettings=function(){
+  var panel=el('gh-settings-panel');
+  var isOpen=panel.style.display!=='none';
+  panel.style.display=isOpen?'none':'block';
+  if(!isOpen){
+    // Populate fields with saved settings
+    var s=loadGHSettings();
+    if(el('gh-user'))el('gh-user').value=s.user||'';
+    if(el('gh-repo'))el('gh-repo').value=s.repo||'';
+    if(el('gh-path'))el('gh-path').value=s.path||'index.html';
+    if(el('gh-branch'))el('gh-branch').value=s.branch||'main';
+    if(el('gh-token'))el('gh-token').value=s.token||'';
+  }
+};
+
+window.saveGHSettings=function(){
+  var s={
+    user:(el('gh-user').value||'').trim(),
+    repo:(el('gh-repo').value||'').trim(),
+    path:(el('gh-path').value||'index.html').trim(),
+    branch:(el('gh-branch').value||'main').trim(),
+    token:(el('gh-token').value||'').trim()
+  };
+  if(!s.user||!s.repo||!s.token){alert('Please fill in Username, Repository and Token at minimum.');return;}
+  saveJ(LS_GH,s);
+  var st=el('gh-status');
+  st.className='gh-status ok';st.textContent='✓ Settings saved!';st.style.display='block';
+  setTimeout(function(){st.style.display='none';},3000);
+};
+
+window.publishToGitHub=function(){
+  var s=loadGHSettings();
+  if(!s.user||!s.repo||!s.token){
+    alert('Please set up your GitHub settings first — click the ⚙️ GitHub button.');
+    return;
+  }
+  var btn=el('gh-publish-btn');
+  btn.disabled=true;btn.textContent='⏳ Publishing…';btn.className='gh-publish-btn publishing';
+
+  // Build the updated HTML with baked-in data (same as saveAll)
+  var src='';
+  try{
+    src=document.documentElement.outerHTML;
+    var newData='var DEFAULT_NEW='+JSON.stringify(NEW_ARRIVALS)+';\nvar DEFAULT_BRANDS='+JSON.stringify(BRANDS)+';';
+    src=src.replace(/var DEFAULT_NEW=\[[\s\S]*?\];\nvar DEFAULT_BRANDS=\[[\s\S]*?\];/,newData);
+    var custData='var customers='+JSON.stringify(customers)+';';
+    src=src.replace(/var customers=loadJ\(LS_CUST\)\|\|\[\];/,custData+'/* loaded */');
+    src=src.replace(/var customers=\[[\s\S]*?\];\/\* loaded \*\//,custData+'/* loaded */');
+  }catch(e){
+    btn.disabled=false;btn.textContent='🚀 Save & Publish';btn.className='gh-publish-btn';
+    alert('Failed to build file: '+e.message);return;
+  }
+
+  // Get current file SHA (required by GitHub API to update a file)
+  var apiBase='https://api.github.com/repos/'+s.user+'/'+s.repo+'/contents/'+s.path;
+  var headers={'Authorization':'token '+s.token,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'};
+
+  fetch(apiBase+'?ref='+(s.branch||'main'),{headers:headers})
+    .then(function(r){
+      if(!r.ok&&r.status!==404)throw new Error('Could not reach GitHub API. Status: '+r.status+'. Check your token and repo details.');
+      return r.ok?r.json():null;
+    })
+    .then(function(fileData){
+      var sha=fileData?fileData.sha:undefined;
+      var content=btoa(unescape(encodeURIComponent(src)));
+      var body={
+        message:'Update store — '+new Date().toLocaleString(),
+        content:content,
+        branch:s.branch||'main'
+      };
+      if(sha)body.sha=sha;
+      return fetch(apiBase,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+    })
+    .then(function(r){
+      if(!r.ok)return r.json().then(function(d){throw new Error(d.message||'GitHub returned error '+r.status);});
+      return r.json();
+    })
+    .then(function(){
+      btn.disabled=false;btn.textContent='✅ Published!';btn.className='gh-publish-btn success';
+      setTimeout(function(){btn.textContent='🚀 Save & Publish';btn.className='gh-publish-btn';},4000);
+      saveProds(); // also save locally
+    })
+    .catch(function(err){
+      btn.disabled=false;btn.textContent='🚀 Save & Publish';btn.className='gh-publish-btn';
+      alert('❌ Publish failed:\n\n'+err.message+'\n\nCheck your token, username, repo name and file path in ⚙️ GitHub settings.');
+    });
+};
+
 window.saveAll=function(){
   saveProds();
   try{
@@ -1382,7 +1527,72 @@ window.saveAll=function(){
   renderOrder();
 };
 
-window.importBackup=function(input){
+/* ── EXPORT DATA (JSON) ── */
+window.exportData=function(){
+  var data={
+    version:2,
+    exportedAt:new Date().toISOString(),
+    newArrivals:NEW_ARRIVALS,
+    brands:BRANDS,
+    customers:customers,
+    photos:photos,
+    inv:loadJ(LS_INV)||{}
+  };
+  var now=new Date();
+  var pad=function(n){return n<10?'0'+n:n;};
+  var stamp=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'_'+pad(now.getHours())+pad(now.getMinutes());
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='snack_data_'+stamp+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  var t=el('toast');t.style.display='inline-block';
+  t.textContent='✓ Data exported!';
+  setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},3000);
+};
+
+/* ── IMPORT DATA (JSON) ── */
+window.importData=function(input){
+  var file=input.files[0];if(!file)return;
+  if(!confirm('Import data from "'+file.name+'"?\n\nThis will replace ALL current products, customers, prices and settings. Continue?')){input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!data.newArrivals||!data.brands){
+        alert('This does not look like a valid snack data file.');input.value='';return;
+      }
+      // Restore all data
+      NEW_ARRIVALS=data.newArrivals;
+      BRANDS=data.brands;
+      if(data.customers)customers=data.customers;
+      if(data.photos)photos=data.photos;
+      // Restore inventory store
+      if(data.inv)saveJ(LS_INV,data.inv);
+      // Restore photos
+      if(data.photos)saveJ(LS_PHOTOS,data.photos);
+      // Save everything to localStorage
+      saveProds();
+      saveJ(LS_CUST,customers);
+      // Rebuild inv store from product objects as fallback for any missing keys
+      var inv=loadJ(LS_INV)||{};
+      getAllProducts().forEach(function(p){
+        if(inv[p.id]===undefined)inv[p.id]=p.stockPieces||0;
+        if(inv['rp_'+p.id]===undefined)inv['rp_'+p.id]=p.price||0;
+        if(inv['dp_'+p.id]===undefined)inv['dp_'+p.id]=p.priceDist||p.price||0;
+        if(inv['vr_'+p.id]===undefined)inv['vr_'+p.id]=p.visRetail!==undefined?p.visRetail:1;
+        if(inv['vd_'+p.id]===undefined)inv['vd_'+p.id]=p.visDist!==undefined?p.visDist:1;
+      });
+      saveJ(LS_INV,inv);
+      renderAdmin();renderCustomerList();renderOrder();renderBasket();
+      var t=el('toast');t.style.display='inline-block';
+      t.textContent='✓ Data imported successfully!';
+      setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},3500);
+    }catch(err){
+      alert('Import failed — invalid JSON file.\n\nError: '+err.message);
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+};
   var file=input.files[0];if(!file)return;
   if(!confirm('Import this backup? This will replace ALL current products, customers and inventory with the data in the file. Continue?')){input.value='';return;}
   var reader=new FileReader();
