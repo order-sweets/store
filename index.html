@@ -401,7 +401,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <body>
 
 <!-- ORDER PAGE -->
-<div class="page" id="page-order">
+<div class="page active" id="page-order">
 <div class="order-wrap">
 
   <div class="greeting-banner" id="greeting-banner" style="display:none">
@@ -546,7 +546,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 </div>
 
 <!-- ADMIN -->
-<div class="page active" id="page-admin">
+<div class="page" id="page-admin">
 <div class="admin-wrap">
   <div class="admin-topbar">
     <h2>Admin Panel</h2>
@@ -567,11 +567,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
       <div class="gh-settings-title">🔗 GitHub Settings</div>
       <p class="gh-settings-desc">Enter your GitHub details once. They are stored only in this browser and never shared.</p>
       <div class="gh-field-grid">
-        <div class="gh-field"><label>GitHub Username</label><input type="text" id="gh-user" placeholder="e.g. order-sweets" autocomplete="off"></div>
-        <div class="gh-field"><label>Repository Name</label><input type="text" id="gh-repo" placeholder="e.g. test" autocomplete="off"></div>
-        <div class="gh-field"><label>File path in repo</label><input type="text" id="gh-path" placeholder="e.g. index.html" autocomplete="off"></div>
-        <div class="gh-field"><label>Branch</label><input type="text" id="gh-branch" placeholder="main" autocomplete="off"></div>
-        <div class="gh-field gh-field-full"><label>Personal Access Token <span style="font-weight:400;color:var(--text-hint)">(stored in this browser only)</span></label><input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"></div>
+        <div class="gh-field"><label>GitHub Username</label><input type="text" id="gh-user" placeholder="e.g. order-sweets" autocomplete="off" value="order-sweets"></div>
+        <div class="gh-field"><label>Repository Name</label><input type="text" id="gh-repo" placeholder="e.g. test" autocomplete="off" value="test"></div>
+        <div class="gh-field"><label>File path in repo</label><input type="text" id="gh-path" placeholder="e.g. index.html" autocomplete="off" value="index.html"></div>
+        <div class="gh-field"><label>Branch</label><input type="text" id="gh-branch" placeholder="main" autocomplete="off" value="main"></div>
+        <div class="gh-field gh-field-full"><label>Personal Access Token <span style="font-weight:400;color:var(--text-hint)">(paste once — saved in this browser)</span></label><input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
         <button class="primary-btn" onclick="saveGHSettings()">Save Settings</button>
@@ -1405,7 +1405,17 @@ function updateStats(){var thresh=getThresh(),low=0,out=0,all=getAllProducts();a
 /* ── GITHUB INTEGRATION ── */
 var LS_GH='snack-gh-settings';
 
-function loadGHSettings(){return loadJ(LS_GH)||{};}
+function loadGHSettings(){
+  var saved=loadJ(LS_GH)||{};
+  // Fall back to hardcoded HTML field values for non-sensitive settings
+  return {
+    user:saved.user||(el('gh-user')?el('gh-user').value:''),
+    repo:saved.repo||(el('gh-repo')?el('gh-repo').value:''),
+    path:saved.path||(el('gh-path')?el('gh-path').value:'index.html'),
+    branch:saved.branch||(el('gh-branch')?el('gh-branch').value:'main'),
+    token:saved.token||''
+  };
+}
 
 window.toggleGHSettings=function(){
   var panel=el('gh-settings-panel');
@@ -1450,6 +1460,18 @@ window.publishToGitHub=function(){
   var src='';
   try{
     src=document.documentElement.outerHTML;
+    // Always reset to order page so GitHub Pages opens on the order form
+    src=src.replace(/class="page" id="page-admin"/g,'class="page" id="page-admin"');
+    src=src.replace(/class="page" id="page-login"/g,'class="page" id="page-login"');
+    src=src.replace(/id="page-admin" class="page"/g,'id="page-admin" class="page"');
+    src=src.replace(/id="page-login" class="page"/g,'id="page-login" class="page"');
+    src=src.replace(/id="page-order" class="page active"/g,'id="page-order" class="page active"');
+    src=src.replace(/class="page active" id="page-order"/g,'class="page active" id="page-order"');
+    // Bake non-sensitive GitHub settings permanently into the file
+    src=src.replace(/id="gh-user"[^>]*>/,'id="gh-user" placeholder="e.g. order-sweets" autocomplete="off" value="'+s.user+'">');
+    src=src.replace(/id="gh-repo"[^>]*>/,'id="gh-repo" placeholder="e.g. test" autocomplete="off" value="'+s.repo+'">');
+    src=src.replace(/id="gh-path"[^>]*>/,'id="gh-path" placeholder="e.g. index.html" autocomplete="off" value="'+s.path+'">');
+    src=src.replace(/id="gh-branch"[^>]*>/,'id="gh-branch" placeholder="main" autocomplete="off" value="'+s.branch+'">');
     var newData='var DEFAULT_NEW='+JSON.stringify(NEW_ARRIVALS)+';\nvar DEFAULT_BRANDS='+JSON.stringify(BRANDS)+';';
     src=src.replace(/var DEFAULT_NEW=\[[\s\S]*?\];\nvar DEFAULT_BRANDS=\[[\s\S]*?\];/,newData);
     var custData='var customers='+JSON.stringify(customers)+';';
@@ -1498,11 +1520,19 @@ window.publishToGitHub=function(){
 window.saveAll=function(){
   saveProds();
   try{
+    // Always ensure page-order is the active page in the exported file
     var src=document.documentElement.outerHTML;
+    src=src.replace(/id="page-order"[^>]*class="page[^"]*active[^"]*"/g,'id="page-order" class="page active"');
+    src=src.replace(/class="page[^"]*active[^"]*"\s+id="page-admin"/g,'class="page" id="page-admin"');
+    src=src.replace(/class="page[^"]*active[^"]*"\s+id="page-login"/g,'class="page" id="page-login"');
+    src=src.replace(/id="page-admin"\s+class="page[^"]*active[^"]*"/g,'id="page-admin" class="page"');
+    src=src.replace(/id="page-login"\s+class="page[^"]*active[^"]*"/g,'id="page-login" class="page"');
     var newData='var DEFAULT_NEW='+JSON.stringify(NEW_ARRIVALS)+';\nvar DEFAULT_BRANDS='+JSON.stringify(BRANDS)+';';
     src=src.replace(/var DEFAULT_NEW=\[[\s\S]*?\];\nvar DEFAULT_BRANDS=\[[\s\S]*?\];/,newData);
     var custData='var customers='+JSON.stringify(customers)+';';
     src=src.replace(/var customers=loadJ\(LS_CUST\)\|\|\[\];/,custData+'/* loaded */');
+    src=src.replace(/var customers=\[[\s\S]*?\];\/\* loaded \*\//,custData+'/* loaded */');
+    var blob=new Blob([src],{type:'text/html'});
     var now=new Date();
     var pad=function(n){return n<10?'0'+n:n;};
     var stamp=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'_'+pad(now.getHours())+pad(now.getMinutes());
