@@ -551,7 +551,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   <div class="admin-topbar">
     <h2>Admin Panel</h2>
     <div class="admin-actions">
-      <span class="toast-msg" id="toast">✓ Saved!</span>
+      <span class="toast-msg" id="toast" style="display: none;">✓ Saved!</span>
       <button class="gh-publish-btn publishing" id="gh-publish-btn" onclick="publishToGitHub()" disabled="">⏳ Publishing…</button>
       <button class="ghost-btn" onclick="saveAll()">💾 Export HTML</button>
       <button class="ghost-btn" onclick="exportData()">📤 Export Data</button>
@@ -595,12 +595,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
   <!-- TABS -->
   <div class="admin-tabs">
-    <button class="admin-tab" onclick="switchTab('tab-products')">📦 Products</button>
-    <button class="admin-tab active" onclick="switchTab('tab-customers')">👥 Customers</button>
+    <button class="admin-tab active" onclick="switchTab('tab-products')">📦 Products</button>
+    <button class="admin-tab" onclick="switchTab('tab-customers')">👥 Customers</button>
   </div>
 
   <!-- PRODUCTS TAB -->
-  <div class="admin-tab-panel" id="tab-products">
+  <div class="admin-tab-panel active" id="tab-products">
     <p class="slabel" style="font-size:18px;margin-bottom:14px">➕ Add New Product</p>
     <div class="section-card">
       <div class="form-grid">
@@ -630,7 +630,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   </div>
 
   <!-- CUSTOMERS TAB -->
-  <div class="admin-tab-panel active" id="tab-customers">
+  <div class="admin-tab-panel" id="tab-customers">
     <div class="section-card">
       <h3>Add New Customer</h3>
       <div class="form-grid">
@@ -895,6 +895,7 @@ function unitRowsHTML(p,pq,cq){
   var discTagC=hasCustomC?'<span class="disc-badge-inline">Custom</span>':(ed>0?'<span class="disc-badge-inline">-'+ed+'%</span>':(d>0?'<span class="disc-badge-inline">-'+d+'%</span>':''));
   pq=pq||0;cq=cq||0;
   var units=allowedUnits(p);
+  var hasCustomCase=custCustomPrice(p.id,'case')!==null;
   var html='<div class="unit-rows">';
   if(units==='piece'||units==='both'){
     var pSpec='1pc'+(p.weight?' × '+p.weight:'');
@@ -906,9 +907,11 @@ function unitRowsHTML(p,pq,cq){
         +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',1)"'+(oos?' disabled':'')+'>+</button>'
       +'</div></div>';
   }
-  if(p.ppc>0&&(units==='case'||units==='both')){
-    var cSpec=p.ppc+'pcs'+(p.weight?' × '+p.weight:'');
-    var maxCase=Math.floor(stock/p.ppc);
+  // Show case row if: product has ppc set, OR customer has a custom case price
+  if((p.ppc>0||hasCustomCase)&&(units==='case'||units==='both')){
+    var effectivePpc=p.ppc>0?p.ppc:1;
+    var cSpec=p.ppc>0?(effectivePpc+'pcs'+(p.weight?' × '+p.weight:'')):'(case)';
+    var maxCase=p.ppc>0?Math.floor(stock/effectivePpc):stock;
     html+='<div class="unit-row'+(cq>0?' has-qty-row':'')+'" id="urow-case-'+p.id+'">'
       +'<div class="unit-row-top"><span class="unit-row-label">Case <span class="unit-row-spec">'+esc(cSpec)+'</span></span><span class="unit-row-price">$'+dcp.toFixed(2)+discTagC+'</span></div>'
       +'<div class="unit-qty-ctrl">'
