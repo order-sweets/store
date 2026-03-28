@@ -518,7 +518,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     <h2>Admin Panel</h2>
     <div class="admin-actions">
       <span class="toast-msg" id="toast">✓ Saved!</span>
-      <button class="ghost-btn" onclick="saveAll()">Save All</button>
+      <button class="ghost-btn" onclick="saveAll()">💾 Save &amp; Export</button>
+      <label class="ghost-btn" style="cursor:pointer" title="Restore from a previously exported snack_store.html file">📂 Import Backup<input type="file" accept=".html" style="display:none" onchange="importBackup(this)"></label>
       <button class="out-btn" onclick="showPage('page-order')">Sign Out</button>
     </div>
   </div>
@@ -1302,23 +1303,77 @@ function updateBrandDatalist(){var dl=el('brand-datalist');if(!dl)return;dl.inne
 function updateStats(){var thresh=getThresh(),low=0,out=0,all=getAllProducts();all.forEach(function(p){var s=getStockPieces(p);var cases=p.ppc>0?Math.floor(s/p.ppc):s;if(s<=0)out++;else if(cases<=thresh)low++;});el('stat-total').textContent=all.length;el('stat-low').textContent=low;el('stat-out').textContent=out;}
 window.saveAll=function(){
   saveProds();
-  // Also bake current data into the HTML file for GitHub Pages deployment
   try{
     var src=document.documentElement.outerHTML;
-    // Replace DEFAULT_NEW and DEFAULT_BRANDS with current live data
     var newData='var DEFAULT_NEW='+JSON.stringify(NEW_ARRIVALS)+';\nvar DEFAULT_BRANDS='+JSON.stringify(BRANDS)+';';
     src=src.replace(/var DEFAULT_NEW=\[[\s\S]*?\];\nvar DEFAULT_BRANDS=\[[\s\S]*?\];/,newData);
-    // Replace default customers
     var custData='var customers='+JSON.stringify(customers)+';';
     src=src.replace(/var customers=loadJ\(LS_CUST\)\|\|\[\];/,custData+'/* loaded */');
     var blob=new Blob([src],{type:'text/html'});
     var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='snack_store.html';
     a.click();URL.revokeObjectURL(a.href);
-  }catch(e){}
+  }catch(e){alert('Export failed: '+e.message);}
   var t=el('toast');t.style.display='inline-block';
-  t.textContent='✓ Saved! Re-upload the downloaded file to GitHub.';
+  t.textContent='✓ Exported! Re-upload to GitHub.';
   setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},4000);
   renderOrder();
+};
+
+window.importBackup=function(input){
+  var file=input.files[0];if(!file)return;
+  if(!confirm('Import this backup? This will replace ALL current products, customers and inventory with the data in the file. Continue?')){input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var html=e.target.result;
+
+      // Extract DEFAULT_NEW
+      var naMatch=html.match(/var DEFAULT_NEW=(\[[\s\S]*?\]);[\s\n]*var DEFAULT_BRANDS=/);
+      var brMatch=html.match(/var DEFAULT_BRANDS=(\[[\s\S]*?\]);/);
+      var cuMatch=html.match(/var customers=(loadJ\(LS_CUST\)\|\|\[\]|\[[\s\S]*?\]);/);
+
+      if(!naMatch||!brMatch){alert('Could not read product data from this file. Make sure it is a valid snack_store.html export.');return;}
+
+      var importedNew=JSON.parse(naMatch[1]);
+      var importedBrands=JSON.parse(brMatch[1]);
+      var importedCustomers=cuMatch&&cuMatch[1]!=='loadJ(LS_CUST)||[]'?JSON.parse(cuMatch[1]):null;
+
+      // Also try to extract baked-in customers (post-save format)
+      if(!importedCustomers){
+        var cu2=html.match(/var customers=(\[[\s\S]*?\]);\/\* loaded \*\//);
+        if(cu2)importedCustomers=JSON.parse(cu2[1]);
+      }
+
+      // Extract inventory (LS_INV) if present as inline JSON in a script comment
+      // (not available in static export — that's fine, prices live on product objects)
+
+      // Apply
+      NEW_ARRIVALS=importedNew;
+      BRANDS=importedBrands;
+      if(importedCustomers){customers=importedCustomers;saveJ(LS_CUST,customers);}
+      saveProds();
+
+      // Also restore inv store entries from product objects (prices, visibility)
+      var inv=getInv();
+      getAllProducts().forEach(function(p){
+        if(p.price!==undefined)inv['rp_'+p.id]=p.price;
+        if(p.priceDist!==undefined)inv['dp_'+p.id]=p.priceDist;
+        if(p.visRetail!==undefined)inv['vr_'+p.id]=p.visRetail?1:0;
+        if(p.visDist!==undefined)inv['vd_'+p.id]=p.visDist?1:0;
+        if(p.stockPieces!==undefined&&inv[p.id]===undefined)inv[p.id]=p.stockPieces;
+      });
+      saveInv(inv);
+
+      renderAdmin();renderCustomerList();renderOrder();renderBasket();
+      var t=el('toast');t.style.display='inline-block';
+      t.textContent='✓ Backup imported successfully!';
+      setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},4000);
+    }catch(err){
+      alert('Import failed — the file may be corrupted or from an incompatible version.\n\nError: '+err.message);
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
 };
 window.addProduct=function(){
   var name=el('add-name').value.trim(),brand=el('add-brand').value.trim();
