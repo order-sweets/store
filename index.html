@@ -361,6 +361,24 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .add-outlet-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .outlet-name-inp,.outlet-addr-inp{flex:1;min-width:110px;font-size:13px;padding:8px 11px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;color:var(--text);font-family:inherit;outline:none;}
 .add-outlet-btn{padding:8px 14px;background:var(--surface);border:1.5px solid var(--border-md);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);}
+
+/* CUSTOM PRICING */
+.cust-pricing-section{margin-top:14px;border-top:1px solid var(--border);padding-top:12px;}
+.cust-pricing-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;}
+.extra-disc-row{display:flex;align-items:center;gap:10px;background:var(--amber-bg);border-radius:8px;padding:8px 12px;margin-bottom:10px;}
+.extra-disc-row label{font-size:12px;font-weight:600;color:var(--amber-text);flex:1;}
+.extra-disc-inp{width:64px;font-size:13px;padding:6px 8px;border:1.5px solid var(--border-md);border-radius:7px;background:#fff;color:var(--text);text-align:center;font-family:inherit;outline:none;}
+.save-extra-disc-btn{padding:6px 12px;background:var(--green-bg);border:1px solid var(--green);border-radius:7px;font-size:12px;font-weight:600;color:var(--green-text);cursor:pointer;font-family:inherit;white-space:nowrap;}
+.custom-prices-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.custom-price-row{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:8px;padding:7px 10px;font-size:12px;flex-wrap:wrap;}
+.custom-price-name{flex:1;font-weight:600;min-width:100px;}
+.custom-price-val{font-size:12px;color:var(--accent-text);font-weight:600;}
+.remove-cp-btn{width:20px;height:20px;background:#FCEBEB;border:none;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#791F1F;font-weight:700;flex-shrink:0;}
+.add-cp-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.cp-prod-inp{flex:2;min-width:130px;font-size:13px;padding:7px 10px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;color:var(--text);font-family:inherit;outline:none;}
+.cp-unit-sel{font-size:13px;padding:7px 8px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;color:var(--text);font-family:inherit;outline:none;-webkit-appearance:none;}
+.cp-price-inp{width:70px;font-size:13px;padding:7px 8px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;color:var(--text);font-family:inherit;outline:none;text-align:center;}
+.add-cp-btn{padding:7px 12px;background:var(--text);border:none;border-radius:8px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -561,6 +579,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
         <div class="form-field"><label>Distributor Case Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price-dist" placeholder="auto" min="0" step="0.01" inputmode="decimal"></div>
         <div class="form-field"><label>Visible to Retail</label><select id="add-vis-retail"><option value="1">Yes</option><option value="0">No</option></select></div>
         <div class="form-field"><label>Visible to Distributors</label><select id="add-vis-dist"><option value="1">Yes</option><option value="0">No</option></select></div>
+        <div class="form-field"><label style="color:var(--blue-text);font-weight:600">🏪 Retail can order by</label><select id="add-units-retail"><option value="both">Piece &amp; Case</option><option value="piece">Piece only</option><option value="case">Case only</option></select></div>
+        <div class="form-field"><label style="color:var(--purple-text);font-weight:600">📦 Distributors can order by</label><select id="add-units-dist"><option value="both">Piece &amp; Case</option><option value="piece">Piece only</option><option value="case">Case only</option></select></div>
       </div>
       <button class="primary-btn full" onclick="addProduct()">Add Product</button>
     </div>
@@ -686,6 +706,28 @@ function distCasePrice(p){
 function piecePrice(p){return activeTier==='distributor'?distPiecePrice(p):retailPiecePrice(p);}
 function casePrice(p){return activeTier==='distributor'?distCasePrice(p):retailCasePrice(p);}
 
+// ── CURRENT CUSTOMER helpers ──
+var currentCustomer=null;
+function custExtraDisc(){return currentCustomer?Number(currentCustomer.extraDisc||0):0;}
+function custCustomPrice(pid,unit){
+  if(!currentCustomer||!currentCustomer.customPrices)return null;
+  var e=currentCustomer.customPrices.find(function(x){return x.pid===pid&&x.unit===unit;});
+  return e!=null?Number(e.price):null;
+}
+function effectivePiecePrice(p){
+  var c=custCustomPrice(p.id,'piece');if(c!==null)return c;
+  var base=piecePrice(p),ed=custExtraDisc();
+  return ed>0?Math.round(base*(1-ed/100)*100)/100:base;
+}
+function effectiveCasePrice(p){
+  var c=custCustomPrice(p.id,'case');if(c!==null)return c;
+  var base=casePrice(p),ed=custExtraDisc();
+  return ed>0?Math.round(base*(1-ed/100)*100)/100:base;
+}
+function allowedUnits(p){
+  return activeTier==='distributor'?(p.unitsDist||'both'):(p.unitsRetail||'both');
+}
+
 // Visibility
 function getVisRetail(p){
   if(p.visRetail!==undefined)return p.visRetail;
@@ -711,6 +753,7 @@ function initGreeting(){
   if(urlCustId)cust=customers.find(function(c){return c.id===urlCustId;});
   if(!cust&&urlCustName)cust=customers.find(function(c){return c.name===decodeURIComponent(urlCustName);});
   if(cust){
+    currentCustomer=cust;
     // Set tier from customer record
     activeTier=cust.tier||'retail';
     // Show tier banner
@@ -718,7 +761,11 @@ function initGreeting(){
     tb.style.display='flex';
     tb.className='tier-banner '+activeTier;
     td.className='tier-dot '+activeTier;
-    tl.textContent=activeTier==='distributor'?'Distributor Pricing':'Retail Pricing';
+    var tierLabel=activeTier==='distributor'?'Distributor Pricing':'Retail Pricing';
+    if(cust.extraDisc>0)tierLabel+=' · Extra '+cust.extraDisc+'% off';
+    var cpCount=(cust.customPrices||[]).length;
+    if(cpCount>0)tierLabel+=' · '+cpCount+' custom price'+(cpCount>1?'s':'');
+    tl.textContent=tierLabel;
 
     el('greeting-banner').style.display='';
     el('cust-name-display').textContent=cust.name;
@@ -803,23 +850,30 @@ document.addEventListener('click',function(e){if(!e.target.closest('.search-wrap
 function unitRowsHTML(p,pq,cq){
   var stock=getStockPieces(p);
   var oos=stock<=0;
-  var dp=piecePrice(p),dcp=casePrice(p),d=getDiscount(p);
-  var discTag=d>0?'<span class="disc-badge-inline">-'+d+'%</span>':'';
+  var dp=effectivePiecePrice(p),dcp=effectiveCasePrice(p);
+  var d=getDiscount(p),ed=custExtraDisc();
+  var hasCustomP=custCustomPrice(p.id,'piece')!==null;
+  var hasCustomC=custCustomPrice(p.id,'case')!==null;
+  var discTag=hasCustomP?'<span class="disc-badge-inline">Custom</span>':(ed>0?'<span class="disc-badge-inline">-'+ed+'%</span>':(d>0?'<span class="disc-badge-inline">-'+d+'%</span>':''));
+  var discTagC=hasCustomC?'<span class="disc-badge-inline">Custom</span>':(ed>0?'<span class="disc-badge-inline">-'+ed+'%</span>':(d>0?'<span class="disc-badge-inline">-'+d+'%</span>':''));
   pq=pq||0;cq=cq||0;
+  var units=allowedUnits(p);
   var html='<div class="unit-rows">';
-  var pSpec='1pc'+(p.weight?' × '+p.weight:'');
-  html+='<div class="unit-row'+(pq>0?' has-qty-row':'')+'" id="urow-piece-'+p.id+'">'
-    +'<div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">'+esc(pSpec)+'</span></span><span class="unit-row-price">$'+dp.toFixed(2)+discTag+'</span></div>'
-    +'<div class="unit-qty-ctrl">'
-      +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',-1)"'+(oos?' disabled':'')+'>−</button>'
-      +'<input class="uq-inp" type="number" min="0" max="'+stock+'" value="'+pq+'" inputmode="numeric" id="uqinp-piece-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'piece\',this.value)">'
-      +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',1)"'+(oos?' disabled':'')+'>+</button>'
-    +'</div></div>';
-  if(p.ppc>0){
+  if(units==='piece'||units==='both'){
+    var pSpec='1pc'+(p.weight?' × '+p.weight:'');
+    html+='<div class="unit-row'+(pq>0?' has-qty-row':'')+'" id="urow-piece-'+p.id+'">'
+      +'<div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">'+esc(pSpec)+'</span></span><span class="unit-row-price">$'+dp.toFixed(2)+discTag+'</span></div>'
+      +'<div class="unit-qty-ctrl">'
+        +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',-1)"'+(oos?' disabled':'')+'>−</button>'
+        +'<input class="uq-inp" type="number" min="0" max="'+stock+'" value="'+pq+'" inputmode="numeric" id="uqinp-piece-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'piece\',this.value)">'
+        +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',1)"'+(oos?' disabled':'')+'>+</button>'
+      +'</div></div>';
+  }
+  if(p.ppc>0&&(units==='case'||units==='both')){
     var cSpec=p.ppc+'pcs'+(p.weight?' × '+p.weight:'');
     var maxCase=Math.floor(stock/p.ppc);
     html+='<div class="unit-row'+(cq>0?' has-qty-row':'')+'" id="urow-case-'+p.id+'">'
-      +'<div class="unit-row-top"><span class="unit-row-label">Case <span class="unit-row-spec">'+esc(cSpec)+'</span></span><span class="unit-row-price">$'+dcp.toFixed(2)+discTag+'</span></div>'
+      +'<div class="unit-row-top"><span class="unit-row-label">Case <span class="unit-row-spec">'+esc(cSpec)+'</span></span><span class="unit-row-price">$'+dcp.toFixed(2)+discTagC+'</span></div>'
       +'<div class="unit-qty-ctrl">'
         +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'case\',-1)"'+(maxCase<=0?' disabled':'')+'>−</button>'
         +'<input class="uq-inp" type="number" min="0" max="'+maxCase+'" value="'+cq+'" inputmode="numeric" id="uqinp-case-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'case\',this.value)">'
@@ -1033,6 +1087,7 @@ function doSend(){
   var metMin=delMode!=='delivery'||sub>=MIN_ORDER;
   var orderId=genOrderId();
   var tierLabel=activeTier==='distributor'?'Distributor':'Retail';
+  var ed=custExtraDisc();if(ed>0)tierLabel+=' (+'+ed+'% extra disc)';
   var lines=[];
   cartEntries.forEach(function(e){
     var p=findProduct(e.pid);if(!p)return;
@@ -1173,6 +1228,9 @@ function prodAdminCard(p){
         // Row 7 — Visible to Retail | Visible to Distributors
         +'<div class="admin-field"><div class="vis-toggle-row retail"><span class="vis-toggle-label">🏪 Visible to Retail</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisr-'+p.id+'" '+(visR?'checked':'')+' onchange="saveVisRetail(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
         +'<div class="admin-field"><div class="vis-toggle-row dist"><span class="vis-toggle-label">📦 Visible to Distributors</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisd-'+p.id+'" '+(visD?'checked':'')+' onchange="saveVisDist(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
+        // Row 8 — Units available to Retail | Units available to Distributors
+        +'<div class="admin-field"><label style="color:var(--blue-text);font-weight:600">🏪 Retail can order by</label><select id="eunitr-'+p.id+'"><option value="both"'+((!p.unitsRetail||p.unitsRetail==='both')?' selected':'')+'>Piece &amp; Case</option><option value="piece"'+(p.unitsRetail==='piece'?' selected':'')+'>Piece only</option><option value="case"'+(p.unitsRetail==='case'?' selected':'')+'>Case only</option></select></div>'
+        +'<div class="admin-field"><label style="color:var(--purple-text);font-weight:600">📦 Distributors can order by</label><select id="eunitd-'+p.id+'"><option value="both"'+((!p.unitsDist||p.unitsDist==='both')?' selected':'')+'>Piece &amp; Case</option><option value="piece"'+(p.unitsDist==='piece'?' selected':'')+'>Piece only</option><option value="case"'+(p.unitsDist==='case'?' selected':'')+'>Case only</option></select></div>'
       +'</div>'
 
       +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
@@ -1223,10 +1281,13 @@ window.saveProductEdits=function(id){
   var newDp=parseFloat((el('edp-'+id)||{}).value)||p.priceDist||newRp;
   var newRcp=parseFloat((el('ercp-'+id)||{}).value)||0;
   var newDcp=parseFloat((el('edcp-'+id)||{}).value)||0;
+  var newUnitR=(el('eunitr-'+id)||{}).value||'both';
+  var newUnitD=(el('eunitd-'+id)||{}).value||'both';
   if(!newName){alert('Product name cannot be empty.');return;}
   if(newSec==='catalog'&&!newBrand){alert('Please enter a brand name.');return;}
 
   p.name=newName;p.ppc=newPpc;p.weight=newWeight;p.desc=newDesc;p.discount=newDisc;p.price=newRp;p.priceDist=newDp;
+  p.unitsRetail=newUnitR;p.unitsDist=newUnitD;
 
   var inv=getInv();
   inv[id]=newStock;
@@ -1309,8 +1370,10 @@ window.saveAll=function(){
     src=src.replace(/var DEFAULT_NEW=\[[\s\S]*?\];\nvar DEFAULT_BRANDS=\[[\s\S]*?\];/,newData);
     var custData='var customers='+JSON.stringify(customers)+';';
     src=src.replace(/var customers=loadJ\(LS_CUST\)\|\|\[\];/,custData+'/* loaded */');
-    var blob=new Blob([src],{type:'text/html'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='snack_store.html';
+    var now=new Date();
+    var pad=function(n){return n<10?'0'+n:n;};
+    var stamp=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'_'+pad(now.getHours())+pad(now.getMinutes());
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='snack_store_'+stamp+'.html';
     a.click();URL.revokeObjectURL(a.href);
   }catch(e){alert('Export failed: '+e.message);}
   var t=el('toast');t.style.display='inline-block';
@@ -1388,6 +1451,8 @@ window.addProduct=function(){
   var disc=parseInt(el('add-disc').value)||0,section=el('add-section').value;
   var visRetail=parseInt(el('add-vis-retail').value)||1;
   var visDist=parseInt(el('add-vis-dist').value)||1;
+  var unitsRetail=el('add-units-retail').value||'both';
+  var unitsDist=el('add-units-dist').value||'both';
   if(!name){alert('Please enter a product name.');return;}if(!price){alert('Please enter a retail price.');return;}
   if(section==='catalog'&&!brand){alert('Please enter a brand name.');return;}
   var id='p_'+Date.now();
@@ -1398,11 +1463,12 @@ window.addProduct=function(){
   if(cpRetail>0)inv['rcp_'+id]=cpRetail;
   if(cpDist>0)inv['dcp_'+id]=cpDist;
   saveInv(inv);
-  var newProd={id:id,name:name,desc:desc,price:price,priceDist:priceDist,ppc:ppc,stockPieces:stockPieces,weight:weight,discount:disc,section:section,variations:[],visRetail:visRetail,visDist:visDist};
+  var newProd={id:id,name:name,desc:desc,price:price,priceDist:priceDist,ppc:ppc,stockPieces:stockPieces,weight:weight,discount:disc,section:section,variations:[],visRetail:visRetail,visDist:visDist,unitsRetail:unitsRetail,unitsDist:unitsDist};
   if(section==='new'){NEW_ARRIVALS.push(newProd);}
   else{var found=BRANDS.find(function(b){return b.brand.toLowerCase()===brand.toLowerCase();});if(found){found.products.push(newProd);}else{BRANDS.push({brand:brand,products:[newProd]});}}
   ['add-name','add-brand','add-price','add-price-dist','add-ppc','add-case-price','add-case-price-dist','add-stock','add-weight','add-desc','add-disc'].forEach(function(fid){if(el(fid))el(fid).value='';});
   el('add-section').value='catalog';el('add-vis-retail').value='1';el('add-vis-dist').value='1';
+  el('add-units-retail').value='both';el('add-units-dist').value='both';
   saveProds();renderAdmin();renderOrder();alert('✓ "'+name+'" added!');
 };
 
@@ -1429,6 +1495,43 @@ window.removeOutlet=function(cid,idx){var cust=customers.find(function(c){return
 window.toggleCust=function(id){var body=el('cbody-'+id),chev=el('cchev-'+id);var open=body.classList.toggle('open');if(chev)chev.classList.toggle('open',open);};
 function buildLink(cust){var base=window.location.href.split('?')[0];return base+'?cid='+encodeURIComponent(cust.id)+'&customer='+encodeURIComponent(cust.name);}
 window.copyCustomerLink=function(cid){var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;var link=buildLink(cust),btn=el('clbtn-'+cid);navigator.clipboard.writeText(link).then(function(){btn.textContent='✓ Copied!';setTimeout(function(){btn.textContent='Copy Link';},2000);}).catch(function(){var inp=document.createElement('textarea');inp.value=link;document.body.appendChild(inp);inp.select();document.execCommand('copy');document.body.removeChild(inp);btn.textContent='✓ Copied!';setTimeout(function(){btn.textContent='Copy Link';},2000);});};
+
+window.saveExtraDisc=function(cid){
+  var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;
+  var inp=el('extradisc-'+cid);if(!inp)return;
+  cust.extraDisc=Math.max(0,Math.min(100,parseFloat(inp.value)||0));
+  saveJ(LS_CUST,customers);
+  var btn=inp.nextElementSibling;
+  if(btn){btn.textContent='✓ Saved!';setTimeout(function(){btn.textContent='Save';},2000);}
+};
+
+window.addCustomPrice=function(cid){
+  var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;
+  var nameInp=el('cpname-'+cid),unitSel=el('cpunit-'+cid),priceInp=el('cpprice-'+cid);
+  if(!nameInp||!unitSel||!priceInp)return;
+  var pname=nameInp.value.trim();
+  var unit=unitSel.value;
+  var price=parseFloat(priceInp.value);
+  if(!pname){alert('Please type a product name.');return;}
+  if(isNaN(price)||price<=0){alert('Please enter a valid price.');return;}
+  // Find product by name (case-insensitive)
+  var pp=getAllProducts().find(function(x){return x.name.toLowerCase()===pname.toLowerCase();});
+  if(!pp){alert('Product "'+pname+'" not found. Please select from the dropdown suggestions.');return;}
+  cust.customPrices=cust.customPrices||[];
+  // Remove existing entry for same product+unit before adding
+  cust.customPrices=cust.customPrices.filter(function(x){return!(x.pid===pp.id&&x.unit===unit);});
+  cust.customPrices.push({pid:pp.id,unit:unit,price:price});
+  saveJ(LS_CUST,customers);
+  nameInp.value='';priceInp.value='';
+  renderCustomerList();
+};
+
+window.removeCustomPrice=function(cid,pid,unit){
+  var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;
+  cust.customPrices=(cust.customPrices||[]).filter(function(x){return!(x.pid===pid&&x.unit===unit);});
+  saveJ(LS_CUST,customers);
+  renderCustomerList();
+};
 
 function renderCustomerList(){
   var list=el('customer-list');
@@ -1468,6 +1571,40 @@ function renderCustomerList(){
         +'<div class="outlet-section-title">Outlets ('+outlets.length+')</div>'
         +(outH||'<p style="font-size:12px;color:var(--text-hint);margin-bottom:10px;font-style:italic">No outlets yet.</p>')
         +'<div class="add-outlet-row"><input class="outlet-name-inp" type="text" id="oname-'+c.id+'" placeholder="Outlet name (e.g. Causeway Point)"><input class="outlet-addr-inp" type="text" id="oaddr-'+c.id+'" placeholder="Address (optional)"><button class="add-outlet-btn" onclick="addOutlet(\''+c.id+'\')">+ Add Outlet</button></div>'
+
+        // Custom pricing section
+        +'<div class="cust-pricing-section">'
+          +'<div class="cust-pricing-title">Custom Pricing</div>'
+          // Extra discount
+          +'<div class="extra-disc-row">'
+            +'<label>Extra discount on top of tier price (%)</label>'
+            +'<input class="extra-disc-inp" type="number" min="0" max="100" inputmode="numeric" id="extradisc-'+c.id+'" value="'+(c.extraDisc||0)+'" placeholder="0">'
+            +'<button class="save-extra-disc-btn" onclick="saveExtraDisc(\''+c.id+'\')">Save</button>'
+          +'</div>'
+          // Per-product custom prices list
+          +'<div class="custom-prices-list" id="cplist-'+c.id+'">'
+            +((c.customPrices||[]).map(function(cp){
+              var pp=findProduct(cp.pid);
+              var pname=pp?esc(pp.name):'(deleted product)';
+              return'<div class="custom-price-row">'
+                +'<span class="custom-price-name">'+pname+'</span>'
+                +'<span style="font-size:11px;color:var(--text-muted)">'+cp.unit+'</span>'
+                +'<span class="custom-price-val">$'+Number(cp.price).toFixed(2)+'</span>'
+                +'<button class="remove-cp-btn" onclick="removeCustomPrice(\''+c.id+'\',\''+cp.pid+'\',\''+cp.unit+'\')">✕</button>'
+              +'</div>';
+            }).join('')||'<p style="font-size:12px;color:var(--text-hint);font-style:italic;margin-bottom:6px">No custom prices yet.</p>')
+          +'</div>'
+          // Add custom price
+          +'<div class="add-cp-row">'
+            +'<input class="cp-prod-inp" type="text" id="cpname-'+c.id+'" list="cp-prod-list-'+c.id+'" placeholder="Product name…">'
+            +'<datalist id="cp-prod-list-'+c.id+'">'
+              +getAllProducts().map(function(pp){return'<option value="'+esc(pp.name)+'"></option>';}).join('')
+            +'</datalist>'
+            +'<select class="cp-unit-sel" id="cpunit-'+c.id+'"><option value="piece">Piece</option><option value="case">Case</option></select>'
+            +'<input class="cp-price-inp" type="number" min="0" step="0.01" inputmode="decimal" id="cpprice-'+c.id+'" placeholder="$0.00">'
+            +'<button class="add-cp-btn" onclick="addCustomPrice(\''+c.id+'\')">+ Add</button>'
+          +'</div>'
+        +'</div>'
       +'</div>'
     +'</div>';
   }
