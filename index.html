@@ -648,17 +648,20 @@ function setStockPieces(pid,v){var inv=getInv();inv[pid]=Math.max(0,v);saveInv(i
 function getDiscount(p){var inv=getInv();return inv['disc_'+p.id]!==undefined?Number(inv['disc_'+p.id]):Number(p.discount||0);}
 function getPhoto(id){return photos[id]||'';}
 
-// Retail piece price
+// Retail piece price — stored on p.price, inv override via rp_
 function retailPiecePrice(p){
   var inv=getInv();
   var base=inv['rp_'+p.id]!==undefined?Number(inv['rp_'+p.id]):Number(p.price||0);
+  // sync back to product so it persists cross-device
+  if(inv['rp_'+p.id]!==undefined&&Number(inv['rp_'+p.id])!==Number(p.price)){p.price=base;}
   var d=getDiscount(p);
   return d>0?Math.round(base*(1-d/100)*100)/100:base;
 }
-// Distributor piece price
+// Distributor piece price — stored on p.priceDist, inv override via dp_
 function distPiecePrice(p){
   var inv=getInv();
   var base=inv['dp_'+p.id]!==undefined?Number(inv['dp_'+p.id]):Number(p.priceDist||p.price||0);
+  if(inv['dp_'+p.id]!==undefined&&Number(inv['dp_'+p.id])!==Number(p.priceDist)){p.priceDist=base;}
   var d=getDiscount(p);
   return d>0?Math.round(base*(1-d/100)*100)/100:base;
 }
@@ -678,7 +681,7 @@ function distCasePrice(p){
   var d=getDiscount(p);
   return d>0?Math.round(base*(1-d/100)*100)/100:base;
 }
-// Active-tier helpers
+// Active-tier price selectors
 function piecePrice(p){return activeTier==='distributor'?distPiecePrice(p):retailPiecePrice(p);}
 function casePrice(p){return activeTier==='distributor'?distCasePrice(p):retailCasePrice(p);}
 
@@ -1195,15 +1198,13 @@ window.saveVisRetail=function(pid,val){
   var p=findProduct(pid);if(!p)return;
   p.visRetail=val;
   var inv=getInv();inv['vr_'+pid]=val?1:0;saveInv(inv);
-  saveProds();
-  renderOrder();
+  saveProds();renderOrder();
 };
 window.saveVisDist=function(pid,val){
   var p=findProduct(pid);if(!p)return;
   p.visDist=val;
   var inv=getInv();inv['vd_'+pid]=val?1:0;saveInv(inv);
-  saveProds();
-  renderOrder();
+  saveProds();renderOrder();
 };
 
 window.saveProductEdits=function(id){
@@ -1299,7 +1300,26 @@ function renderAdmin(){
 }
 function updateBrandDatalist(){var dl=el('brand-datalist');if(!dl)return;dl.innerHTML=BRANDS.map(function(b){return'<option value="'+esc(b.brand)+'">'+esc(b.brand)+'</option>';}).join('');}
 function updateStats(){var thresh=getThresh(),low=0,out=0,all=getAllProducts();all.forEach(function(p){var s=getStockPieces(p);var cases=p.ppc>0?Math.floor(s/p.ppc):s;if(s<=0)out++;else if(cases<=thresh)low++;});el('stat-total').textContent=all.length;el('stat-low').textContent=low;el('stat-out').textContent=out;}
-window.saveAll=function(){saveProds();var t=el('toast');t.style.display='inline-block';setTimeout(function(){t.style.display='none';},2500);renderOrder();};
+window.saveAll=function(){
+  saveProds();
+  // Also bake current data into the HTML file for GitHub Pages deployment
+  try{
+    var src=document.documentElement.outerHTML;
+    // Replace DEFAULT_NEW and DEFAULT_BRANDS with current live data
+    var newData='var DEFAULT_NEW='+JSON.stringify(NEW_ARRIVALS)+';\nvar DEFAULT_BRANDS='+JSON.stringify(BRANDS)+';';
+    src=src.replace(/var DEFAULT_NEW=\[[\s\S]*?\];\nvar DEFAULT_BRANDS=\[[\s\S]*?\];/,newData);
+    // Replace default customers
+    var custData='var customers='+JSON.stringify(customers)+';';
+    src=src.replace(/var customers=loadJ\(LS_CUST\)\|\|\[\];/,custData+'/* loaded */');
+    var blob=new Blob([src],{type:'text/html'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='snack_store.html';
+    a.click();URL.revokeObjectURL(a.href);
+  }catch(e){}
+  var t=el('toast');t.style.display='inline-block';
+  t.textContent='✓ Saved! Re-upload the downloaded file to GitHub.';
+  setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},4000);
+  renderOrder();
+};
 window.addProduct=function(){
   var name=el('add-name').value.trim(),brand=el('add-brand').value.trim();
   var price=parseFloat(el('add-price').value)||0;
@@ -1410,7 +1430,7 @@ function renderCustomerList(){
 }
 
 window.renderAdmin=renderAdmin;
-renderOrder();renderBasket();initGreeting();
+initGreeting();renderOrder();renderBasket();
 }());
 </script>
 </body>
