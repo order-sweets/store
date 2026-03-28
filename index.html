@@ -690,9 +690,21 @@ function piecePrice(p){return activeTier==='distributor'?distPiecePrice(p):retai
 function casePrice(p){return activeTier==='distributor'?distCasePrice(p):retailCasePrice(p);}
 
 // Visibility
+function getVisRetail(p){
+  var inv=getInv();
+  if(inv['vr_'+p.id]!==undefined)return Number(inv['vr_'+p.id]);
+  if(p.visRetail!==undefined)return Number(p.visRetail);
+  return 1;
+}
+function getVisDist(p){
+  var inv=getInv();
+  if(inv['vd_'+p.id]!==undefined)return Number(inv['vd_'+p.id]);
+  if(p.visDist!==undefined)return Number(p.visDist);
+  return 1;
+}
 function isVisible(p){
-  if(activeTier==='distributor')return p.visDist!==0;
-  return p.visRetail!==0;
+  if(activeTier==='distributor')return getVisDist(p)!==0;
+  return getVisRetail(p)!==0;
 }
 
 /* ── URL PARAMS ── */
@@ -1117,8 +1129,8 @@ function prodAdminCard(p){
   var dcp=inv['dcp_'+p.id]>0?Number(inv['dcp_'+p.id]):0;
   var autoRcp=p.ppc>0?(rp*p.ppc).toFixed(2):'—';
   var autoDcp=p.ppc>0?(dp*p.ppc).toFixed(2):'—';
-  var visR=p.visRetail!==0;
-  var visD=p.visDist!==0;
+  var visR=getVisRetail(p)!==0;
+  var visD=getVisDist(p)!==0;
   var vars=p.variations||[];
 
   return'<div class="prod-admin-card" id="pac-'+p.id+'">'
@@ -1192,12 +1204,18 @@ function prodAdminCard(p){
 
 window.togglePAC=function(id){var body=el('pab-'+id),chev=el('chev-'+id);var open=body.classList.toggle('open');if(chev)chev.classList.toggle('open',open);};
 
-window.saveVisibility=function(id){
-  var p=findProduct(id);if(!p)return;
-  var vr=el('evisr-'+id);var vd=el('evisd-'+id);
-  if(vr)p.visRetail=vr.checked?1:0;
-  if(vd)p.visDist=vd.checked?1:0;
-  saveProds();renderOrder();
+window.saveVisibility=function(pid){
+  var p=findProduct(pid);if(!p)return;
+  var vr=el('evisr-'+pid);
+  var vd=el('evisd-'+pid);
+  var inv=getInv();
+  if(vr){inv['vr_'+pid]=vr.checked?1:0;p.visRetail=vr.checked?1:0;}
+  if(vd){inv['vd_'+pid]=vd.checked?1:0;p.visDist=vd.checked?1:0;}
+  saveInv(inv);
+  saveProds();
+  renderOrder();
+  // Update badge only — don't re-render whole card (would reset checkboxes)
+  var b=el('abadge-'+pid);if(b)b.innerHTML=aBadgeP(p,getThresh());
 };
 
 window.saveProductEdits=function(id){
@@ -1227,6 +1245,9 @@ window.saveProductEdits=function(id){
   inv['dp_'+id]=newDp;
   inv['rcp_'+id]=newRcp>0?newRcp:0;
   inv['dcp_'+id]=newDcp>0?newDcp:0;
+  // preserve current visibility values (toggles save instantly via saveVisibility)
+  inv['vr_'+id]=getVisRetail(p);
+  inv['vd_'+id]=getVisDist(p);
   saveInv(inv);
 
   // Handle section / brand change
@@ -1310,6 +1331,7 @@ window.addProduct=function(){
   var inv=getInv();
   inv[id]=stockPieces;inv['disc_'+id]=disc;
   inv['rp_'+id]=price;inv['dp_'+id]=priceDist;
+  inv['vr_'+id]=visRetail;inv['vd_'+id]=visDist;
   if(cpRetail>0)inv['rcp_'+id]=cpRetail;
   if(cpDist>0)inv['dcp_'+id]=cpDist;
   saveInv(inv);
