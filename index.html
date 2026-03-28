@@ -21,7 +21,7 @@
 html{-webkit-text-size-adjust:100%;}
 body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;}
 .page{display:none;min-height:100vh;}.page.active{display:block;}
-#lock-btn{position:fixed;bottom:90px;right:16px;z-index:300;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+#lock-btn{position:fixed;bottom:90px;right:16px;z-index:500;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);display:flex;align-items:center;justify-content:center;cursor:pointer;}
 #lock-btn svg{width:20px;height:20px;stroke:var(--text-muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .order-wrap{max-width:680px;margin:0 auto;padding:1.25rem 1.1rem 8rem;}
 
@@ -175,8 +175,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .basket-row.tot{font-weight:700;font-size:18px;border-top:1.5px solid var(--border-md);padding-top:10px;margin-top:6px;}
 
 /* STICKY */
-.wa-sticky{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:10px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);}
-.wa-btn{width:100%;padding:17px;background:#25D366;border:none;border-radius:var(--r-lg);font-size:17px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
+.wa-sticky{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:10px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
+.wa-btn{pointer-events:all;width:100%;padding:17px;background:#25D366;border:none;border-radius:var(--r-lg);font-size:17px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
 .wa-btn:disabled{opacity:.32;cursor:not-allowed;}
 .wa-icon{width:22px;height:22px;flex-shrink:0;}
 
@@ -486,7 +486,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     <div class="field full" id="addr-field"><label>Delivery Address</label><input type="text" id="f-address" placeholder="Block, street, unit number"></div>
     <div class="field full"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Any allergies, special requests…"></textarea></div>
   </div>
-</div>
+</div><!-- /order-wrap -->
 
 <div class="wa-sticky">
   <button class="wa-btn" id="wa-btn" disabled>
@@ -497,7 +497,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <button id="lock-btn" onclick="showPage('page-login')" aria-label="Admin">
   <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
 </button>
-</div>
+
+</div><!-- /page-order -->
 
 <!-- MIN ORDER MODAL -->
 <div class="modal-overlay" id="min-order-modal">
