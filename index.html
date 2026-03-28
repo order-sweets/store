@@ -292,19 +292,18 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .tier-price-block .admin-field input{font-size:13px;padding:7px 9px;}
 
 /* VISIBILITY toggles */
-.visibility-section{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
-.visibility-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;}
-.vis-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border-radius:9px;margin-bottom:6px;}
-.vis-row-label{font-size:13px;font-weight:600;}
-.vis-row-label.retail{color:var(--blue-text);}
-.vis-row-label.dist{color:var(--purple-text);}
-.toggle-switch{position:relative;width:42px;height:24px;flex-shrink:0;}
-.toggle-switch input{opacity:0;width:0;height:0;}
-.toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:24px;cursor:pointer;transition:.2s;}
-.toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
-.toggle-switch input:checked+.toggle-slider{background:var(--green);}
-.toggle-switch input:checked+.toggle-slider:before{transform:translateX(18px);}
-
+.vis-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;}
+.vis-toggle-row.retail{background:var(--blue-bg);}
+.vis-toggle-row.dist{background:var(--purple-bg);}
+.vis-toggle-label{font-size:11px;font-weight:600;}
+.vis-toggle-row.retail .vis-toggle-label{color:var(--blue-text);}
+.vis-toggle-row.dist .vis-toggle-label{color:var(--purple-text);}
+.vis-toggle-label-wrap{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;cursor:pointer;}
+.vis-checkbox{position:absolute;opacity:0;width:0;height:0;}
+.vis-toggle-track{position:absolute;inset:0;background:#ccc;border-radius:24px;transition:background .2s;}
+.vis-toggle-thumb{position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.vis-checkbox:checked~.vis-toggle-track{background:var(--green);}
+.vis-checkbox:checked~.vis-toggle-track .vis-toggle-thumb{transform:translateX(20px);}
 /* PHOTO */
 .photo-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
 .photo-thumb-sm{width:40px;height:40px;border-radius:7px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0;}
@@ -685,20 +684,16 @@ function casePrice(p){return activeTier==='distributor'?distCasePrice(p):retailC
 
 // Visibility
 function getVisRetail(p){
-  var inv=getInv();
-  if(inv['vr_'+p.id]!==undefined)return Number(inv['vr_'+p.id]);
-  if(p.visRetail!==undefined)return Number(p.visRetail);
-  return 1;
+  if(p.visRetail!==undefined)return p.visRetail;
+  return true;
 }
 function getVisDist(p){
-  var inv=getInv();
-  if(inv['vd_'+p.id]!==undefined)return Number(inv['vd_'+p.id]);
-  if(p.visDist!==undefined)return Number(p.visDist);
-  return 1;
+  if(p.visDist!==undefined)return p.visDist;
+  return true;
 }
 function isVisible(p){
-  if(activeTier==='distributor')return getVisDist(p)!==0;
-  return getVisRetail(p)!==0;
+  if(activeTier==='distributor')return !!getVisDist(p);
+  return !!getVisRetail(p);
 }
 
 /* ── URL PARAMS ── */
@@ -1123,8 +1118,8 @@ function prodAdminCard(p){
   var dcp=inv['dcp_'+p.id]>0?Number(inv['dcp_'+p.id]):0;
   var autoRcp=p.ppc>0?(rp*p.ppc).toFixed(2):'—';
   var autoDcp=p.ppc>0?(dp*p.ppc).toFixed(2):'—';
-  var visR=getVisRetail(p)!==0;
-  var visD=getVisDist(p)!==0;
+  var visR=!!getVisRetail(p);
+  var visD=!!getVisDist(p);
   var vars=p.variations||[];
 
   return'<div class="prod-admin-card" id="pac-'+p.id+'">'
@@ -1172,8 +1167,8 @@ function prodAdminCard(p){
         +'<div class="admin-field"><label>Distributor Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="edp-'+p.id+'" value="'+dp.toFixed(2)+'"></div>'
         +'<div class="admin-field"><label>Distributor Case Price ($) <small style="color:var(--text-hint)">(auto $'+autoDcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="edcp-'+p.id+'" value="'+(dcp>0?dcp:'')+'" placeholder="'+autoDcp+'"></div>'
         // Row 7 — Visible to Retail | Visible to Distributors
-        +'<div class="admin-field"><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--blue-bg);border-radius:8px;"><span style="font-size:11px;font-weight:600;color:var(--blue-text);">🏪 Visible to Retail</span><div class="toggle-switch" onclick="var c=el(\'evisr-'+p.id+'\');c.checked=!c.checked;saveVisRetail(\''+p.id+'\',c.checked)"><input type="checkbox" id="evisr-'+p.id+'"'+(visR?' checked':'')+' style="position:absolute;opacity:0;width:0;height:0"><span class="toggle-slider"></span></div></div></div>'
-        +'<div class="admin-field"><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--purple-bg);border-radius:8px;"><span style="font-size:11px;font-weight:600;color:var(--purple-text);">📦 Visible to Distributors</span><div class="toggle-switch" onclick="var c=el(\'evisd-'+p.id+'\');c.checked=!c.checked;saveVisDist(\''+p.id+'\',c.checked)"><input type="checkbox" id="evisd-'+p.id+'"'+(visD?' checked':'')+' style="position:absolute;opacity:0;width:0;height:0"><span class="toggle-slider"></span></div></div></div>'
+        +'<div class="admin-field"><div class="vis-toggle-row retail"><span class="vis-toggle-label">🏪 Visible to Retail</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisr-'+p.id+'" '+(visR?'checked':'')+' onchange="saveVisRetail(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
+        +'<div class="admin-field"><div class="vis-toggle-row dist"><span class="vis-toggle-label">📦 Visible to Distributors</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisd-'+p.id+'" '+(visD?'checked':'')+' onchange="saveVisDist(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
       +'</div>'
 
       +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
@@ -1196,19 +1191,19 @@ function prodAdminCard(p){
 
 window.togglePAC=function(id){var body=el('pab-'+id),chev=el('chev-'+id);var open=body.classList.toggle('open');if(chev)chev.classList.toggle('open',open);};
 
-window.saveVisRetail=function(pid,checked){
+window.saveVisRetail=function(pid,val){
   var p=findProduct(pid);if(!p)return;
-  var val=checked?1:0;
   p.visRetail=val;
-  var inv=getInv();inv['vr_'+pid]=val;saveInv(inv);
-  saveProds();renderOrder();
+  var inv=getInv();inv['vr_'+pid]=val?1:0;saveInv(inv);
+  saveProds();
+  renderOrder();
 };
-window.saveVisDist=function(pid,checked){
+window.saveVisDist=function(pid,val){
   var p=findProduct(pid);if(!p)return;
-  var val=checked?1:0;
   p.visDist=val;
-  var inv=getInv();inv['vd_'+pid]=val;saveInv(inv);
-  saveProds();renderOrder();
+  var inv=getInv();inv['vd_'+pid]=val?1:0;saveInv(inv);
+  saveProds();
+  renderOrder();
 };
 
 window.saveProductEdits=function(id){
