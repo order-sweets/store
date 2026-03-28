@@ -1594,6 +1594,8 @@ window.importData=function(input){
   };
   reader.readAsText(file);
 };
+
+window.importBackup=function(input){
   var file=input.files[0];if(!file)return;
   if(!confirm('Import this backup? This will replace ALL current products, customers and inventory with the data in the file. Continue?')){input.value='';return;}
   var reader=new FileReader();
