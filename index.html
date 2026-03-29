@@ -658,7 +658,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
       <p class="gh-settings-desc">Enter your GitHub details once. They are stored only in this browser and never shared.</p>
       <div class="gh-field-grid">
         <div class="gh-field"><label>GitHub Username</label><input type="text" id="gh-user" placeholder="e.g. order-sweets" autocomplete="off" value="order-sweets"></div>
-        <div class="gh-field"><label>Repository Name</label><input type="text" id="gh-repo" placeholder="e.g. test" autocomplete="off" value="store"></div>
+        <div class="gh-field"><label>Repository Name</label><input type="text" id="gh-repo" placeholder="e.g. store" autocomplete="off" value="store"></div>
         <div class="gh-field"><label>File path in repo</label><input type="text" id="gh-path" placeholder="e.g. index.html" autocomplete="off" value="index.html"></div>
         <div class="gh-field"><label>Branch</label><input type="text" id="gh-branch" placeholder="main" autocomplete="off" value="main"></div>
         <div class="gh-field gh-field-full"><label>Personal Access Token <span style="font-weight:400;color:var(--text-hint)">(paste once — saved in this browser)</span></label><input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"></div>
@@ -759,28 +759,13 @@ var _pendingVar={};
 var activeTier='retail'; // current viewer's tier ('retail' | 'distributor')
 
 /* ── DEFAULT DATA ── */
-var DEFAULT_NEW=[
-  {id:'n1',name:'Placeholder Drop A',desc:'Coming soon!',price:3.50,priceDist:3.00,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[],visRetail:1,visDist:1},
-  {id:'n2',name:'Placeholder Drop B',desc:'Coming soon!',price:4.00,priceDist:3.20,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[],visRetail:1,visDist:1},
-];
-var DEFAULT_BRANDS=[
-  {brand:'Bee Events',products:[
-    {id:'be1',name:'Cotton Candy',desc:'',price:1.80,priceDist:1.70,ppc:0,stockPieces:1000,weight:'',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1,unitsRetail:'piece',unitsDist:'piece'},
-  ]},
-  {brand:'Airheads',products:[
-    {id:'a1',name:'Airheads Bars',desc:'Chewy taffy candy bar',price:2.50,priceDist:2.00,ppc:36,cpRetail:0,cpDist:0,stockPieces:720,weight:'37g',discount:0,section:'catalog',variations:['Watermelon','Cherry','Blue Raspberry'],visRetail:1,visDist:1},
-    {id:'a2',name:'Airheads Bites',desc:'Bite-sized chewy candy',price:3.00,priceDist:2.40,ppc:24,cpRetail:0,cpDist:0,stockPieces:480,weight:'57g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
-  ]},
-  {brand:'Nerds',products:[
-    {id:'nb1',name:'Nerds Grape & Strawberry',desc:'Tiny crunchy candy',price:2.80,priceDist:2.20,ppc:36,cpRetail:0,cpDist:0,stockPieces:720,weight:'46.7g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
-    {id:'nb2',name:'Nerds Rope Rainbow',desc:'Chewy rope covered in Nerds',price:3.20,priceDist:2.60,ppc:24,cpRetail:0,cpDist:0,stockPieces:480,weight:'26g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
-  ]},
-];
+var DEFAULT_NEW=[{"id":"n1","name":"Placeholder Drop Affffffddddd","desc":"Coming soon!","price":3.5,"priceDist":3,"ppc":0,"stockPieces":60,"weight":"","discount":0,"section":"new","variations":[],"visRetail":1,"visDist":0},{"id":"n2","name":"Placeholder Drop B","desc":"Coming soon!","price":4,"priceDist":3.2,"ppc":0,"stockPieces":60,"weight":"","discount":0,"section":"new","variations":[],"visRetail":1,"visDist":1}];
+var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads Bars","desc":"Chewy taffy candy bar","price":2.5,"priceDist":2,"ppc":36,"cpRetail":0,"cpDist":0,"stockPieces":720,"weight":"37g","discount":0,"section":"catalog","variations":[],"visRetail":true,"visDist":true},{"id":"a2","name":"Airheads Bites","desc":"Bite-sized chewy candy","price":3,"priceDist":2.4,"ppc":24,"cpRetail":0,"cpDist":0,"stockPieces":480,"weight":"57g","discount":0,"section":"catalog","variations":[],"visRetail":1,"visDist":false}]},{"brand":"Nerds","products":[{"id":"nb1","name":"Nerds Grape & Strawberry","desc":"Tiny crunchy candy","price":2.8,"priceDist":2.2,"ppc":36,"cpRetail":0,"cpDist":0,"stockPieces":720,"weight":"46.7g","discount":0,"section":"catalog","variations":[],"visRetail":1,"visDist":0},{"id":"nb2","name":"Nerds Rope Rainbow","desc":"Chewy rope covered in Nerds","price":3.2,"priceDist":2.6,"ppc":24,"cpRetail":0,"cpDist":0,"stockPieces":480,"weight":"26g","discount":0,"section":"catalog","variations":[],"visRetail":1,"visDist":1}]},{"brand":"Bee Events","products":[{"id":"p_1774654791150","name":"Cotton Candy","desc":"","price":1.8,"priceDist":1.7,"ppc":15,"stockPieces":1000,"weight":"38g","discount":0,"section":"catalog","variations":[],"visRetail":1,"visDist":1,"unitsRetail":"both","unitsDist":"case"}]}];
 
 var savedP=loadJ(LS_PROD);
 var NEW_ARRIVALS=savedP?savedP.newArrivals:DEFAULT_NEW;
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
-var customers=loadJ(LS_CUST)||[];
+var customers=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5}]}];/* loaded */
 var photos=loadJ(LS_PHOTOS)||{};
 
 function loadJ(k){try{var s=localStorage.getItem(k);if(s)return JSON.parse(s);}catch(e){}return null;}
