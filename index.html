@@ -46,11 +46,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .tier-dot.distributor{background:var(--purple);}
 
 /* GREETING */
-.greeting-banner{background:linear-gradient(135deg,#1C1B18 0%,#3a3832 100%);border-radius:var(--r-lg);padding:1.25rem 1.5rem;margin-bottom:1.5rem;}
-.greeting-banner .hello{display:none;}
-.greeting-banner .cust-name{font-family:'DM Serif Display',serif;font-size:28px;color:#fff;margin-bottom:4px;line-height:1.2;}
-.greeting-selected-outlet{font-size:14px;color:rgba(255,255,255,.75);font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.change-outlet-btn{font-size:12px;color:rgba(255,255,255,.55);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;text-underline-offset:2px;}
+.greeting-banner{background:linear-gradient(135deg,#1C1B18 0%,#3a3832 100%);border-radius:var(--r-lg);padding:1.5rem 1.5rem 1.25rem;margin-bottom:1.5rem;text-align:center;}
+.greeting-banner .hello{font-size:13px;color:rgba(255,255,255,.55);margin-bottom:4px;font-weight:500;}
+.greeting-banner .cust-name{font-family:'DM Serif Display',serif;font-size:clamp(32px,8vw,44px);color:#fff;margin-bottom:8px;line-height:1.15;}
+.greeting-selected-outlet{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.greeting-outlet-name-text{font-family:'DM Serif Display',serif;font-size:clamp(22px,5vw,28px);color:rgba(255,255,255,.85);line-height:1.2;}
+.change-outlet-btn{font-size:14px;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;text-underline-offset:3px;font-weight:500;}
 .change-outlet-btn:hover{color:rgba(255,255,255,.85);}
 .outlet-label{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
 .outlet-grid{display:flex;flex-wrap:wrap;gap:10px;}
@@ -461,10 +462,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <div class="order-wrap">
 
   <div class="greeting-banner" id="greeting-banner" style="display:none">
-    <div class="hello">Hello,</div>
+    <div class="hello">Welcome,</div>
     <div class="cust-name" id="cust-name-display"></div>
     <div id="greeting-outlet-line" style="display:none" class="greeting-selected-outlet">
-      <span id="greeting-outlet-name"></span>
+      <span class="greeting-outlet-name-text" id="greeting-outlet-name"></span>
       <button class="change-outlet-btn" id="change-outlet-btn" onclick="reopenOutletModal()">Change outlet</button>
     </div>
     <div id="outlet-picker" style="display:none">
@@ -473,8 +474,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     </div>
   </div>
 
-  <!-- Tier banner shown for logged-in customers -->
-  <div id="tier-banner" style="display:none" class="tier-banner retail">
+  <!-- Tier banner hidden from customer view -->
+  <div id="tier-banner" style="display:none!important" class="tier-banner retail">
     <span class="tier-dot retail" id="tier-dot"></span>
     <span id="tier-label-text"></span>
   </div>
@@ -656,7 +657,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
       <p class="gh-settings-desc">Enter your GitHub details once. They are stored only in this browser and never shared.</p>
       <div class="gh-field-grid">
         <div class="gh-field"><label>GitHub Username</label><input type="text" id="gh-user" placeholder="e.g. order-sweets" autocomplete="off" value="order-sweets"></div>
-        <div class="gh-field"><label>Repository Name</label><input type="text" id="gh-repo" placeholder="e.g. store" autocomplete="off" value="store"></div>
+        <div class="gh-field"><label>Repository Name</label><input type="text" id="gh-repo" placeholder="e.g. test" autocomplete="off" value="store"></div>
         <div class="gh-field"><label>File path in repo</label><input type="text" id="gh-path" placeholder="e.g. index.html" autocomplete="off" value="index.html"></div>
         <div class="gh-field"><label>Branch</label><input type="text" id="gh-branch" placeholder="main" autocomplete="off" value="main"></div>
         <div class="gh-field gh-field-full"><label>Personal Access Token <span style="font-weight:400;color:var(--text-hint)">(paste once — saved in this browser)</span></label><input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"></div>
@@ -757,13 +758,28 @@ var _pendingVar={};
 var activeTier='retail'; // current viewer's tier ('retail' | 'distributor')
 
 /* ── DEFAULT DATA ── */
-var DEFAULT_NEW=[{"id":"n1","name":"Placeholder Drop Affffffddddd","desc":"Coming soon!","price":3.5,"priceDist":3,"ppc":0,"stockPieces":60,"weight":"","discount":0,"section":"new","variations":[],"visRetail":1,"visDist":0},{"id":"n2","name":"Placeholder Drop B","desc":"Coming soon!","price":4,"priceDist":3.2,"ppc":0,"stockPieces":60,"weight":"","discount":0,"section":"new","variations":[],"visRetail":1,"visDist":1}];
-var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads Bars","desc":"Chewy taffy candy bar","price":2.5,"priceDist":2,"ppc":36,"cpRetail":0,"cpDist":0,"stockPieces":720,"weight":"37g","discount":0,"section":"catalog","variations":[],"visRetail":true,"visDist":true},{"id":"a2","name":"Airheads Bites","desc":"Bite-sized chewy candy","price":3,"priceDist":2.4,"ppc":24,"cpRetail":0,"cpDist":0,"stockPieces":480,"weight":"57g","discount":0,"section":"catalog","variations":[],"visRetail":1,"visDist":false}]},{"brand":"Nerds","products":[{"id":"nb1","name":"Nerds Grape & Strawberry","desc":"Tiny crunchy candy","price":2.8,"priceDist":2.2,"ppc":36,"cpRetail":0,"cpDist":0,"stockPieces":720,"weight":"46.7g","discount":0,"section":"catalog","variations":[],"visRetail":1,"visDist":0},{"id":"nb2","name":"Nerds Rope Rainbow","desc":"Chewy rope covered in Nerds","price":3.2,"priceDist":2.6,"ppc":24,"cpRetail":0,"cpDist":0,"stockPieces":480,"weight":"26g","discount":0,"section":"catalog","variations":[],"visRetail":1,"visDist":1}]},{"brand":"Bee Events","products":[{"id":"p_1774654791150","name":"Cotton Candy","desc":"","price":1.8,"priceDist":1.7,"ppc":15,"stockPieces":1000,"weight":"38g","discount":0,"section":"catalog","variations":[],"visRetail":1,"visDist":1,"unitsRetail":"both","unitsDist":"case"}]}];
+var DEFAULT_NEW=[
+  {id:'n1',name:'Placeholder Drop A',desc:'Coming soon!',price:3.50,priceDist:3.00,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[],visRetail:1,visDist:1},
+  {id:'n2',name:'Placeholder Drop B',desc:'Coming soon!',price:4.00,priceDist:3.20,ppc:0,stockPieces:60,weight:'',discount:0,section:'new',variations:[],visRetail:1,visDist:1},
+];
+var DEFAULT_BRANDS=[
+  {brand:'Bee Events',products:[
+    {id:'be1',name:'Cotton Candy',desc:'',price:1.80,priceDist:1.70,ppc:0,stockPieces:1000,weight:'',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1,unitsRetail:'piece',unitsDist:'piece'},
+  ]},
+  {brand:'Airheads',products:[
+    {id:'a1',name:'Airheads Bars',desc:'Chewy taffy candy bar',price:2.50,priceDist:2.00,ppc:36,cpRetail:0,cpDist:0,stockPieces:720,weight:'37g',discount:0,section:'catalog',variations:['Watermelon','Cherry','Blue Raspberry'],visRetail:1,visDist:1},
+    {id:'a2',name:'Airheads Bites',desc:'Bite-sized chewy candy',price:3.00,priceDist:2.40,ppc:24,cpRetail:0,cpDist:0,stockPieces:480,weight:'57g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
+  ]},
+  {brand:'Nerds',products:[
+    {id:'nb1',name:'Nerds Grape & Strawberry',desc:'Tiny crunchy candy',price:2.80,priceDist:2.20,ppc:36,cpRetail:0,cpDist:0,stockPieces:720,weight:'46.7g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
+    {id:'nb2',name:'Nerds Rope Rainbow',desc:'Chewy rope covered in Nerds',price:3.20,priceDist:2.60,ppc:24,cpRetail:0,cpDist:0,stockPieces:480,weight:'26g',discount:0,section:'catalog',variations:[],visRetail:1,visDist:1},
+  ]},
+];
 
 var savedP=loadJ(LS_PROD);
 var NEW_ARRIVALS=savedP?savedP.newArrivals:DEFAULT_NEW;
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
-var customers=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5}]}];/* loaded */
+var customers=loadJ(LS_CUST)||[];
 var photos=loadJ(LS_PHOTOS)||{};
 
 function loadJ(k){try{var s=localStorage.getItem(k);if(s)return JSON.parse(s);}catch(e){}return null;}
@@ -1090,7 +1106,7 @@ function unitRowsHTML(p,pq,cq){
   // Show case row only if product has ppc set, OR customer has a custom case price
   if((p.ppc>0||hasCustomCase)&&(units==='case'||units==='both')){
     var effectivePpc=p.ppc>0?p.ppc:1;
-    var cSpec=p.ppc>0?(p.ppc+' pcs/box'+(p.weight?' × '+p.weight:'')):'(box)';
+    var cSpec=p.ppc>0?(p.ppc+' pcs'+(p.weight?' × '+p.weight:'')):'(box)';
     var maxCase=p.ppc>0?Math.floor(stock/p.ppc):(hasCustomCase?stock:0);
     html+='<div class="unit-row'+(cq>0?' has-qty-row':'')+'" id="urow-case-'+p.id+'">'
       +'<div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">'+esc(cSpec)+'</span></span><span class="unit-row-price">$'+dcp.toFixed(2)+discTagC+'</span></div>'
@@ -1109,7 +1125,7 @@ function cartEntriesHTML(pid){
   if(!entries.length)return'';
   return'<div class="cart-entries">'+entries.map(function(e){
     var price=e.unit==='case'?casePrice(p):piecePrice(p);
-    var label=(e.variation?'['+esc(e.variation)+'] ':'')+e.unit+(e.unit==='case'?' ('+p.ppc+' pcs/box)':'')+' × '+e.qty+' = $'+(price*e.qty).toFixed(2);
+    var label=(e.variation?'['+esc(e.variation)+'] ':'')+e.unit+(e.unit==='case'?' ('+p.ppc+' pcs)':'')+' × '+e.qty+' = $'+(price*e.qty).toFixed(2);
     return'<div class="cart-entry"><span class="cart-entry-label">'+label+'</span><button class="cart-entry-remove" onclick="removeEntry(\''+e.entryId+'\')">✕</button></div>';
   }).join('')+'</div>';
 }
@@ -2096,7 +2112,7 @@ function renderCustomerList(){
               var pname=pp?esc(pp.name):'(deleted product)';
               return'<div class="custom-price-row">'
                 +'<span class="custom-price-name">'+pname+'</span>'
-                +'<span style="font-size:11px;color:var(--text-muted)">'+cp.unit+'</span>'
+                +'<span style="font-size:11px;color:var(--text-muted)">'+(cp.unit==='case'?'Box':cp.unit)+'</span>'
                 +'<span class="custom-price-val">$'+Number(cp.price).toFixed(2)+'</span>'
                 +'<button class="remove-cp-btn" onclick="removeCustomPrice(\''+c.id+'\',\''+cp.pid+'\',\''+cp.unit+'\')">✕</button>'
               +'</div>';
@@ -2108,7 +2124,7 @@ function renderCustomerList(){
             +'<datalist id="cp-prod-list-'+c.id+'">'
               +getAllProducts().map(function(pp){return'<option value="'+esc(pp.name)+'"></option>';}).join('')
             +'</datalist>'
-            +'<select class="cp-unit-sel" id="cpunit-'+c.id+'"><option value="piece">Piece</option><option value="case">Case</option></select>'
+            +'<select class="cp-unit-sel" id="cpunit-'+c.id+'"><option value="piece">Piece</option><option value="case">Box</option></select>'
             +'<input class="cp-price-inp" type="number" min="0" step="0.01" inputmode="decimal" id="cpprice-'+c.id+'" placeholder="$0.00">'
             +'<button class="add-cp-btn" onclick="addCustomPrice(\''+c.id+'\')">+ Add</button>'
           +'</div>'
