@@ -33,7 +33,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   100%{box-shadow:0 0 0 24px rgba(216,90,48,0),0 2px 12px rgba(0,0,0,.2);}
 }
 .basket-glow{animation:basket-glow 1s ease-out;}
-.order-wrap{max-width:680px;margin:0 auto;padding:1.25rem 1.1rem 8rem;}
+.order-wrap{max-width:680px;margin:0 auto;padding:3rem 1.1rem 8rem;}
 
 /* TIER BANNER */
 .tier-banner{display:none!important;}
@@ -70,7 +70,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .outlet-modal-btn-name{font-size:15px;font-weight:700;color:var(--text);}
 .outlet-modal-btn-addr{font-size:12px;color:var(--text-muted);font-weight:400;}
 
-.brush-divider{width:100%;max-width:320px;margin:-0.5rem auto -1.5rem;display:block;opacity:0.35;pointer-events:none;}
+.brush-divider{width:100%;max-width:320px;margin:0.25rem auto -1rem;display:block;opacity:0.35;pointer-events:none;}
 /* HERO */
 .hero{text-align:center;margin-bottom:1.25rem;margin-top:0;}
 .hero h1{font-family:'DM Serif Display',serif;font-size:clamp(28px,7vw,40px);font-weight:400;letter-spacing:-.3px;margin-bottom:6px;}
@@ -129,7 +129,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 @media(max-width:420px){
   .card-img{width:115px;height:115px;align-self:center;margin:8px 0 8px 8px;}
   .card-body{padding:10px 11px;}
-  .order-wrap{padding:1rem 0.85rem 8rem;}
+  .order-wrap{padding:3rem 0.85rem 8rem;}
   .unit-qty-ctrl{gap:6px;}
 }
 .card-img img{width:100%;height:100%;object-fit:contain;object-position:center;background:var(--surface);}
@@ -176,7 +176,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 /* DELIVERY / PAYMENT */
 .cash-banner{background:var(--green-bg);border:2px solid var(--green);border-radius:var(--r-lg);padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:14px;}
 .cash-icon{font-size:32px;flex-shrink:0;}
-.cash-text-title{font-family:'DM Serif Display',serif;font-size:24px;font-weight:400;color:var(--green-text);}
+.cash-text-title{font-family:'DM Sans',-apple-system,sans-serif;font-size:18px;font-weight:700;color:var(--green-text);}
 .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem;}
 @media(max-width:380px){.opt-grid{grid-template-columns:1fr;}}
 @media(max-width:360px){
@@ -234,13 +234,19 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
 /* TRANSLATE */
 #google_translate_element{display:none;}
+/* Hide Google Translate toolbar */
+.goog-te-banner-frame{display:none!important;}
+body{top:0!important;}
+.skiptranslate{display:none!important;}
+#goog-gt-tt{display:none!important;}
+.goog-te-balloon-frame{display:none!important;}
 .page-admin-active .translate-btn,.page-login-active .translate-btn{display:none!important;}
 .translate-btn{position:fixed;top:16px;right:16px;z-index:490;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .translate-btn img{width:28px;height:28px;object-fit:contain;}
 .translate-btn:hover{box-shadow:0 3px 14px rgba(0,0,0,.22);}
 /* STICKY */
-.wa-sticky{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:10px 12px 0;background:transparent;pointer-events:none;}
-.wa-btn{pointer-events:all;width:100%;padding:17px;background:#128C4A;border:none;border-radius:var(--r-lg) var(--r-lg) 0 0;font-size:17px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
+.wa-sticky{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:10px 12px env(safe-area-inset-bottom,12px);background:transparent;pointer-events:none;}
+.wa-btn{pointer-events:all;width:100%;padding:17px;background:#128C4A;border:none;border-radius:var(--r-lg);font-size:17px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
 .wa-btn:disabled{opacity:.65;cursor:not-allowed;}
 .wa-icon{width:22px;height:22px;flex-shrink:0;}
 
@@ -509,10 +515,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   <p class="slabel">Products Available</p>
   <div id="brand-catalog"><div class="brand-group"><div class="brand-group-title">Bee Events</div><div class="prod-list"><div class="item-card" id="card-p_1774654791150"><div class="card-img" onclick="openLightbox('p_1774654791150')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Cotton Candy</div><div class="item-desc"></div><div class="unit-rows"><div class="unit-row" id="urow-piece-p_1774654791150"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 38g</span></span><span class="unit-row-price">$1.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('p_1774654791150','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="15000" value="0" inputmode="numeric" id="uqinp-piece-p_1774654791150" onchange="setUnitQty('p_1774654791150','piece',this.value)"><button class="uq-btn" onclick="chgUnit('p_1774654791150','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-p_1774654791150"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">15 pcs × 38g</span></span><span class="unit-row-price">$27.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('p_1774654791150','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="1000" value="0" inputmode="numeric" id="uqinp-case-p_1774654791150" onchange="setUnitQty('p_1774654791150','case',this.value)"><button class="uq-btn" onclick="chgUnit('p_1774654791150','case',1)">+</button></div></div></div></div></div></div></div><div class="brand-group"><div class="brand-group-title">Airheads</div><div class="prod-list"><div class="item-card" id="card-a1"><div class="card-img" onclick="openLightbox('a1')" title="Tap to enlarge"><img src="https://m.media-amazon.com/images/I/810GINaT5YL._AC_UF1000,1000_QL80_.jpg" alt=""></div><div class="card-body"><div class="item-name">Airheads Bars</div><div class="item-desc">Chewy taffy candy bar</div><div class="unit-rows"><div class="unit-row" id="urow-piece-a1"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 37g</span></span><span class="unit-row-price">$2.50</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a1','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="720" value="0" inputmode="numeric" id="uqinp-piece-a1" onchange="setUnitQty('a1','piece',this.value)"><button class="uq-btn" onclick="chgUnit('a1','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-a1"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">36 pcs × 37g</span></span><span class="unit-row-price">$90.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a1','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-a1" onchange="setUnitQty('a1','case',this.value)"><button class="uq-btn" onclick="chgUnit('a1','case',1)">+</button></div></div></div></div></div><div class="item-card" id="card-a2"><div class="card-img" onclick="openLightbox('a2')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Airheads Bites</div><div class="item-desc">Bite-sized chewy candy</div><div class="unit-rows"><div class="unit-row" id="urow-piece-a2"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 57g</span></span><span class="unit-row-price">$3.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a2','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="480" value="0" inputmode="numeric" id="uqinp-piece-a2" onchange="setUnitQty('a2','piece',this.value)"><button class="uq-btn" onclick="chgUnit('a2','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-a2"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">24 pcs × 57g</span></span><span class="unit-row-price">$72.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a2','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-a2" onchange="setUnitQty('a2','case',this.value)"><button class="uq-btn" onclick="chgUnit('a2','case',1)">+</button></div></div></div></div></div></div></div><div class="brand-group"><div class="brand-group-title">Nerds</div><div class="prod-list"><div class="item-card" id="card-nb1"><div class="card-img" onclick="openLightbox('nb1')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Nerds Grape &amp; Strawberry</div><div class="item-desc">Tiny crunchy candy</div><div class="unit-rows"><div class="unit-row" id="urow-piece-nb1"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 46.7g</span></span><span class="unit-row-price">$2.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb1','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="720" value="0" inputmode="numeric" id="uqinp-piece-nb1" onchange="setUnitQty('nb1','piece',this.value)"><button class="uq-btn" onclick="chgUnit('nb1','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-nb1"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">36 pcs × 46.7g</span></span><span class="unit-row-price">$100.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb1','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-nb1" onchange="setUnitQty('nb1','case',this.value)"><button class="uq-btn" onclick="chgUnit('nb1','case',1)">+</button></div></div></div></div></div><div class="item-card" id="card-nb2"><div class="card-img" onclick="openLightbox('nb2')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Nerds Rope Rainbow</div><div class="item-desc">Chewy rope covered in Nerds</div><div class="unit-rows"><div class="unit-row" id="urow-piece-nb2"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 26g</span></span><span class="unit-row-price">$3.20</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb2','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="480" value="0" inputmode="numeric" id="uqinp-piece-nb2" onchange="setUnitQty('nb2','piece',this.value)"><button class="uq-btn" onclick="chgUnit('nb2','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-nb2"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">24 pcs × 26g</span></span><span class="unit-row-price">$76.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb2','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-nb2" onchange="setUnitQty('nb2','case',this.value)"><button class="uq-btn" onclick="chgUnit('nb2','case',1)">+</button></div></div></div></div></div></div></div></div>
 
-  <p class="slabel">Your Basket</p>
-  <div class="basket-wrap" id="basket-section">
-    <div class="basket-header">
-      <span class="basket-header-title">Items selected <span class="basket-count" id="basket-count">0</span></span>
+  <p class="slabel" style="font-size:17px;font-weight:800;color:var(--accent-text);letter-spacing:-.01em;margin-bottom:8px;">🧺 Your Basket</p>
+  <div class="basket-wrap" id="basket-section" style="border:2.5px solid var(--accent);box-shadow:0 4px 18px rgba(0,0,0,.10);">
+    <div class="basket-header" style="background:var(--accent-bg);">
+      <span class="basket-header-title" style="color:var(--accent-text);">Items selected <span class="basket-count" id="basket-count">0</span></span>
     </div>
     <div class="basket-body" id="basket-body"><div class="basket-empty">Your basket is empty — add products above.</div></div>
     <div class="basket-footer" id="basket-footer" style="display:none">
@@ -521,21 +527,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     </div>
   </div>
 
-  <p class="slabel">Delivery Method</p>
-  <div class="opt-grid">
-    <div class="opt-card sel" data-del="delivery" onclick="selDel('delivery')">
-      <p class="ot">🚚 Delivery</p><p class="os">Minimum order $80</p>
-    </div>
-    <div class="opt-card" data-del="pickup" onclick="selDel('pickup')">
-      <p class="ot">🏪 Self Collect</p><p class="os">Free: please arrange with us</p>
-    </div>
-  </div>
-  <div class="del-notice" id="del-notice">
-    <span class="del-dot" id="del-dot"></span>
-    <div style="flex:1"><span id="del-txt"></span>
-      <div class="prog-wrap" id="prog-wrap" style="display:none"><div class="prog-bar" id="prog-bar"></div></div>
-    </div>
-  </div>
+  <!-- Delivery method removed -->
 
   <p class="slabel">Payment Method</p>
   <div class="cash-banner"><div class="cash-icon">💵</div><div class="cash-text-title">Cash on Delivery</div></div>
@@ -1078,9 +1070,11 @@ function unitRowsHTML(p,pq,cq){
     var effectivePpc=p.ppc>0?p.ppc:1;
     var cpCaseObj=custCustomPriceObj(p.id,'case');
     var cMinQty=cpCaseObj&&cpCaseObj.minQty&&cpCaseObj.minQty>1?cpCaseObj.minQty:null;
-    var cSpec=p.ppc>0?(p.ppc+' pcs'+(p.weight?' × '+p.weight:'')):'(box)';
+    var effectivePpc=(cpCaseObj&&cpCaseObj.ppc)?cpCaseObj.ppc:p.ppc;
+    var cSpec=effectivePpc>0?(effectivePpc+' pcs'+(p.weight?' × '+p.weight:'')):'(box)';
+    if(cpCaseObj&&cpCaseObj.ppc)cSpec+=' (custom)';
     if(cMinQty)cSpec+=' (min '+cMinQty+')';
-    var maxCase=p.ppc>0?Math.floor(stock/p.ppc):(hasCustomCase?stock:0);
+    var maxCase=effectivePpc>0?Math.floor(stock/effectivePpc):(hasCustomCase?stock:0);
     html+='<div class="unit-row'+(cq>0?' has-qty-row':'')+'" id="urow-case-'+p.id+'">'
       +'<div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">'+esc(cSpec)+'</span></span><span class="unit-row-price">$'+dcp.toFixed(2)+discTagC+'</span></div>'
       +'<div class="unit-qty-ctrl">'
@@ -1228,9 +1222,6 @@ function syncSimpleToCart(pid,p){
 }
 window.selDel=function(m){
   delMode=m;
-  document.querySelectorAll('[data-del]').forEach(function(e){e.classList.toggle('sel',e.dataset.del===m);});
-  el('addr-field').style.display=m==='delivery'?'':'none';
-  updateDelNotice();
 };
 function getSub(){
   return cartEntries.reduce(function(s,e){
@@ -1262,7 +1253,7 @@ function renderBasket(){
   if(fb){fb.classList.remove('basket-glow');void fb.offsetWidth;fb.classList.add('basket-glow');}
   if(!cartEntries.length){
     el('basket-body').innerHTML='<div class="basket-empty">Your basket is empty — add products above.</div>';
-    el('basket-footer').style.display='none';el('wa-btn').disabled=true;updateDelNotice();return;
+    el('basket-footer').style.display='none';el('wa-btn').disabled=true;return;
   }
   el('basket-body').innerHTML=cartEntries.map(function(e){
     var p=findProduct(e.pid);if(!p)return'';
@@ -1285,7 +1276,6 @@ function renderBasket(){
   }).join('');
   el('basket-total').textContent='$'+sub.toFixed(2);
   el('basket-footer').style.display='';el('wa-btn').disabled=false;
-  updateDelNotice();
 }
 window.bChg=function(entryId,delta){
   var e=cartEntries.find(function(x){return x.entryId===entryId;});if(!e)return;
@@ -1301,14 +1291,7 @@ window.bSet=function(entryId,val){
   if(!nv){cartEntries=cartEntries.filter(function(x){return x.entryId!==entryId;});}else{e.qty=nv;}
   renderBasket();
 };
-function updateDelNotice(){
-  var sub=getSub();
-  var notice=el('del-notice'),dot=el('del-dot'),txt=el('del-txt'),pw=el('prog-wrap'),pb=el('prog-bar');
-  if(delMode!=='delivery'||sub===0){notice.className='del-notice';return;}
-  var met=sub>=MIN_ORDER,rem=(MIN_ORDER-sub).toFixed(2),pct=Math.min(100,Math.round(sub/MIN_ORDER*100));
-  if(met){notice.className='del-notice show is-ok';dot.className='del-dot green';txt.textContent='Minimum order met ✓';pw.style.display='none';}
-  else{notice.className='del-notice show is-min';dot.className='del-dot amber';txt.textContent='Add $'+rem+' more to meet the $'+MIN_ORDER+' minimum';pw.style.display='block';pb.style.width=pct+'%';}
-}
+function updateDelNotice(){} // delivery section removed
 
 /* ── SEND ── */
 function doSend(){
@@ -1418,9 +1401,7 @@ window.closePlacedModal=function(another){
   if(another){cartEntries=[];simpleState={};_pendingVar={};renderOrder();renderBasket();window.scrollTo({top:0,behavior:'smooth'});}
 };
 el('wa-btn').addEventListener('click',function(){
-  var sub=getSub();
-  if(delMode==='delivery'&&sub<MIN_ORDER){pendingMinOrder=true;el('min-order-modal').classList.add('open');}
-  else doSend();
+  doSend();
 });
 el('modal-confirm-btn').addEventListener('click',function(){el('min-order-modal').classList.remove('open');if(pendingMinOrder)doSend();pendingMinOrder=false;});
 el('f-phone').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,8);});
@@ -1875,12 +1856,13 @@ window.saveExtraDisc=function(cid){
 
 window.addCustomPrice=function(cid){
   var cust=customers.find(function(c){return c.id===cid;});if(!cust)return;
-  var nameInp=el('cpname-'+cid),unitSel=el('cpunit-'+cid),priceInp=el('cpprice-'+cid),minQtyInp=el('cpminqty-'+cid);
+  var nameInp=el('cpname-'+cid),unitSel=el('cpunit-'+cid),priceInp=el('cpprice-'+cid),minQtyInp=el('cpminqty-'+cid),ppcInp=el('cpppc-'+cid);
   if(!nameInp||!unitSel||!priceInp)return;
   var pname=nameInp.value.trim();
   var unit=unitSel.value;
   var price=parseFloat(priceInp.value);
   var minQty=minQtyInp?parseInt(minQtyInp.value)||1:1;
+  var customPpc=ppcInp&&ppcInp.value?parseInt(ppcInp.value)||null:null;
   if(!pname){alert('Please type a product name.');return;}
   if(isNaN(price)||price<=0){alert('Please enter a valid price.');return;}
   // Find product by name (case-insensitive)
@@ -1889,9 +1871,9 @@ window.addCustomPrice=function(cid){
   cust.customPrices=cust.customPrices||[];
   // Remove existing entry for same product+unit before adding
   cust.customPrices=cust.customPrices.filter(function(x){return!(x.pid===pp.id&&x.unit===unit);});
-  cust.customPrices.push({pid:pp.id,unit:unit,price:price,minQty:minQty});
+  cust.customPrices.push({pid:pp.id,unit:unit,price:price,minQty:minQty,ppc:customPpc});
   saveJ(LS_CUST,customers);
-  nameInp.value='';priceInp.value='';if(minQtyInp)minQtyInp.value='';
+  nameInp.value='';priceInp.value='';if(minQtyInp)minQtyInp.value='';if(ppcInp)ppcInp.value='';
   renderCustomerList();
   renderProducts(); // reflect on storefront immediately
 };
@@ -1966,6 +1948,7 @@ function renderCustomerList(){
                 +'<span class="custom-price-name">'+pname+'</span>'
                 +'<span style="font-size:11px;color:var(--text-muted)">'+(cp.unit==='case'?'Box':cp.unit)+'</span>'
                 +(cp.minQty&&cp.minQty>1?'<span style="font-size:11px;color:var(--text-muted)">Min: '+cp.minQty+'</span>':'')
+                +(cp.ppc?'<span style="font-size:11px;color:var(--text-muted)">'+cp.ppc+'pcs/box</span>':'')
                 +'<span class="custom-price-val">$'+Number(cp.price).toFixed(2)+'</span>'
                 +'<button class="remove-cp-btn" onclick="removeCustomPrice(\''+c.id+'\',\''+cp.pid+'\',\''+cp.unit+'\')">✕</button>'
               +'</div>';
@@ -1979,6 +1962,7 @@ function renderCustomerList(){
             +'</datalist>'
             +'<select class="cp-unit-sel" id="cpunit-'+c.id+'"><option value="piece">Piece</option><option value="case">Box</option></select>'
             +'<input class="cp-minqty-inp" type="number" min="1" step="1" inputmode="numeric" id="cpminqty-'+c.id+'" placeholder="Min qty" title="Minimum order quantity">'
+            +'<input class="cp-minqty-inp" type="number" min="1" step="1" inputmode="numeric" id="cpppc-'+c.id+'" placeholder="pcs/box" title="Custom pieces per box (leave blank to use product default)">'
             +'<input class="cp-price-inp" type="number" min="0" step="0.01" inputmode="decimal" id="cpprice-'+c.id+'" placeholder="$0.00">'
             +'<button class="add-cp-btn" onclick="addCustomPrice(\''+c.id+'\')">+ Add</button>'
           +'</div>'
@@ -2027,29 +2011,36 @@ function googleTranslateElementInit(){
   new google.translate.TranslateElement({
     pageLanguage:'en',
     includedLanguages:'zh-CN,zh-TW,ms,ta,id,th,vi,ja,ko',
-    layout:google.translate.TranslateElement.FloatPosition.TOP_LEFT,
     autoDisplay:false
   },'google_translate_element');
 }
 
+// Poll until the Google Translate select is ready, then trigger Mandarin
+function waitForGTAndTranslate(attempts){
+  attempts = attempts || 0;
+  if(attempts > 40) return; // give up after ~4 seconds
+  var sel = document.querySelector('select.goog-te-combo');
+  if(sel){
+    sel.value = 'zh-CN';
+    sel.dispatchEvent(new Event('change'));
+  } else {
+    setTimeout(function(){ waitForGTAndTranslate(attempts + 1); }, 100);
+  }
+}
+
+var _translated = false;
 function toggleTranslateWidget(){
-  var el=document.getElementById('google_translate_element');
-  if(!el)return;
-  var visible=el.style.display!=='none';
-  if(visible){el.style.display='none';return;}
-  // Show the widget
-  el.style.display='block';
-  setTimeout(function(){
-    var sel=el.querySelector('select.goog-te-combo');
-    if(!sel)return;
-    // Auto-select Mandarin if not already translated
-    if(!sel.value){
-      sel.value='zh-CN';
-      sel.dispatchEvent(new Event('change'));
-    } else {
-      sel.focus();
-    }
-  },400);
+  if(!_translated){
+    // First click: auto-translate to Mandarin
+    _translated = true;
+    waitForGTAndTranslate();
+  } else {
+    // Already translated — show the widget so user can switch language
+    var el = document.getElementById('google_translate_element');
+    if(!el) return;
+    var visible = el.style.display !== 'none';
+    el.style.display = visible ? 'none' : 'block';
+  }
 }
 
 // Close widget when clicking outside
