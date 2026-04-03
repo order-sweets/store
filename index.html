@@ -523,7 +523,7 @@ body{top:0!important;}
     <div class="basket-body" id="basket-body"><div class="basket-empty">Your basket is empty — add products above.</div></div>
     <div class="basket-footer" id="basket-footer" style="display:none">
       <div id="basket-lines"></div>
-      <div class="basket-row tot"><span>Total</span><span id="basket-total">$0.00</span></div>
+      <div class="basket-row tot"><span>Total</span><span id="basket-total" translate="no" class="notranslate">$0.00</span></div>
     </div>
   </div>
 
@@ -534,9 +534,9 @@ body{top:0!important;}
 
   <p class="slabel">Your Details</p>
   <div class="field-grid">
-    <div class="field full"><label>Full Name / Company Name</label><input type="text" id="f-name" placeholder="e.g. Nelly's Retro Snacks" autocomplete="name"></div>
+    <div class="field full"><label>Full Name / Company Name</label><input type="text" id="f-name" placeholder="" autocomplete="name"></div>
     <div class="field full"><label>Phone Number</label>
-      <div class="phone-row"><span class="phone-pfx">+65</span><input type="tel" id="f-phone" placeholder="9123 4567" maxlength="8" inputmode="numeric"></div>
+      <div class="phone-row"><span class="phone-pfx">+65</span><input type="tel" id="f-phone" placeholder="" maxlength="8" inputmode="numeric"></div>
     </div>
     <div class="field full" id="addr-field"><label>Delivery Address</label><input type="text" id="f-address" placeholder="Block, street, unit number"></div>
     <div class="field full"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Any allergies, special requests…"></textarea></div>
@@ -1026,7 +1026,7 @@ window.onSearch=function(){
     return'<div class="search-result-item" onclick="scrollToProduct(\''+p.id+'\')">'
       +'<span style="font-size:22px;flex-shrink:0">'+thumb+'</span>'
       +'<div style="flex:1;min-width:0"><div class="sri-name">'+esc(p.name)+'</div><div class="sri-brand">'+(brand?esc(brand.brand):'New Arrivals')+'</div></div>'
-      +'<div class="sri-price">$'+piecePrice(p).toFixed(2)+'</div>'
+      +'<div class="sri-price notranslate">$'+piecePrice(p).toFixed(2)+'</div>'
     +'</div>';
   }).join('');
   dd.classList.add('open');
@@ -1264,7 +1264,7 @@ function renderBasket(){
       +'<div class="basket-qty-ctrl"><button class="b-qty-btn" onclick="bChg(\''+e.entryId+'\',-1)">−</button>'
       +'<input class="b-qty-inp" type="number" min="1" value="'+e.qty+'" inputmode="numeric" onchange="bSet(\''+e.entryId+'\',this.value)">'
       +'<button class="b-qty-btn" onclick="bChg(\''+e.entryId+'\',1)">+</button></div>'
-      +'<span class="basket-item-price">$'+(price*e.qty).toFixed(2)+'</span>'
+      +'<span class="basket-item-price notranslate">$'+(price*e.qty).toFixed(2)+'</span>'
     +'</div>';
   }).join('');
   var sub=getSub();
@@ -1272,9 +1272,9 @@ function renderBasket(){
     var p=findProduct(e.pid);if(!p)return'';
     var price=e.unit==='case'?casePrice(p):piecePrice(p);
     var varStr=e.variation?' ['+esc(e.variation)+']':'';
-    return'<div class="basket-row dim"><span>'+esc(p.name)+varStr+' ('+(e.unit==='case'?'Box':'Piece')+') × '+e.qty+'</span><span>$'+(price*e.qty).toFixed(2)+'</span></div>';
+    return'<div class="basket-row dim"><span>'+esc(p.name)+varStr+' ('+(e.unit==='case'?'Box':'Piece')+') × '+e.qty+'</span><span class="notranslate">$'+(price*e.qty).toFixed(2)+'</span></div>';
   }).join('');
-  el('basket-total').textContent='$'+sub.toFixed(2);
+  el('basket-total').textContent='SGD $'+sub.toFixed(2);
   el('basket-footer').style.display='';el('wa-btn').disabled=false;
 }
 window.bChg=function(entryId,delta){
@@ -2030,16 +2030,26 @@ function waitForGTAndTranslate(attempts){
 
 var _translated = false;
 function toggleTranslateWidget(){
+  var sel = document.querySelector('select.goog-te-combo');
   if(!_translated){
-    // First click: auto-translate to Mandarin
+    // First click: translate to Mandarin
     _translated = true;
     waitForGTAndTranslate();
   } else {
-    // Already translated — show the widget so user can switch language
-    var el = document.getElementById('google_translate_element');
-    if(!el) return;
-    var visible = el.style.display !== 'none';
-    el.style.display = visible ? 'none' : 'block';
+    // Subsequent clicks: toggle between Mandarin and English
+    if(sel){
+      if(sel.value === 'zh-CN'){
+        // Switch back to English
+        sel.value = '';
+        sel.dispatchEvent(new Event('change'));
+        _translated = false;
+      } else {
+        // Switch to Mandarin
+        sel.value = 'zh-CN';
+        sel.dispatchEvent(new Event('change'));
+        _translated = true;
+      }
+    }
   }
 }
 
