@@ -1594,29 +1594,31 @@ function doSend(){
   // Build WA message
   var msg='';
   if(isRevision){
-    msg='*Revised Order | '+orderId+'*'
-      +'\n\n*Name:* '+name+'\n'
+    msg='*REVISED ORDER! | '+orderId+'*'
+      +'\n--------------------------------------------------------------------------'
+      +'\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'\n*Notes:* '+notes:'')
-      +'\n\n*Edit Order (within 3 days):* '+'{EDITLINK}'
-      +'\n'+'--------------------'
+      +'\n\n*Edit Order* (within 3 days): {EDITLINK}'
+      +'\n--------------------------------------------------------------------------'
       +'\n*Items:*\n'+lines.join('\n')
-      +'\n\n*Total: $'+sub.toFixed(2)+'*'
+      +'\n--------------------------------------------------------------------------'
+      +'\n*Total: $'+sub.toFixed(2)+'*'
       +'\nCash on Delivery'
-      +'\n--------------------'
       +'\n\n_We\'ll be in touch to confirm. Thank you!_'
       +minNote;
   } else {
-    msg='*Order Received | '+orderId+'*'
-      +'\n\n*Name:* '+name+'\n'
+    msg='*ORDER RECEIVED! | '+orderId+'*'
+      +'\n--------------------------------------------------------------------------'
+      +'\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'\n*Notes:* '+notes:'')
-      +'\n\n*Edit Order (within 3 days):* '+'{EDITLINK}'
-      +'\n'+'--------------------'
+      +'\n\n*Edit Order* (within 3 days): {EDITLINK}'
+      +'\n--------------------------------------------------------------------------'
       +'\n*Items:*\n'+lines.join('\n')
-      +'\n\n*Total: $'+sub.toFixed(2)+'*'
+      +'\n--------------------------------------------------------------------------'
+      +'\n*Total: $'+sub.toFixed(2)+'*'
       +'\nCash on Delivery'
-      +'\n--------------------'
       +'\n\n_We\'ll be in touch to confirm. Thank you!_'
       +minNote;
   }
@@ -2463,13 +2465,10 @@ document.addEventListener('click',function(e){
 });
 
 // Show translate button only on storefront, not admin/login
-(function syncTranslateVisibility(){
+// Show translate button if on storefront on initial load
+(function(){
   var btn=document.getElementById('translate-btn');
-  var el=document.getElementById('google_translate_element');
-  if(!btn)return;
-  var onStore=!!document.querySelector('#page-order.active');
-  btn.style.display=onStore?'':'none';
-  if(!onStore&&el)el.style.display='none';
+  if(btn)btn.style.display='';
 })();
 </script>
 <!-- Load Google Translate script -->
