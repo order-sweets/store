@@ -637,6 +637,7 @@ body{top:0!important;}
       <span class="toast-msg" id="toast" style="display: inline-block;">✓ Data exported!</span>
       <button class="ghost-btn" onclick="saveAll()">💾 Export HTML</button>
       <button class="ghost-btn" onclick="exportData()">📤 Export Data</button>
+      <button class="ghost-btn" onclick="exportCSV()">📊 Export CSV</button>
       <label class="ghost-btn" style="cursor:pointer">📥 Import Data<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
       <button class="out-btn" onclick="showPage('page-order')">Sign Out</button>
     </div>
@@ -1685,6 +1686,70 @@ window.exportData=function(){
   var t=el('toast');t.style.display='inline-block';
   t.textContent='✓ Data exported!';
   setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},3000);
+};
+
+
+/* ── EXPORT CSV ── */
+window.exportCSV=function(){
+  var rows=[];
+  var esc2=function(v){
+    var s=String(v==null?'':v);
+    if(s.indexOf(',')!==-1||s.indexOf('"')!==-1||s.indexOf('\n')!==-1)
+      s='"'+s.replace(/"/g,'""')+'"';
+    return s;
+  };
+
+  // ── PRODUCTS SHEET ──
+  rows.push(['PRODUCTS']);
+  rows.push(['Brand','Product','Description','Weight','Pieces/Box','Retail Piece ($)','Retail Box ($)','Dist Piece ($)','Dist Box ($)','Stock (Boxes)','Stock (Pieces)','Visible Retail','Visible Dist']);
+  var allBrands=loadJ(LS_PRODS)||DEFAULT_BRANDS;
+  allBrands.forEach(function(b){
+    b.products.forEach(function(p){
+      var inv2=loadJ(LS_INV)||{};
+      var rcp=Number(inv2['rcp_'+p.id])||0;
+      var dcp=Number(inv2['dcp_'+p.id])||0;
+      var autoRcp=p.ppc>0?Math.round(p.price*p.ppc*100)/100:0;
+      var autoDcp=p.ppc>0?Math.round(p.priceDist*p.ppc*100)/100:0;
+      var stockPcs=Number(p.stockPieces)||0;
+      var boxes=p.ppc>0?Math.floor(stockPcs/p.ppc):0;
+      rows.push([
+        b.brand, p.name, p.desc||'', p.weight||'', p.ppc||'',
+        p.price.toFixed(2), (rcp>0?rcp:autoRcp).toFixed(2),
+        p.priceDist.toFixed(2), (dcp>0?dcp:autoDcp).toFixed(2),
+        boxes, stockPcs,
+        p.visRetail?'Yes':'No', p.visDist?'Yes':'No'
+      ]);
+    });
+  });
+
+  rows.push([]);
+  rows.push([]);
+
+  // ── CUSTOMERS SHEET ──
+  rows.push(['CUSTOMERS']);
+  rows.push(['Name','Tier','Phone','Default Address','Outlets','Extra Discount (%)','Custom Prices']);
+  customers.forEach(function(c){
+    var outlets=(c.outlets||[]).map(function(o){return o.name+(o.address?' ('+o.address+')':'');}).join(' | ');
+    var cp=(c.customPrices||[]).map(function(x){
+      var pp=findProduct(x.pid);
+      return (pp?pp.name:x.pid)+' '+(x.unit==='case'?'Box':'Piece')+'=$'+Number(x.price).toFixed(2)+(x.ppc?' ('+x.ppc+'pcs/box)':'')+(x.minQty>1?' min'+x.minQty:'');
+    }).join(' | ');
+    rows.push([
+      c.name, c.tier||'retail', c.phone?'+65 '+c.phone:'',
+      c.address||'', outlets, c.extraDisc||0, cp
+    ]);
+  });
+
+  var csv=rows.map(function(r){return r.map(esc2).join(',');}).join('\n');
+  var now=new Date();
+  var pad=function(n){return n<10?'0'+n:n;};
+  var stamp=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bee_events_'+stamp+'.csv';
+  a.click();URL.revokeObjectURL(a.href);
+  var t=el('toast');t.style.display='inline-block';
+  t.textContent='\u2713 CSV exported!';
+  setTimeout(function(){t.style.display='none';t.textContent='\u2713 Saved!';},3000);
 };
 
 /* ── IMPORT DATA (JSON) ── */
