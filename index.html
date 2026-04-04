@@ -1586,7 +1586,7 @@ function doSend(){
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var d=getDiscount(p);
     var varStr=e.variation?' ['+e.variation+']':'';
-    lines.push('  \u{1F4E6} '+p.name+varStr+' · '+(e.unit==='case'?'Box('+p.ppc+'pcs)':'Piece')+(d>0?' (-'+d+'%)':'')+' × '+e.qty+' — $'+(price*e.qty).toFixed(2));
+    lines.push('  \uD83D\uDCE6 '+p.name+varStr+' · '+(e.unit==='case'?'Box('+p.ppc+'pcs)':'Piece')+(d>0?' (-'+d+'%)':'')+' × '+e.qty+' — $'+(price*e.qty).toFixed(2));
   });
   var minNote=metMin?'':'\n\u26A0\uFE0F Below minimum ($'+MIN_ORDER+'). Subject to approval.';
   var delLbl=delMode==='delivery'?'Delivery':'Self Collect';
@@ -1596,9 +1596,7 @@ function doSend(){
   if(isRevision){
     msg='\u2705 *Revised Order* | '+orderId
       +'\n\n*Name:* '+name+'\n'
-      +(delMode==='delivery'?'*Address:* '+addr+'\n':'')
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
-      +'*Delivery:* '+delLbl+'\n'
       +(notes?'*Notes:* '+notes+'\n':'')
       +'\n*Items:*\n'+lines.join('\n')
       +'\n\n*Total: $'+sub.toFixed(2)+'*'
@@ -1607,9 +1605,7 @@ function doSend(){
   } else {
     msg='\u2705 *Order Received* | '+orderId
       +'\n\n*Name:* '+name+'\n'
-      +(delMode==='delivery'?'*Address:* '+addr+'\n':'')
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
-      +'*Delivery:* '+delLbl+'\n'
       +(notes?'*Notes:* '+notes+'\n':'')
       +'\n*Items:*\n'+lines.join('\n')
       +'\n\n*Total: $'+sub.toFixed(2)+'*'
