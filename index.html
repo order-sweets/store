@@ -1586,30 +1586,38 @@ function doSend(){
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var d=getDiscount(p);
     var varStr=e.variation?' ['+e.variation+']':'';
-    lines.push('\uD83D\uDCE6 '+p.name+varStr+' · '+(e.unit==='case'?'Box('+p.ppc+'pcs)':'Piece')+(d>0?' (-'+d+'%)':'')+' × '+e.qty+' — $'+(price*e.qty).toFixed(2));
+    lines.push('• '+p.name+varStr+' | '+(e.unit==='case'?'Box':'Piece')+(d>0?' (-'+d+'%)':'')+' x '+e.qty+' — $'+(price*e.qty).toFixed(2));
   });
-  var minNote=metMin?'':'\n\u26A0\uFE0F Below minimum ($'+MIN_ORDER+'). Subject to approval.';
+  var minNote=metMin?'':'\n\n_Below minimum order ($'+MIN_ORDER+'). Subject to approval._';
   var delLbl=delMode==='delivery'?'Delivery':'Self Collect';
 
   // Build WA message
   var msg='';
   if(isRevision){
-    msg='\u2705 *Revised Order* | '+orderId
+    msg='*Revised Order | '+orderId+'*'
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
-      +(notes?'*Notes:* '+notes+'\n':'')
+      +(notes?'\n*Notes:* '+notes:'')
+      +'\n\n*Edit Order (within 3 days):* '+'{EDITLINK}'
+      +'\n'+'--------------------'
       +'\n*Items:*\n'+lines.join('\n')
       +'\n\n*Total: $'+sub.toFixed(2)+'*'
-      +'\n*Payment:* Cash on Delivery'
+      +'\nCash on Delivery'
+      +'\n--------------------'
+      +'\n\n_We\'ll be in touch to confirm. Thank you!_'
       +minNote;
   } else {
-    msg='\u2705 *Order Received* | '+orderId
+    msg='*Order Received | '+orderId+'*'
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
-      +(notes?'*Notes:* '+notes+'\n':'')
+      +(notes?'\n*Notes:* '+notes:'')
+      +'\n\n*Edit Order (within 3 days):* '+'{EDITLINK}'
+      +'\n'+'--------------------'
       +'\n*Items:*\n'+lines.join('\n')
       +'\n\n*Total: $'+sub.toFixed(2)+'*'
-      +'\n*Payment:* Cash on Delivery'
+      +'\nCash on Delivery'
+      +'\n--------------------'
+      +'\n\n_We\'ll be in touch to confirm. Thank you!_'
       +minNote;
   }
 
@@ -1640,18 +1648,16 @@ function doSend(){
         .then(function(r){return r.json();})
         .then(function(data){
           var shortUrl=data&&data.short_url?data.short_url:fullEditLink;
-          editLine='\n\n\u270F\uFE0F *Edit Order (within 3 days):*\n'+shortUrl+'\n\nWe\'ll be in touch to confirm. Thank you!';
-          _sendWA(msg+editLine,orderId,sub);
+          _sendWA(msg.replace('{EDITLINK}',shortUrl),orderId,sub);
         })
         .catch(function(){
-          editLine='\n\n\u270F\uFE0F *Edit Order (within 3 days):*\n'+fullEditLink+'\n\nWe\'ll be in touch to confirm. Thank you!';
-          _sendWA(msg+editLine,orderId,sub);
+          _sendWA(msg.replace('{EDITLINK}',fullEditLink),orderId,sub);
         });
       return; // wait for TinyURL before sending
     }catch(e){editLine='';}
-    if(!editLine)msg+='\n\nWe\'ll be in touch to confirm. Thank you!';
+    if(!editLine)msg=msg.replace('{EDITLINK}','(link unavailable)');
   }
-  _sendWA(msg+editLine,orderId,sub);
+  _sendWA(msg.replace('{EDITLINK}','(see above)'),orderId,sub);
 }
 function _sendWA(fullMsg,orderId,sub){
   // Use anchor click instead of window.open to preserve emoji encoding
