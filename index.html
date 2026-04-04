@@ -1231,7 +1231,7 @@ function initGreeting(){
       // Show editing banner
       var editBanner=document.createElement('div');
       editBanner.style.cssText='background:var(--amber-bg);color:var(--amber-text);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:14px;font-weight:600;text-align:center;border:1.5px solid #E8C87A;';
-      editBanner.innerHTML='✏️ Editing order <strong>'+urlEditOrder+'</strong> &nbsp;·&nbsp; Edit window closes in <strong id="edit-countdown"></strong>';
+      editBanner.innerHTML='\u270F\uFE0F Editing order <strong>'+urlEditOrder+'</strong> &nbsp;·&nbsp; Edit window closes in <strong id="edit-countdown"></strong>';
       var wrap2=el('order-wrap');
       if(wrap2)wrap2.insertBefore(editBanner,wrap2.firstChild);
       // Countdown timer
@@ -1268,7 +1268,7 @@ window.tryLogin=function(){
 };
 window.openLightbox=function(pid){
   var photo=getPhoto(pid);
-  el('lightbox-content').innerHTML=photo?'<img src="'+photo+'" alt="">':'<span style="font-size:80px">📦</span>';
+  el('lightbox-content').innerHTML=photo?'<img src="'+photo+'" alt="">':'<span style="font-size:80px">\uD83D\uDCE6</span>';
   el('lightbox').classList.add('open');document.body.style.overflow='hidden';
 };
 window.closeLightbox=function(){el('lightbox').classList.remove('open');document.body.style.overflow='';};
@@ -1292,7 +1292,7 @@ window.onSearch=function(){
   if(!results.length){dd.innerHTML='<div class="search-no-results">No products found for "'+esc(q)+'"</div>';dd.classList.add('open');return;}
   dd.innerHTML=results.slice(0,8).map(function(p){
     var photo=getPhoto(p.id);
-    var thumb=photo?'<img src="'+photo+'" style="width:28px;height:28px;border-radius:6px;object-fit:cover">':'📦';
+    var thumb=photo?'<img src="'+photo+'" style="width:28px;height:28px;border-radius:6px;object-fit:cover">':'\uD83D\uDCE6';
     var brand=BRANDS.find(function(b){return b.products.some(function(x){return x.id===p.id;});});
     return'<div class="search-result-item" onclick="scrollToProduct(\''+p.id+'\')">'
       +'<span style="font-size:22px;flex-shrink:0">'+thumb+'</span>'
@@ -1373,7 +1373,7 @@ function cardHTML(p,isNew){
   var oos=stock<=0;
   var hasVar=p.variations&&p.variations.length>0;
   var photo=getPhoto(p.id);
-  var imgHTML=photo?'<img src="'+photo+'" alt="">':'<span class="card-img-placeholder">📦</span>';
+  var imgHTML=photo?'<img src="'+photo+'" alt="">':'<span class="card-img-placeholder">\uD83D\uDCE6</span>';
   var st=hasVar?{pieceQty:0,caseQty:0}:getSimple(p.id);
   var hasQty=hasVar?cartEntries.some(function(e){return e.pid===p.id;}):(st.pieceQty>0||st.caseQty>0);
   var pendingVar=_pendingVar[p.id]||'';
@@ -1586,15 +1586,15 @@ function doSend(){
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var d=getDiscount(p);
     var varStr=e.variation?' ['+e.variation+']':'';
-    lines.push('📦 '+p.name+varStr+' · '+(e.unit==='case'?'Box('+p.ppc+'pcs)':'Piece')+(d>0?' (-'+d+'%)':'')+' × '+e.qty+' — $'+(price*e.qty).toFixed(2));
+    lines.push('\uD83D\uDCE6 '+p.name+varStr+' · '+(e.unit==='case'?'Box('+p.ppc+'pcs)':'Piece')+(d>0?' (-'+d+'%)':'')+' × '+e.qty+' — $'+(price*e.qty).toFixed(2));
   });
-  var minNote=metMin?'':'\n⚠️ Below minimum ($'+MIN_ORDER+'). Subject to approval.';
+  var minNote=metMin?'':'\n\u26A0\uFE0F Below minimum ($'+MIN_ORDER+'). Subject to approval.';
   var delLbl=delMode==='delivery'?'Delivery':'Self Collect';
 
   // Build WA message
   var msg='';
   if(isRevision){
-    msg='✅ *Revised Order* | '+orderId
+    msg='\u2705 *Revised Order* | '+orderId
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'*Notes:* '+notes+'\n':'')
@@ -1603,7 +1603,7 @@ function doSend(){
       +'\n*Payment:* Cash on Delivery'
       +minNote;
   } else {
-    msg='✅ *Order Received* | '+orderId
+    msg='\u2705 *Order Received* | '+orderId
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'*Notes:* '+notes+'\n':'')
@@ -1640,11 +1640,11 @@ function doSend(){
         .then(function(r){return r.json();})
         .then(function(data){
           var shortUrl=data&&data.short_url?data.short_url:fullEditLink;
-          editLine='\n\n✏️ *Edit Order (within 3 days):*\n'+shortUrl+'\n\nWe\'ll be in touch to confirm. Thank you!';
+          editLine='\n\n\u270F\uFE0F *Edit Order (within 3 days):*\n'+shortUrl+'\n\nWe\'ll be in touch to confirm. Thank you!';
           _sendWA(msg+editLine,orderId,sub);
         })
         .catch(function(){
-          editLine='\n\n✏️ *Edit Order (within 3 days):*\n'+fullEditLink+'\n\nWe\'ll be in touch to confirm. Thank you!';
+          editLine='\n\n\u270F\uFE0F *Edit Order (within 3 days):*\n'+fullEditLink+'\n\nWe\'ll be in touch to confirm. Thank you!';
           _sendWA(msg+editLine,orderId,sub);
         });
       return; // wait for TinyURL before sending
@@ -1767,7 +1767,7 @@ function prodAdminCard(p){
 
   return'<div class="prod-admin-card" id="pac-'+p.id+'">'
     +'<div class="prod-admin-header" onclick="togglePAC(\''+p.id+'\')">'
-      +'<div class="prod-admin-thumb">'+(photo?'<img src="'+photo+'" alt="">':'📦')+'</div>'
+      +'<div class="prod-admin-thumb">'+(photo?'<img src="'+photo+'" alt="">':'\uD83D\uDCE6')+'</div>'
       +'<div class="prod-admin-info"><div class="prod-admin-name">'+esc(p.name)+'</div>'
         +'<div class="prod-admin-price">Retail $'+rp.toFixed(2)+' · Dist $'+dp.toFixed(2)+(p.ppc?' · '+p.ppc+'pcs/box':'')+'</div></div>'
       +'<span id="abadge-'+p.id+'">'+aBadgeP(p,getThresh())+'</span>'
@@ -1780,7 +1780,7 @@ function prodAdminCard(p){
 
     // Photo row
     +'<div class="photo-row">'
-      +'<div class="photo-thumb-sm" id="photo-thumb-'+p.id+'">'+(photo?'<img src="'+photo+'" alt="">':'📦')+'</div>'
+      +'<div class="photo-thumb-sm" id="photo-thumb-'+p.id+'">'+(photo?'<img src="'+photo+'" alt="">':'\uD83D\uDCE6')+'</div>'
       +'<input class="photo-url-inp-sm" type="text" id="photo-url-'+p.id+'" placeholder="Paste image URL…" value="'+(photo&&photo.startsWith('http')?esc(photo):'')+'">'
       +'<button class="photo-url-btn-sm" onclick="setPhotoURL(\''+p.id+'\')">Use URL</button>'
       +'<label class="photo-upload-label-sm">📷 Upload<input class="photo-upload-input" type="file" accept="image/*" onchange="uploadPhoto(\''+p.id+'\',this)"></label>'
@@ -1811,10 +1811,10 @@ function prodAdminCard(p){
         +'<div class="admin-field"><label>Distributor Box Price ($) <small style="color:var(--text-hint)">(auto $'+autoDcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="edcp-'+p.id+'" value="'+(dcp>0?dcp:'')+'" placeholder="'+autoDcp+'"></div>'
         // Row 7 — Visible to Retail | Visible to Distributors
         +'<div class="admin-field"><div class="vis-toggle-row retail"><span class="vis-toggle-label">🏪 Visible to Retail</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisr-'+p.id+'" '+(visR?'checked':'')+' onchange="saveVisRetail(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
-        +'<div class="admin-field"><div class="vis-toggle-row dist"><span class="vis-toggle-label">📦 Visible to Distributors</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisd-'+p.id+'" '+(visD?'checked':'')+' onchange="saveVisDist(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
+        +'<div class="admin-field"><div class="vis-toggle-row dist"><span class="vis-toggle-label">\uD83D\uDCE6 Visible to Distributors</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisd-'+p.id+'" '+(visD?'checked':'')+' onchange="saveVisDist(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
         // Row 8 — Units available to Retail | Units available to Distributors
         +'<div class="admin-field"><label style="color:var(--blue-text);font-weight:600">🏪 Retail can order by</label><select id="eunitr-'+p.id+'"><option value="both"'+((!p.unitsRetail||p.unitsRetail==='both')?' selected':'')+'>Piece &amp; Box</option><option value="piece"'+(p.unitsRetail==='piece'?' selected':'')+'>Piece only</option><option value="case"'+(p.unitsRetail==='case'?' selected':'')+'>Box only</option></select></div>'
-        +'<div class="admin-field"><label style="color:var(--purple-text);font-weight:600">📦 Distributors can order by</label><select id="eunitd-'+p.id+'"><option value="both"'+((!p.unitsDist||p.unitsDist==='both')?' selected':'')+'>Piece &amp; Box</option><option value="piece"'+(p.unitsDist==='piece'?' selected':'')+'>Piece only</option><option value="case"'+(p.unitsDist==='case'?' selected':'')+'>Box only</option></select></div>'
+        +'<div class="admin-field"><label style="color:var(--purple-text);font-weight:600">\uD83D\uDCE6 Distributors can order by</label><select id="eunitd-'+p.id+'"><option value="both"'+((!p.unitsDist||p.unitsDist==='both')?' selected':'')+'>Piece &amp; Box</option><option value="piece"'+(p.unitsDist==='piece'?' selected':'')+'>Piece only</option><option value="case"'+(p.unitsDist==='case'?' selected':'')+'>Box only</option></select></div>'
       +'</div>'
 
       +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
