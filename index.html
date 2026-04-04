@@ -1586,15 +1586,15 @@ function doSend(){
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var d=getDiscount(p);
     var varStr=e.variation?' ['+e.variation+']':'';
-    lines.push('  \uD83D\uDCE6 '+p.name+varStr+' · '+(e.unit==='case'?'Box('+p.ppc+'pcs)':'Piece')+(d>0?' (-'+d+'%)':'')+' × '+e.qty+' — $'+(price*e.qty).toFixed(2));
+    lines.push('📦 '+p.name+varStr+' · '+(e.unit==='case'?'Box('+p.ppc+'pcs)':'Piece')+(d>0?' (-'+d+'%)':'')+' × '+e.qty+' — $'+(price*e.qty).toFixed(2));
   });
-  var minNote=metMin?'':'\n\u26A0\uFE0F Below minimum ($'+MIN_ORDER+'). Subject to approval.';
+  var minNote=metMin?'':'\n⚠️ Below minimum ($'+MIN_ORDER+'). Subject to approval.';
   var delLbl=delMode==='delivery'?'Delivery':'Self Collect';
 
   // Build WA message
   var msg='';
   if(isRevision){
-    msg='\u2705 *Revised Order* | '+orderId
+    msg='✅ *Revised Order* | '+orderId
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'*Notes:* '+notes+'\n':'')
@@ -1603,7 +1603,7 @@ function doSend(){
       +'\n*Payment:* Cash on Delivery'
       +minNote;
   } else {
-    msg='\u2705 *Order Received* | '+orderId
+    msg='✅ *Order Received* | '+orderId
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'*Notes:* '+notes+'\n':'')
@@ -1640,11 +1640,11 @@ function doSend(){
         .then(function(r){return r.json();})
         .then(function(data){
           var shortUrl=data&&data.short_url?data.short_url:fullEditLink;
-          editLine='\n\n\u270F\uFE0F *Edit Order (within 3 days):*\n'+shortUrl+'\n\nWe\'ll be in touch to confirm. Thank you!';
+          editLine='\n\n✏️ *Edit Order (within 3 days):*\n'+shortUrl+'\n\nWe\'ll be in touch to confirm. Thank you!';
           _sendWA(msg+editLine,orderId,sub);
         })
         .catch(function(){
-          editLine='\n\n\u270F\uFE0F *Edit Order (within 3 days):*\n'+fullEditLink+'\n\nWe\'ll be in touch to confirm. Thank you!';
+          editLine='\n\n✏️ *Edit Order (within 3 days):*\n'+fullEditLink+'\n\nWe\'ll be in touch to confirm. Thank you!';
           _sendWA(msg+editLine,orderId,sub);
         });
       return; // wait for TinyURL before sending
@@ -1654,9 +1654,13 @@ function doSend(){
   _sendWA(msg+editLine,orderId,sub);
 }
 function _sendWA(fullMsg,orderId,sub){
-  // encodeURIComponent handles emoji correctly in modern browsers
+  // Use anchor click instead of window.open to preserve emoji encoding
   var enc=encodeURIComponent(fullMsg);
-  window.open('https://wa.me/'+WA_1+'?text='+enc,'_blank');
+  var url='https://wa.me/'+WA_1+'?text='+enc;
+  var a=document.createElement('a');
+  a.href=url;a.target='_blank';a.rel='noopener';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);},100);
   isRevision=false;
   sessionOrders.push({id:orderId,total:sub,items:cartEntries.length});
   // Persist full order to orderLog for admin history
