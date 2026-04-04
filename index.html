@@ -2035,25 +2035,11 @@ function toggleTranslateWidget(){
     _translated = true;
     waitForGTAndTranslate();
   } else {
-    _translated = false;
-    // Reset cookie so Google knows target is English
+    // Revert to English — most reliable method is a clean reload
+    // Clear the googtrans cookie first so it reloads in English
     document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     document.cookie = 'googtrans=; path=/; domain=' + location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    // Use Google's internal doGTranslate to switch to English
-    if(typeof doGTranslate === 'function'){
-      doGTranslate('en|en');
-    } else {
-      // Fallback: set select to empty and fire change
-      var sel = document.querySelector('select.goog-te-combo');
-      if(sel){ sel.value = ''; sel.dispatchEvent(new Event('change')); }
-    }
-    // Final fallback: reload the page after a short delay if still translated
-    setTimeout(function(){
-      var html = document.documentElement;
-      if(html.className.indexOf('translated') !== -1){
-        location.reload();
-      }
-    }, 600);
+    location.reload();
   }
 }
 
