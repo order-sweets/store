@@ -238,6 +238,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .goog-te-banner-frame{display:none!important;}
 body{top:0!important;}
 .skiptranslate{display:none!important;}
+.notranslate{font-style:normal!important;}
 #goog-gt-tt{display:none!important;}
 .goog-te-balloon-frame{display:none!important;}
 .page-admin-active .translate-btn,.page-login-active .translate-btn{display:none!important;}
@@ -523,7 +524,7 @@ body{top:0!important;}
     <div class="basket-body" id="basket-body"><div class="basket-empty">Your basket is empty — add products above.</div></div>
     <div class="basket-footer" id="basket-footer" style="display:none">
       <div id="basket-lines"></div>
-      <div class="basket-row tot"><span>Total</span><span id="basket-total" translate="no" class="notranslate">$0.00</span></div>
+      <div class="basket-row tot"><span>Total</span><span id="basket-total" class="notranslate" translate="no">$0.00</span></div>
     </div>
   </div>
 
@@ -695,8 +696,8 @@ body{top:0!important;}
     <div class="section-card">
       <h3>Add New Customer</h3>
       <div class="form-grid">
-        <div class="form-field"><label>Customer / Company Name</label><input type="text" id="nc-name" placeholder="e.g. Nelly's Retro Snacks"></div>
-        <div class="form-field"><label>Phone (+65)</label><input type="tel" id="nc-phone" placeholder="91234567" maxlength="8" inputmode="numeric"></div>
+        <div class="form-field"><label>Customer / Company Name</label><input type="text" id="nc-name" placeholder=""></div>
+        <div class="form-field"><label>Phone (+65)</label><input type="tel" id="nc-phone" placeholder="" maxlength="8" inputmode="numeric"></div>
         <div class="form-field full"><label>Default Delivery Address</label><input type="text" id="nc-addr" placeholder="Block, street, unit number (optional)"></div>
         <div class="form-field"><label>Pricing Tier</label>
           <select id="nc-tier">
@@ -1058,7 +1059,7 @@ function unitRowsHTML(p,pq,cq){
   var pMinQty=cpPieceObj&&cpPieceObj.minQty&&cpPieceObj.minQty>1?cpPieceObj.minQty:null;
   var pSpec='1pc'+(p.weight?' × '+p.weight:'')+(pMinQty?' (min '+pMinQty+')':'');
     html+='<div class="unit-row'+(pq>0?' has-qty-row':'')+'" id="urow-piece-'+p.id+'">'
-      +'<div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">'+esc(pSpec)+'</span></span><span class="unit-row-price">$'+dp.toFixed(2)+discTag+'</span></div>'
+      +'<div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">'+esc(pSpec)+'</span></span><span class="unit-row-price notranslate">$'+dp.toFixed(2)+discTag+'</span></div>'
       +'<div class="unit-qty-ctrl">'
         +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',-1)"'+(oos?' disabled':'')+'>−</button>'
         +'<input class="uq-inp" type="number" min="0" max="'+stock+'" value="'+pq+'" inputmode="numeric" id="uqinp-piece-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'piece\',this.value)">'
@@ -1076,7 +1077,7 @@ function unitRowsHTML(p,pq,cq){
     if(cMinQty)cSpec+=' (min '+cMinQty+')';
     var maxCase=effectivePpc>0?Math.floor(stock/effectivePpc):(hasCustomCase?stock:0);
     html+='<div class="unit-row'+(cq>0?' has-qty-row':'')+'" id="urow-case-'+p.id+'">'
-      +'<div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">'+esc(cSpec)+'</span></span><span class="unit-row-price">$'+dcp.toFixed(2)+discTagC+'</span></div>'
+      +'<div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">'+esc(cSpec)+'</span></span><span class="unit-row-price notranslate">$'+dcp.toFixed(2)+discTagC+'</span></div>'
       +'<div class="unit-qty-ctrl">'
         +'<button class="uq-btn" onclick="chgUnit(\''+p.id+'\',\'case\',-1)"'+(maxCase<=0?' disabled':'')+'>−</button>'
         +'<input class="uq-inp" type="number" min="0" max="'+maxCase+'" value="'+cq+'" inputmode="numeric" id="uqinp-case-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'case\',this.value)">'
@@ -1274,7 +1275,7 @@ function renderBasket(){
     var varStr=e.variation?' ['+esc(e.variation)+']':'';
     return'<div class="basket-row dim"><span>'+esc(p.name)+varStr+' ('+(e.unit==='case'?'Box':'Piece')+') × '+e.qty+'</span><span class="notranslate">$'+(price*e.qty).toFixed(2)+'</span></div>';
   }).join('');
-  el('basket-total').textContent='SGD $'+sub.toFixed(2);
+  el('basket-total').textContent='$'+sub.toFixed(2);
   el('basket-footer').style.display='';el('wa-btn').disabled=false;
 }
 window.bChg=function(entryId,delta){
@@ -2029,6 +2030,30 @@ function waitForGTAndTranslate(attempts){
 }
 
 var _translated = false;
+function revertToEnglish(){
+  // Google Translate's own revert function
+  var fn = window.google && google.translate && google.translate.TranslateElement && google.translate.TranslateElement.getInstance;
+  // Try clicking the "Show original" restore bar if present
+  var iframe = document.querySelector('.goog-te-banner-frame');
+  if(iframe){
+    try{
+      var inner = iframe.contentDocument || iframe.contentWindow.document;
+      var btn = inner.querySelector('.goog-te-banner-frame-restore') || inner.querySelector('[id$=restore]') || inner.querySelector('button');
+      if(btn){btn.click();return;}
+    }catch(e){}
+  }
+  // Fallback: set cookie and reload
+  var cookie = 'googtrans=/en/en; path=/';
+  document.cookie = cookie;
+  var sel = document.querySelector('select.goog-te-combo');
+  if(sel){sel.value='';sel.dispatchEvent(new Event('change'));}
+  // Force-restore via Google's own mechanism
+  setTimeout(function(){
+    if(window.google && google.translate){
+      try{ google.translate.TranslateElement.restore(); }catch(e){}
+    }
+  }, 50);
+}
 function toggleTranslateWidget(){
   var sel = document.querySelector('select.goog-te-combo');
   if(!_translated){
@@ -2036,20 +2061,9 @@ function toggleTranslateWidget(){
     _translated = true;
     waitForGTAndTranslate();
   } else {
-    // Subsequent clicks: toggle between Mandarin and English
-    if(sel){
-      if(sel.value === 'zh-CN'){
-        // Switch back to English
-        sel.value = '';
-        sel.dispatchEvent(new Event('change'));
-        _translated = false;
-      } else {
-        // Switch to Mandarin
-        sel.value = 'zh-CN';
-        sel.dispatchEvent(new Event('change'));
-        _translated = true;
-      }
-    }
+    // Second click: revert to English
+    _translated = false;
+    revertToEnglish();
   }
 }
 
