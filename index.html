@@ -825,7 +825,7 @@ var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads 
 var savedP=loadJ(LS_PROD);
 var _rawSettings=loadJ(LS_SETTINGS)||{};
 var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||''};
-function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted)_fbDebouncedPush();}
+function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted){_fbPausePollUntil=Date.now()+10000;clearTimeout(_fbPushTimer);_fbPushTimer=setTimeout(fbPushAll,0);}}
 var NEW_ARRIVALS=savedP?savedP.newArrivals:DEFAULT_NEW;
 var HOT_SALE=savedP?savedP.hotSale||[]:[];
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
@@ -840,7 +840,7 @@ function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getInv(){return loadJ(LS_INV)||{};}
 function saveInv(inv){saveJ(LS_INV,inv);if(window._fbStarted)_fbDebouncedPush();}
-function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted)_fbDebouncedPush();}
+function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted){_fbPausePollUntil=Date.now()+10000;clearTimeout(_fbPushTimer);_fbPushTimer=setTimeout(fbPushAll,0);}}
 
 /* ── RESTOCK LOG ── */
 var LS_RESTOCK='snack-restock-v1';
@@ -2629,9 +2629,13 @@ function fbPushAll() {
 }
 
 var _fbPushTimer = null;
+var _fbPausePollUntil = 0;  // timestamp — pause polling after local writes
+
 function _fbDebouncedPush() {
   clearTimeout(_fbPushTimer);
-  _fbPushTimer = setTimeout(fbPushAll, 800);
+  // Pause polling for 6 seconds after any local write
+  _fbPausePollUntil = Date.now() + 10000;
+  _fbPushTimer = setTimeout(fbPushAll, 200);
 }
 
 var _fbFirstLoad = true;
@@ -2649,7 +2653,11 @@ function fbPoll() {
 function fbLoad() {
   _fbStatus('Syncing…', 'orange');
   fbPoll();
-  setInterval(fbPoll, 5000);
+  setInterval(function() {
+    // Skip poll if we recently made a local change (give push time to complete)
+    if (Date.now() < _fbPausePollUntil) return;
+    fbPoll();
+  }, 5000);
 }
 
 function _fbHookSaves() {} // no-op — saves patched directly in main app
