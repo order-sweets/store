@@ -825,7 +825,7 @@ var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads 
 var savedP=loadJ(LS_PROD);
 var _rawSettings=loadJ(LS_SETTINGS)||{};
 var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||''};
-function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted){_fbPausePollUntil=Date.now()+10000;clearTimeout(_fbPushTimer);_fbPushTimer=setTimeout(fbPushAll,0);}}
+function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted){clearTimeout(_fbPushTimer);_fbPushTimer=setTimeout(fbPushAll,0);}}
 var NEW_ARRIVALS=savedP?savedP.newArrivals:DEFAULT_NEW;
 var HOT_SALE=savedP?savedP.hotSale||[]:[];
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
@@ -840,7 +840,7 @@ function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getInv(){return loadJ(LS_INV)||{};}
 function saveInv(inv){saveJ(LS_INV,inv);if(window._fbStarted)_fbDebouncedPush();}
-function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted){_fbPausePollUntil=Date.now()+10000;clearTimeout(_fbPushTimer);_fbPushTimer=setTimeout(fbPushAll,0);}}
+function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted){clearTimeout(_fbPushTimer);_fbPushTimer=setTimeout(fbPushAll,0);}}
 
 /* ── RESTOCK LOG ── */
 var LS_RESTOCK='snack-restock-v1';
@@ -945,8 +945,8 @@ window.markOrderDone=function(idx){
   if(!orderLog[idx])return;
   orderLog[idx].status='done';
   saveOrderLog();
-  var pending2=orderLog.filter(function(o){return o.status!=='done';}).length;
   renderOrderHistoryAdmin();
+  if(window._fbStarted){clearTimeout(_fbPushTimer);fbPushAll();}
 };
 
 window.deleteOrder=function(idx){
@@ -954,6 +954,8 @@ window.deleteOrder=function(idx){
   orderLog.splice(idx,1);
   saveOrderLog();
   renderOrderHistoryAdmin();
+  // Push immediately — no debounce delay
+  if(window._fbStarted){clearTimeout(_fbPushTimer);fbPushAll();}
 };
 
 window.clearDoneOrders=function(){
@@ -961,6 +963,8 @@ window.clearDoneOrders=function(){
   orderLog=orderLog.filter(function(o){return o.status!=='done';});
   saveOrderLog();
   renderOrderHistoryAdmin();
+  // Push immediately — no debounce delay
+  if(window._fbStarted){clearTimeout(_fbPushTimer);fbPushAll();}
 };
 
 window.toggleNewArrivals=function(on){
@@ -2610,16 +2614,28 @@ function fbSet(path, data) {
 }
 
 function fbPushAll() {
-  fbSet('store', _fbGetAllData());
+  _fbLocalVersion = Date.now();
+  var data = _fbGetAllData();
+  data._v = _fbLocalVersion;
+  // Show saving indicator
+  _fbStatus('Saving…', 'orange');
+  fetch(_FB_URL + '/store.json', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).then(function() {
+    _fbStatus('✓ Saved', '#38a169');
+  }).catch(function() {
+    _fbStatus('Save failed', '#e53e3e');
+  });
 }
 
 var _fbPushTimer = null;
-var _fbPausePollUntil = 0;  // timestamp — pause polling after local writes
+var _fbLocalVersion = 0;
+var _fbRemoteVersion = 0;
 
 function _fbDebouncedPush() {
   clearTimeout(_fbPushTimer);
-  // Pause polling for 6 seconds after any local write
-  _fbPausePollUntil = Date.now() + 10000;
   _fbPushTimer = setTimeout(fbPushAll, 200);
 }
 
@@ -2628,8 +2644,20 @@ function fbPoll() {
   fetch(_FB_URL + '/store.json')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      if (d) _fbSetAllData(d);
-      _fbStatus(_fbFirstLoad ? '✓ Synced' : '✓ Updated', '#38a169');
+      if (!d) { _fbStatus('✓ Synced', '#38a169'); _fbFirstLoad = false; return; }
+      var remoteV = d._v || 0;
+      // Only apply if remote data is newer than what we last wrote
+      if (remoteV > _fbLocalVersion) {
+        _fbRemoteVersion = remoteV;
+        _fbSetAllData(d);
+        _fbStatus(_fbFirstLoad ? '✓ Synced' : '✓ Updated', '#38a169');
+      } else if (_fbFirstLoad) {
+        // On first load always apply even if versions match
+        _fbSetAllData(d);
+        _fbStatus('✓ Synced', '#38a169');
+      } else {
+        _fbStatus('✓ In sync', '#38a169');
+      }
       _fbFirstLoad = false;
     })
     .catch(function() { _fbStatus('Offline', '#e53e3e'); });
@@ -2638,11 +2666,7 @@ function fbPoll() {
 function fbLoad() {
   _fbStatus('Syncing…', 'orange');
   fbPoll();
-  setInterval(function() {
-    // Skip poll if we recently made a local change (give push time to complete)
-    if (Date.now() < _fbPausePollUntil) return;
-    fbPoll();
-  }, 5000);
+  setInterval(fbPoll, 8000);
 }
 
 function _fbHookSaves() {} // no-op — saves patched directly in main app
