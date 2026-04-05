@@ -2531,4 +2531,173 @@ document.addEventListener('click',function(e){
 </script>
 <!-- Load Google Translate script -->
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<!-- ═══ FIREBASE SYNC ═══ -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// ── Firebase config ──
+var _fbApp = firebase.initializeApp({
+  apiKey: "AIzaSyDz9gGz8wTC8lCeZ7tsjvEPaNCj4AUFm40",
+  authDomain: "store-and-invoicing.firebaseapp.com",
+  databaseURL: "https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "store-and-invoicing",
+  storageBucket: "store-and-invoicing.firebasestorage.app",
+  messagingSenderId: "368263477365",
+  appId: "1:368263477365:web:6bf726257078b336c9203c"
+});
+var _fbDb = firebase.database(_fbApp);
+
+// ── Sync status indicator ──
+function _fbStatus(msg, colour) {
+  var el = document.getElementById('fb-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.background = colour || '#2D3748';
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  if (colour !== 'orange' && colour !== '#e53e3e') {
+    el._t = setTimeout(function(){ el.style.opacity = '0'; }, 2500);
+  }
+}
+
+// ── Write to Firebase + localStorage ──
+function fbSet(path, data) {
+  _fbDb.ref(path).set(data).catch(function(e) {
+    _fbStatus('Sync failed', '#e53e3e');
+  });
+}
+
+// ── Load ALL data from Firebase on startup ──
+function fbLoad() {
+  _fbStatus('Syncing…', 'orange');
+  _fbDb.ref('store').once('value').then(function(snap) {
+    var d = snap.val();
+    if (!d) { _fbStatus('No cloud data yet', '#2D3748'); return; }
+
+    var changed = false;
+
+    if (d.products) {
+      var p = d.products;
+      if (p.newArrivals) NEW_ARRIVALS = p.newArrivals;
+      if (p.hotSale) HOT_SALE = p.hotSale;
+      if (p.brands) BRANDS = p.brands;
+      saveJ(LS_PROD, {newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS});
+      changed = true;
+    }
+    if (d.inv) { saveJ(LS_INV, d.inv); changed = true; }
+    if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); changed = true; }
+    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); saveJ(LS_SETTINGS, SETTINGS); changed = true; }
+    if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); changed = true; }
+    if (d.orderLog) { orderLog = d.orderLog; saveOrderLog(); changed = true; }
+    if (d.orderCounter) { localStorage.setItem(LS_ORD_CTR, String(d.orderCounter)); changed = true; }
+    if (d.restockHistory) { restockHistory = d.restockHistory; saveRestockHistory(); changed = true; }
+    if (d.pendingOrders) { localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders)); changed = true; }
+
+    if (changed) {
+      renderOrder();
+      renderAdmin();
+      renderCustomerList();
+      renderOrderHistoryAdmin();
+      _fbStatus('\u2713 Synced', '#38a169');
+    } else {
+      _fbStatus('\u2713 Up to date', '#38a169');
+    }
+  }).catch(function(e) {
+    _fbStatus('Offline', '#e53e3e');
+  });
+}
+
+// ── Push ALL data to Firebase ──
+function fbPushAll() {
+  _fbStatus('Saving…', 'orange');
+  var counter = parseInt(localStorage.getItem(LS_ORD_CTR) || '0', 10);
+  var pending = JSON.parse(localStorage.getItem('beinv-pending') || '[]');
+  _fbDb.ref('store').set({
+    products: { newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS },
+    inv: getInv(),
+    customers: customers,
+    settings: SETTINGS,
+    photos: photos,
+    orderLog: orderLog,
+    orderCounter: counter,
+    restockHistory: restockHistory,
+    pendingOrders: pending
+  }).then(function() {
+    _fbStatus('\u2713 Saved', '#38a169');
+  }).catch(function(e) {
+    _fbStatus('Save failed', '#e53e3e');
+  });
+}
+
+// ── Hook save functions to also push to Firebase ──
+var _origSaveProds = saveProds;
+saveProds = function() {
+  _origSaveProds();
+  fbSet('store/products', { newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS });
+  fbSet('store/inv', getInv());
+};
+
+var _origSaveInv = saveInv;
+saveInv = function(inv) {
+  _origSaveInv(inv);
+  fbSet('store/inv', inv);
+};
+
+var _origSaveSettings = saveSettings;
+saveSettings = function() {
+  _origSaveSettings();
+  fbSet('store/settings', SETTINGS);
+};
+
+var _origSaveOrderLog = saveOrderLog;
+saveOrderLog = function() {
+  _origSaveOrderLog();
+  fbSet('store/orderLog', orderLog);
+  var counter = parseInt(localStorage.getItem(LS_ORD_CTR) || '0', 10);
+  fbSet('store/orderCounter', counter);
+};
+
+var _origSaveRestockHistory = saveRestockHistory;
+saveRestockHistory = function() {
+  _origSaveRestockHistory();
+  fbSet('store/restockHistory', restockHistory);
+};
+
+// Also sync customers and photos when saved
+var _origAddCustomer = window.addCustomer;
+window.addCustomer = function() {
+  _origAddCustomer && _origAddCustomer.apply(this, arguments);
+  setTimeout(function(){ fbSet('store/customers', customers); }, 100);
+};
+
+// Patch saveJ for customers and photos
+var _origSaveJ = saveJ;
+saveJ = function(k, v) {
+  _origSaveJ(k, v);
+  if (k === LS_CUST) fbSet('store/customers', v);
+  if (k === LS_PHOTOS) fbSet('store/photos', v);
+};
+
+// Sync pending orders to Firebase whenever beinv-pending is written
+var _origSetItem = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(key, value) {
+  _origSetItem(key, value);
+  if (key === 'beinv-pending') {
+    try { fbSet('store/pendingOrders', JSON.parse(value)); } catch(e){}
+  }
+  if (key === LS_ORD_CTR) {
+    fbSet('store/orderCounter', parseInt(value, 10));
+  }
+};
+
+// ── Load on startup ──
+window.addEventListener('load', function() {
+  setTimeout(fbLoad, 500);
+});
+</script>
+
+<!-- Sync status badge -->
+<div id="fb-status" style="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2D3748;color:#fff;font-size:11px;font-weight:600;padding:5px 14px;border-radius:20px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .4s;white-space:nowrap;"></div>
+
 </body></html>
