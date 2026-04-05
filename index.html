@@ -2630,69 +2630,71 @@ function fbPushAll() {
   });
 }
 
-// ── Hook save functions to also push to Firebase ──
-var _origSaveProds = saveProds;
-saveProds = function() {
-  _origSaveProds();
-  fbSet('store/products', { newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS });
-  fbSet('store/inv', getInv());
-};
-
-var _origSaveInv = saveInv;
-saveInv = function(inv) {
-  _origSaveInv(inv);
-  fbSet('store/inv', inv);
-};
-
-var _origSaveSettings = saveSettings;
-saveSettings = function() {
-  _origSaveSettings();
-  fbSet('store/settings', SETTINGS);
-};
-
-var _origSaveOrderLog = saveOrderLog;
-saveOrderLog = function() {
-  _origSaveOrderLog();
-  fbSet('store/orderLog', orderLog);
-  var counter = parseInt(localStorage.getItem(LS_ORD_CTR) || '0', 10);
-  fbSet('store/orderCounter', counter);
-};
-
-var _origSaveRestockHistory = saveRestockHistory;
-saveRestockHistory = function() {
-  _origSaveRestockHistory();
-  fbSet('store/restockHistory', restockHistory);
-};
-
-// Also sync customers and photos when saved
-var _origAddCustomer = window.addCustomer;
-window.addCustomer = function() {
-  _origAddCustomer && _origAddCustomer.apply(this, arguments);
-  setTimeout(function(){ fbSet('store/customers', customers); }, 100);
-};
-
-// Patch saveJ for customers and photos
-var _origSaveJ = saveJ;
-saveJ = function(k, v) {
-  _origSaveJ(k, v);
-  if (k === LS_CUST) fbSet('store/customers', v);
-  if (k === LS_PHOTOS) fbSet('store/photos', v);
-};
-
-// Sync pending orders to Firebase whenever beinv-pending is written
-var _origSetItem = localStorage.setItem.bind(localStorage);
-localStorage.setItem = function(key, value) {
-  _origSetItem(key, value);
-  if (key === 'beinv-pending') {
-    try { fbSet('store/pendingOrders', JSON.parse(value)); } catch(e){}
-  }
-  if (key === LS_ORD_CTR) {
-    fbSet('store/orderCounter', parseInt(value, 10));
-  }
-};
-
-// ── Load on startup ──
+// ── Hook save functions + load — all inside window.load so app is ready ──
 window.addEventListener('load', function() {
+
+  // Wrap save functions to also push to Firebase
+  var _origSaveProds = saveProds;
+  saveProds = function() {
+    _origSaveProds();
+    fbSet('store/products', { newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS });
+    fbSet('store/inv', getInv());
+  };
+
+  var _origSaveInv = saveInv;
+  saveInv = function(inv) {
+    _origSaveInv(inv);
+    fbSet('store/inv', inv);
+  };
+
+  var _origSaveSettings = saveSettings;
+  saveSettings = function() {
+    _origSaveSettings();
+    fbSet('store/settings', SETTINGS);
+  };
+
+  var _origSaveOrderLog = saveOrderLog;
+  saveOrderLog = function() {
+    _origSaveOrderLog();
+    fbSet('store/orderLog', orderLog);
+    var counter = parseInt(localStorage.getItem(LS_ORD_CTR) || '0', 10);
+    fbSet('store/orderCounter', counter);
+  };
+
+  var _origSaveRestockHistory = saveRestockHistory;
+  saveRestockHistory = function() {
+    _origSaveRestockHistory();
+    fbSet('store/restockHistory', restockHistory);
+  };
+
+  // Also sync customers and photos when saved
+  var _origAddCustomer = window.addCustomer;
+  window.addCustomer = function() {
+    _origAddCustomer && _origAddCustomer.apply(this, arguments);
+    setTimeout(function(){ fbSet('store/customers', customers); }, 100);
+  };
+
+  // Patch saveJ for customers and photos
+  var _origSaveJ = saveJ;
+  saveJ = function(k, v) {
+    _origSaveJ(k, v);
+    if (k === LS_CUST) fbSet('store/customers', v);
+    if (k === LS_PHOTOS) fbSet('store/photos', v);
+  };
+
+  // Sync pending orders + order counter to Firebase
+  var _origSetItem = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(key, value) {
+    _origSetItem(key, value);
+    if (key === 'beinv-pending') {
+      try { fbSet('store/pendingOrders', JSON.parse(value)); } catch(e){}
+    }
+    if (key === LS_ORD_CTR) {
+      fbSet('store/orderCounter', parseInt(value, 10));
+    }
+  };
+
+  // Start real-time listener
   setTimeout(fbLoad, 500);
 });
 </script>
