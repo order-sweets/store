@@ -2462,40 +2462,27 @@ window.renderCustomerList=renderCustomerList;
 window.renderOrderHistoryAdmin=renderOrderHistoryAdmin;
 window.saveProds=saveProds;
 window.saveJ=saveJ;
-window.importDataFromFirebase=function(d){
-  if(!d)return;
-  // Don't apply if we made a local change recently (poll pause window)
-  if(Date.now() < _fbPausePollUntil) return;
-  function sj(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-  if(d.products){sj('snack-products-v5',d.products);}
-  if(d.inv){sj('snack-inv-v5',d.inv);}
-  if(d.customers){sj('snack-customers-v2',d.customers);}
-  if(d.settings){sj('snack-settings-v1',d.settings);}
-  if(d.photos){sj('snack-photos-v1',d.photos);}
-  if(d.orderLog){sj('snack-orders-v1',d.orderLog);}
-  if(d.orderCounter){localStorage.setItem('snack-ord-counter',String(d.orderCounter));}
-  if(d.restockHistory){sj('snack-restock-v1',d.restockHistory);}
-  if(d.pendingOrders){sj('beinv-pending',d.pendingOrders);}
-  window.reloadFromStorage();
-};
-window.reloadFromStorage=function(){
-  var prods=JSON.parse(localStorage.getItem('snack-products-v5')||'null');
-  if(prods){
-    if(prods.newArrivals)NEW_ARRIVALS=prods.newArrivals;
-    if(prods.hotSale!==undefined)HOT_SALE=prods.hotSale;
-    if(prods.brands)BRANDS=prods.brands;
+// ── Firebase apply — inside IIFE so all vars are in scope ──
+window._fbApplyData = function(d) {
+  if (!d) return;
+  if (d.products) {
+    if (d.products.newArrivals !== undefined) NEW_ARRIVALS = d.products.newArrivals;
+    if (d.products.hotSale !== undefined) HOT_SALE = d.products.hotSale;
+    if (d.products.brands) BRANDS = d.products.brands;
+    saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
   }
-  var custs=JSON.parse(localStorage.getItem('snack-customers-v2')||'null');
-  if(custs)customers=custs;
-  var setts=JSON.parse(localStorage.getItem('snack-settings-v1')||'null');
-  if(setts){Object.keys(setts).forEach(function(k){SETTINGS[k]=setts[k];});}
-  var ph=JSON.parse(localStorage.getItem('snack-photos-v1')||'null');
-  if(ph)photos=ph;
-  var ol=JSON.parse(localStorage.getItem('snack-orders-v1')||'null');
-  if(ol!==null)orderLog=ol;
-  var rh=JSON.parse(localStorage.getItem('snack-restock-v1')||'null');
-  if(rh)restockHistory=rh;
-  renderOrder();renderAdmin();renderCustomerList();renderOrderHistoryAdmin();
+  if (d.inv) saveJ(LS_INV, d.inv);
+  if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
+  if (d.settings) {
+    Object.keys(d.settings).forEach(function(k){ SETTINGS[k] = d.settings[k]; });
+    saveJ(LS_SETTINGS, SETTINGS);
+  }
+  if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
+  if (d.orderLog !== undefined) { orderLog = d.orderLog; saveJ(LS_ORDERS, orderLog); }
+  if (d.orderCounter) localStorage.setItem(LS_ORD_CTR, String(d.orderCounter));
+  if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
+  if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
+  renderOrder(); renderAdmin(); renderCustomerList(); renderOrderHistoryAdmin();
 };
 initGreeting();renderOrder();renderBasket();
 }());
@@ -2606,11 +2593,11 @@ function _fbGetAllData() {
   };
 }
 
-// Apply Firebase data — write to localStorage then reload app state
+// Apply Firebase data using IIFE-scoped function
 function _fbSetAllData(d) {
   if (!d) return;
-  if (window.importDataFromFirebase) {
-    window.importDataFromFirebase(d);
+  if (window._fbApplyData) {
+    window._fbApplyData(d);
   }
 }
 
