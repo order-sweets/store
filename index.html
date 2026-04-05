@@ -2527,6 +2527,30 @@ document.addEventListener('click',function(e){
   var onStore=!!document.querySelector('#page-order.active');
   btn.style.display=onStore?'':'none';
   if(!onStore&&el)el.style.display='none';
+  // ── Expose globals for Firebase sync ──
+  window._appGetInv = getInv;
+  window._appNEW_ARRIVALS = function() { return NEW_ARRIVALS; };
+  window._appHOT_SALE = function() { return HOT_SALE; };
+  window._appBRANDS = function() { return BRANDS; };
+  window._appCustomers = function() { return customers; };
+  window._appSetCustomers = function(v) { customers = v; };
+  window._appSETTINGS = function() { return SETTINGS; };
+  window._appSetSETTINGS = function(v) { SETTINGS = v; };
+  window._appPhotos = function() { return photos; };
+  window._appSetPhotos = function(v) { photos = v; };
+  window._appOrderLog = function() { return orderLog; };
+  window._appSetOrderLog = function(v) { orderLog = v; };
+  window._appRestockHistory = function() { return restockHistory; };
+  window._appSetRestockHistory = function(v) { restockHistory = v; };
+  window._appLS = {
+    LS_PROD: LS_PROD, LS_INV: LS_INV, LS_CUST: LS_CUST,
+    LS_PHOTOS: LS_PHOTOS, LS_SETTINGS: LS_SETTINGS,
+    LS_ORDERS: LS_ORDERS, LS_ORD_CTR: LS_ORD_CTR, LS_RESTOCK: LS_RESTOCK
+  };
+  window._appSaveJ = saveJ;
+  window._appRender = function() {
+    renderOrder(); renderAdmin(); renderCustomerList(); renderOrderHistoryAdmin();
+  };
 })();
 </script>
 <!-- Load Google Translate script -->
@@ -2557,33 +2581,37 @@ function fbSet(path, data) {
 }
 
 function fbPushAll() {
-  var counter = parseInt(localStorage.getItem(LS_ORD_CTR) || '0', 10);
+  var ls = window._appLS || {};
+  var counter = parseInt(localStorage.getItem(ls.LS_ORD_CTR || 'snack-ord-counter') || '0', 10);
   var pending = JSON.parse(localStorage.getItem('beinv-pending') || '[]');
   fbSet('store', {
-    products: {newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS},
-    inv: getInv(), customers: customers, settings: SETTINGS, photos: photos,
-    orderLog: orderLog, orderCounter: counter, restockHistory: restockHistory,
-    pendingOrders: pending
+    products: {newArrivals: window._appNEW_ARRIVALS(), hotSale: window._appHOT_SALE(), brands: window._appBRANDS()},
+    inv: window._appGetInv(), customers: window._appCustomers(), settings: window._appSETTINGS(),
+    photos: window._appPhotos(), orderLog: window._appOrderLog(), orderCounter: counter,
+    restockHistory: window._appRestockHistory(), pendingOrders: pending
   });
 }
 
 function _fbApply(d) {
-  if (!d) return;
+  if (!d || !window._appLS) return;
+  var ls = window._appLS;
+  var sj = window._appSaveJ;
   if (d.products) {
-    if (d.products.newArrivals) NEW_ARRIVALS = d.products.newArrivals;
-    if (d.products.hotSale) HOT_SALE = d.products.hotSale;
-    if (d.products.brands) BRANDS = d.products.brands;
-    saveJ(LS_PROD, {newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS});
+    if (d.products.newArrivals) window._appNEW_ARRIVALS = function(){ return d.products.newArrivals; };
+    if (d.products.hotSale) window._appHOT_SALE = function(){ return d.products.hotSale; };
+    if (d.products.brands) window._appBRANDS = function(){ return d.products.brands; };
+    // Use window.importData-style restore via saveJ
+    if (d.products.newArrivals) sj(ls.LS_PROD, {newArrivals: d.products.newArrivals, hotSale: d.products.hotSale||[], brands: d.products.brands||[]});
   }
-  if (d.inv) saveJ(LS_INV, d.inv);
-  if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
-  if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); saveJ(LS_SETTINGS, SETTINGS); }
-  if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
-  if (d.orderLog) { orderLog = d.orderLog; saveJ(LS_ORDERS, orderLog); }
-  if (d.orderCounter) localStorage.setItem(LS_ORD_CTR, String(d.orderCounter));
-  if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
+  if (d.inv) sj(ls.LS_INV, d.inv);
+  if (d.customers) { window._appSetCustomers(d.customers); sj(ls.LS_CUST, d.customers); }
+  if (d.settings) { window._appSetSETTINGS(Object.assign(window._appSETTINGS(), d.settings)); sj(ls.LS_SETTINGS, window._appSETTINGS()); }
+  if (d.photos) { window._appSetPhotos(d.photos); sj(ls.LS_PHOTOS, d.photos); }
+  if (d.orderLog) { window._appSetOrderLog(d.orderLog); sj(ls.LS_ORDERS, d.orderLog); }
+  if (d.orderCounter) localStorage.setItem(ls.LS_ORD_CTR, String(d.orderCounter));
+  if (d.restockHistory) { window._appSetRestockHistory(d.restockHistory); sj(ls.LS_RESTOCK, d.restockHistory); }
   if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-  renderOrder(); renderAdmin(); renderCustomerList(); renderOrderHistoryAdmin();
+  if (window._appRender) window._appRender();
 }
 
 var _fbFirstLoad = true;
