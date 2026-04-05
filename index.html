@@ -2568,14 +2568,13 @@ function fbSet(path, data) {
   });
 }
 
-// ── Load ALL data from Firebase on startup ──
+// ── Real-time listener — fires on load AND whenever ANY device saves ──
+var _fbFirstLoad = true;
 function fbLoad() {
   _fbStatus('Syncing…', 'orange');
-  _fbDb.ref('store').once('value').then(function(snap) {
+  _fbDb.ref('store').on('value', function(snap) {
     var d = snap.val();
     if (!d) { _fbStatus('No cloud data yet', '#2D3748'); return; }
-
-    var changed = false;
 
     if (d.products) {
       var p = d.products;
@@ -2583,27 +2582,28 @@ function fbLoad() {
       if (p.hotSale) HOT_SALE = p.hotSale;
       if (p.brands) BRANDS = p.brands;
       saveJ(LS_PROD, {newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS});
-      changed = true;
     }
-    if (d.inv) { saveJ(LS_INV, d.inv); changed = true; }
-    if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); changed = true; }
-    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); saveJ(LS_SETTINGS, SETTINGS); changed = true; }
-    if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); changed = true; }
-    if (d.orderLog) { orderLog = d.orderLog; saveOrderLog(); changed = true; }
-    if (d.orderCounter) { localStorage.setItem(LS_ORD_CTR, String(d.orderCounter)); changed = true; }
-    if (d.restockHistory) { restockHistory = d.restockHistory; saveRestockHistory(); changed = true; }
-    if (d.pendingOrders) { localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders)); changed = true; }
+    if (d.inv) saveJ(LS_INV, d.inv);
+    if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
+    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); saveJ(LS_SETTINGS, SETTINGS); }
+    if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
+    if (d.orderLog) { orderLog = d.orderLog; saveJ(LS_ORDERS, orderLog); }
+    if (d.orderCounter) localStorage.setItem(LS_ORD_CTR, String(d.orderCounter));
+    if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
+    if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
 
-    if (changed) {
-      renderOrder();
-      renderAdmin();
-      renderCustomerList();
-      renderOrderHistoryAdmin();
+    renderOrder();
+    renderAdmin();
+    renderCustomerList();
+    renderOrderHistoryAdmin();
+
+    if (_fbFirstLoad) {
+      _fbFirstLoad = false;
       _fbStatus('\u2713 Synced', '#38a169');
     } else {
-      _fbStatus('\u2713 Up to date', '#38a169');
+      _fbStatus('\u2713 Updated', '#38a169');
     }
-  }).catch(function(e) {
+  }, function(e) {
     _fbStatus('Offline', '#e53e3e');
   });
 }
