@@ -2460,6 +2460,8 @@ window.renderAdmin=renderAdmin;
 window.renderOrder=renderOrder;
 window.renderCustomerList=renderCustomerList;
 window.renderOrderHistoryAdmin=renderOrderHistoryAdmin;
+window.saveProds=saveProds;
+window.saveJ=saveJ;
 initGreeting();renderOrder();renderBasket();
 }());
 </script>
@@ -2538,17 +2540,17 @@ document.addEventListener('click',function(e){
       if (d.products.newArrivals) NEW_ARRIVALS = d.products.newArrivals;
       if (d.products.hotSale !== undefined) HOT_SALE = d.products.hotSale;
       if (d.products.brands) BRANDS = d.products.brands;
-      saveProds();
+      window.saveProds();
     }
-    if (d.inv) saveJ(LS_INV, d.inv);
-    if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
-    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); saveJ(LS_SETTINGS, SETTINGS); }
-    if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
-    if (d.orderLog) { orderLog = d.orderLog; saveJ(LS_ORDERS, orderLog); }
+    if (d.inv) window.saveJ(LS_INV, d.inv);
+    if (d.customers) { customers = d.customers; window.saveJ(LS_CUST, customers); }
+    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); window.saveJ(LS_SETTINGS, SETTINGS); }
+    if (d.photos) { photos = d.photos; window.saveJ(LS_PHOTOS, photos); }
+    if (d.orderLog) { orderLog = d.orderLog; window.saveJ(LS_ORDERS, orderLog); }
     if (d.orderCounter) localStorage.setItem(LS_ORD_CTR, String(d.orderCounter));
-    if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
+    if (d.restockHistory) { restockHistory = d.restockHistory; window.saveJ(LS_RESTOCK, restockHistory); }
     if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-    renderOrder(); renderAdmin(); renderCustomerList(); renderOrderHistoryAdmin();
+    window.renderOrder(); window.renderAdmin(); window.renderCustomerList(); window.renderOrderHistoryAdmin();
   };
 })();
 </script>
