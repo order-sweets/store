@@ -810,7 +810,7 @@ var delMode='delivery';
 var pendingMinOrder=false;
 var sessionOrders=[];
 var orderLog=loadJ(LS_ORDERS)||[]; // persisted order history
-function saveOrderLog(){saveJ(LS_ORDERS,orderLog);}
+function saveOrderLog(){saveJ(LS_ORDERS,orderLog);if(window._fbStarted)_fbDebouncedPush();}
 var cartEntries=[];
 var simpleState={};
 var entryCounter=0;
@@ -824,7 +824,7 @@ var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads 
 var savedP=loadJ(LS_PROD);
 var _rawSettings=loadJ(LS_SETTINGS)||{};
 var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||''};
-function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);}
+function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted)_fbDebouncedPush();}
 var NEW_ARRIVALS=savedP?savedP.newArrivals:DEFAULT_NEW;
 var HOT_SALE=savedP?savedP.hotSale||[]:[];
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
@@ -833,18 +833,18 @@ var customers=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address"
 var photos=loadJ(LS_PHOTOS)||{};
 
 function loadJ(k){try{var s=localStorage.getItem(k);if(s)return JSON.parse(s);}catch(e){}return null;}
-function saveJ(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function saveJ(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}if(window._fbStarted&&(k===LS_CUST||k===LS_PHOTOS))_fbDebouncedPush();}
 function getAllProducts(){return NEW_ARRIVALS.concat(HOT_SALE).concat(BRANDS.reduce(function(a,b){return a.concat(b.products);},[])); }
 function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getInv(){return loadJ(LS_INV)||{};}
-function saveInv(inv){saveJ(LS_INV,inv);}
-function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});}
+function saveInv(inv){saveJ(LS_INV,inv);if(window._fbStarted)_fbDebouncedPush();}
+function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted)_fbDebouncedPush();}
 
 /* ── RESTOCK LOG ── */
 var LS_RESTOCK='snack-restock-v1';
 var restockHistory=loadJ(LS_RESTOCK)||{}; // {pid:[{boxes,ts},...]}
-function saveRestockHistory(){saveJ(LS_RESTOCK,restockHistory);}
+function saveRestockHistory(){saveJ(LS_RESTOCK,restockHistory);if(window._fbStarted)_fbDebouncedPush();}
 
 function restockLogHTML(pid){
   var entries=(restockHistory[pid]||[]).slice(-3).reverse(); // last 3
@@ -1052,7 +1052,7 @@ function maybeShowPopup(){
   }
 }
 function findProduct(id){return getAllProducts().find(function(x){return x.id===id;});}
-function genOrderId(){var n=(parseInt(localStorage.getItem(LS_ORD_CTR)||'0')+1);localStorage.setItem(LS_ORD_CTR,String(n));return'ORD-'+String(n).padStart(4,'0');}
+function genOrderId(){var n=(parseInt(localStorage.getItem(LS_ORD_CTR)||'0')+1);localStorage.setItem(LS_ORD_CTR,String(n));if(window._fbStarted)_fbDebouncedPush();return'ORD-'+String(n).padStart(4,'0');}
 function getSimple(id){if(!simpleState[id])simpleState[id]={pieceQty:0,caseQty:0};return simpleState[id];}
 
 /* ── PRICING HELPERS (tier-aware) ── */
@@ -2605,37 +2605,14 @@ function fbLoad() {
   setInterval(fbPoll, 5000);
 }
 
-// ── Hook save functions — patched once on first admin login ──
-var _fbHooked = false;
-function _fbHookSaves() {
-  if (_fbHooked) return;
-  _fbHooked = true;
-
-  var _oSaveProds = saveProds;
-  saveProds = function() { _oSaveProds(); fbSet('store/products', {newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS}); fbSet('store/inv', getInv()); };
-
-  var _oSaveInv = saveInv;
-  saveInv = function(inv) { _oSaveInv(inv); fbSet('store/inv', inv); };
-
-  var _oSaveSettings = saveSettings;
-  saveSettings = function() { _oSaveSettings(); fbSet('store/settings', SETTINGS); };
-
-  var _oSaveOrderLog = saveOrderLog;
-  saveOrderLog = function() { _oSaveOrderLog(); fbSet('store/orderLog', orderLog); fbSet('store/orderCounter', parseInt(localStorage.getItem(LS_ORD_CTR)||'0',10)); };
-
-  var _oSaveRestockHistory = saveRestockHistory;
-  saveRestockHistory = function() { _oSaveRestockHistory(); fbSet('store/restockHistory', restockHistory); };
-
-  var _oSaveJ = saveJ;
-  saveJ = function(k, v) { _oSaveJ(k, v); if(k===LS_CUST) fbSet('store/customers', v); if(k===LS_PHOTOS) fbSet('store/photos', v); };
-
-  var _oSetItem = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(key, value) {
-    _oSetItem(key, value);
-    if(key==='beinv-pending'){try{fbSet('store/pendingOrders', JSON.parse(value));}catch(e){}}
-    if(key===LS_ORD_CTR){fbSet('store/orderCounter', parseInt(value,10));}
-  };
+// ── Debounced push — called after any save ──
+var _fbPushTimer = null;
+function _fbDebouncedPush() {
+  clearTimeout(_fbPushTimer);
+  _fbPushTimer = setTimeout(fbPushAll, 800);
 }
+// _fbHookSaves is now a no-op — saves are intercepted via fbPushAll calls in main app
+function _fbHookSaves() {}
 </script>
 
 <!-- Sync status badge -->
