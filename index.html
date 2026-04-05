@@ -2653,22 +2653,28 @@ function fbPoll() {
       var remoteV = d._v || 0;
 
       if (_fbFirstLoad) {
-        // Always apply on first load
+        // Always apply on first load — don't set _fbLocalVersion here
         _fbLastAppliedVersion = remoteV;
-        _fbLocalVersion = remoteV;
         _fbSetAllData(d);
         _fbStatus('✓ Synced', '#38a169');
         _fbFirstLoad = false;
         return;
       }
 
-      // Skip if: we wrote this version ourselves, OR we already applied this version
-      if (remoteV <= _fbLocalVersion || remoteV <= _fbLastAppliedVersion) {
-        _fbStatus('✓ In sync', '#38a169');
+      // Skip only if: we wrote this exact version OR already applied it
+      if (remoteV <= _fbLastAppliedVersion) {
+        // But if remoteV > our last write, it's from another device — apply it
+        if (remoteV > _fbLocalVersion) {
+          _fbLastAppliedVersion = remoteV;
+          _fbSetAllData(d);
+          _fbStatus('✓ Updated', '#38a169');
+        } else {
+          _fbStatus('✓ In sync', '#38a169');
+        }
         return;
       }
 
-      // New version from another device — apply it
+      // New version — apply it
       _fbLastAppliedVersion = remoteV;
       _fbSetAllData(d);
       _fbStatus('✓ Updated', '#38a169');
