@@ -1295,7 +1295,7 @@ window.tryLogin=function(){
   var pw=el('pw-input').value;
   if(pw===ADMIN_PW){
     el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';
-    renderAdmin();renderCustomerList();window.showPage('page-admin');
+    renderAdmin();renderCustomerList();window.showPage('page-admin');if(typeof fbLoad==='function'&&!window._fbStarted){window._fbStarted=true;_fbHookSaves();fbLoad();}
   }
   else{el('pw-input').classList.add('err-i');el('login-err').style.display='block';}
 };
@@ -2603,6 +2603,38 @@ function fbLoad() {
   _fbStatus('Syncing…', 'orange');
   fbPoll();
   setInterval(fbPoll, 5000);
+}
+
+// ── Hook save functions — patched once on first admin login ──
+var _fbHooked = false;
+function _fbHookSaves() {
+  if (_fbHooked) return;
+  _fbHooked = true;
+
+  var _oSaveProds = saveProds;
+  saveProds = function() { _oSaveProds(); fbSet('store/products', {newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS}); fbSet('store/inv', getInv()); };
+
+  var _oSaveInv = saveInv;
+  saveInv = function(inv) { _oSaveInv(inv); fbSet('store/inv', inv); };
+
+  var _oSaveSettings = saveSettings;
+  saveSettings = function() { _oSaveSettings(); fbSet('store/settings', SETTINGS); };
+
+  var _oSaveOrderLog = saveOrderLog;
+  saveOrderLog = function() { _oSaveOrderLog(); fbSet('store/orderLog', orderLog); fbSet('store/orderCounter', parseInt(localStorage.getItem(LS_ORD_CTR)||'0',10)); };
+
+  var _oSaveRestockHistory = saveRestockHistory;
+  saveRestockHistory = function() { _oSaveRestockHistory(); fbSet('store/restockHistory', restockHistory); };
+
+  var _oSaveJ = saveJ;
+  saveJ = function(k, v) { _oSaveJ(k, v); if(k===LS_CUST) fbSet('store/customers', v); if(k===LS_PHOTOS) fbSet('store/photos', v); };
+
+  var _oSetItem = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(key, value) {
+    _oSetItem(key, value);
+    if(key==='beinv-pending'){try{fbSet('store/pendingOrders', JSON.parse(value));}catch(e){}}
+    if(key===LS_ORD_CTR){fbSet('store/orderCounter', parseInt(value,10));}
+  };
 }
 </script>
 
