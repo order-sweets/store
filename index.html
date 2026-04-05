@@ -2464,7 +2464,8 @@ window.saveProds=saveProds;
 window.saveJ=saveJ;
 window.importDataFromFirebase=function(d){
   if(!d)return;
-  // Write to localStorage only — importData handles the rest
+  // Don't apply if we made a local change recently (poll pause window)
+  if(Date.now() < _fbPausePollUntil) return;
   function sj(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
   if(d.products){sj('snack-products-v5',d.products);}
   if(d.inv){sj('snack-inv-v5',d.inv);}
@@ -2475,26 +2476,23 @@ window.importDataFromFirebase=function(d){
   if(d.orderCounter){localStorage.setItem('snack-ord-counter',String(d.orderCounter));}
   if(d.restockHistory){sj('snack-restock-v1',d.restockHistory);}
   if(d.pendingOrders){sj('beinv-pending',d.pendingOrders);}
-  // Reload all data from localStorage into app vars and re-render
   window.reloadFromStorage();
 };
 window.reloadFromStorage=function(){
-  // Trigger a full reload of app state from localStorage
-  // The cleanest way is to call the existing importData-style reload
   var prods=JSON.parse(localStorage.getItem('snack-products-v5')||'null');
   if(prods){
-    NEW_ARRIVALS=prods.newArrivals||NEW_ARRIVALS;
-    HOT_SALE=prods.hotSale||HOT_SALE;
-    BRANDS=prods.brands||BRANDS;
+    if(prods.newArrivals)NEW_ARRIVALS=prods.newArrivals;
+    if(prods.hotSale!==undefined)HOT_SALE=prods.hotSale;
+    if(prods.brands)BRANDS=prods.brands;
   }
   var custs=JSON.parse(localStorage.getItem('snack-customers-v2')||'null');
   if(custs)customers=custs;
   var setts=JSON.parse(localStorage.getItem('snack-settings-v1')||'null');
-  if(setts)SETTINGS=Object.assign(SETTINGS,setts);
+  if(setts){Object.keys(setts).forEach(function(k){SETTINGS[k]=setts[k];});}
   var ph=JSON.parse(localStorage.getItem('snack-photos-v1')||'null');
   if(ph)photos=ph;
   var ol=JSON.parse(localStorage.getItem('snack-orders-v1')||'null');
-  if(ol)orderLog=ol;
+  if(ol!==null)orderLog=ol;
   var rh=JSON.parse(localStorage.getItem('snack-restock-v1')||'null');
   if(rh)restockHistory=rh;
   renderOrder();renderAdmin();renderCustomerList();renderOrderHistoryAdmin();
