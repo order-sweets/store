@@ -1984,6 +1984,7 @@ window.removeVar=function(id,idx){
 };
 
 function renderAdmin(){
+  syncAdminSettings();
   el('admin-new').innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><p class="admin-brand-name" style="margin:0">New Arrivals</p><label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-new-arrivals" '+(SETTINGS.showNewArrivals?'checked':'')+' onchange="toggleNewArrivals(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div>'+(NEW_ARRIVALS.length?NEW_ARRIVALS.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No new arrivals.</p>');
   var sorted=BRANDS.slice().sort(function(a,b){return a.brand.localeCompare(b.brand);});
   var isHotNew=NEW_ARRIVALS.some(function(x){return x.id===x.id;}); // always true, used for clarity
@@ -2461,6 +2462,7 @@ window.reopenOutletModal=function(){
 };
 
 window.renderAdmin=renderAdmin;
+window.syncAdminSettings=syncAdminSettings;
 window.renderOrder=renderOrder;
 window.renderCustomerList=renderCustomerList;
 window.renderOrderHistoryAdmin=renderOrderHistoryAdmin;
@@ -2487,6 +2489,7 @@ window._fbApplyData = function(d) {
   if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
   if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
   renderOrder(); renderAdmin(); renderCustomerList(); renderOrderHistoryAdmin();
+  syncAdminSettings();
 };
 initGreeting();renderOrder();renderBasket();
 }());
@@ -2640,25 +2643,35 @@ function _fbDebouncedPush() {
 }
 
 var _fbFirstLoad = true;
+var _fbLastAppliedVersion = 0; // track the last version we applied from Firebase
+
 function fbPoll() {
   fetch(_FB_URL + '/store.json')
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (!d) { _fbStatus('✓ Synced', '#38a169'); _fbFirstLoad = false; return; }
       var remoteV = d._v || 0;
-      // Only apply if remote data is newer than what we last wrote
-      if (remoteV > _fbLocalVersion) {
-        _fbRemoteVersion = remoteV;
-        _fbSetAllData(d);
-        _fbStatus(_fbFirstLoad ? '✓ Synced' : '✓ Updated', '#38a169');
-      } else if (_fbFirstLoad) {
-        // On first load always apply even if versions match
+
+      if (_fbFirstLoad) {
+        // Always apply on first load
+        _fbLastAppliedVersion = remoteV;
+        _fbLocalVersion = remoteV;
         _fbSetAllData(d);
         _fbStatus('✓ Synced', '#38a169');
-      } else {
-        _fbStatus('✓ In sync', '#38a169');
+        _fbFirstLoad = false;
+        return;
       }
-      _fbFirstLoad = false;
+
+      // Skip if: we wrote this version ourselves, OR we already applied this version
+      if (remoteV <= _fbLocalVersion || remoteV <= _fbLastAppliedVersion) {
+        _fbStatus('✓ In sync', '#38a169');
+        return;
+      }
+
+      // New version from another device — apply it
+      _fbLastAppliedVersion = remoteV;
+      _fbSetAllData(d);
+      _fbStatus('✓ Updated', '#38a169');
     })
     .catch(function() { _fbStatus('Offline', '#e53e3e'); });
 }
