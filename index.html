@@ -1585,9 +1585,9 @@ function doSend(){
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var d=getDiscount(p);
     var varStr=e.variation?' ['+e.variation+']':'';
-    lines.push((lines.length+1)+'. '+p.name+varStr+' | '+(e.unit==='case'?'Box':'Piece')+(d>0?' (-'+d+'%)':'')+' x '+e.qty+' — $'+(price*e.qty).toFixed(2));
+    lines.push('*'+(lines.length+1)+'.*'+' '+p.name+varStr+' | '+(e.unit==='case'?'Box':'Piece')+(d>0?' (-'+d+'%)':'')+' x '+e.qty+' — $'+(price*e.qty).toFixed(2));
   });
-  var minNote=metMin?'':'\n\n_Below minimum order ($'+MIN_ORDER+'). Subject to approval._';
+  var minNote=metMin?'':'\n_Below minimum order ($'+MIN_ORDER+'). Subject to approval._';
   var delLbl=delMode==='delivery'?'Delivery':'Self Collect';
 
   // Build WA message
@@ -1603,8 +1603,8 @@ function doSend(){
       +'\n\nTotal: $'+sub.toFixed(2)
       +'\nCash on Delivery'
       +'\n----------------------------------------------------'
-      +'\n_We\'ll be in touch to confirm. Thank you!_'
-      +minNote;
+      +minNote
+      +'\n_We\'ll be in touch to confirm. Thank you!_';
   } else {
     msg='*\u2713ORDER RECEIVED! | '+orderId+'*'
       +'\n\n*Name:* '+name+'\n'
@@ -1616,8 +1616,8 @@ function doSend(){
       +'\n\nTotal: $'+sub.toFixed(2)
       +'\nCash on Delivery'
       +'\n----------------------------------------------------'
-      +'\n_We\'ll be in touch to confirm. Thank you!_'
-      +minNote;
+      +minNote
+      +'\n_We\'ll be in touch to confirm. Thank you!_';
   }
 
   // Build edit link (only for fresh orders, not revisions)
