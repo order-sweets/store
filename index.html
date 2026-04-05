@@ -2542,13 +2542,13 @@ document.addEventListener('click',function(e){
       if (d.products.brands) BRANDS = d.products.brands;
       window.saveProds();
     }
-    if (d.inv) window.saveJ(LS_INV, d.inv);
-    if (d.customers) { customers = d.customers; window.saveJ(LS_CUST, customers); }
-    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); window.saveJ(LS_SETTINGS, SETTINGS); }
-    if (d.photos) { photos = d.photos; window.saveJ(LS_PHOTOS, photos); }
-    if (d.orderLog) { orderLog = d.orderLog; window.saveJ(LS_ORDERS, orderLog); }
-    if (d.orderCounter) localStorage.setItem(LS_ORD_CTR, String(d.orderCounter));
-    if (d.restockHistory) { restockHistory = d.restockHistory; window.saveJ(LS_RESTOCK, restockHistory); }
+    if (d.inv) window.saveJ('snack-inv-v5', d.inv);
+    if (d.customers) { customers = d.customers; window.saveJ('snack-customers-v2', customers); }
+    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); window.saveJ('snack-settings-v1', SETTINGS); }
+    if (d.photos) { photos = d.photos; window.saveJ('snack-photos-v1', photos); }
+    if (d.orderLog) { orderLog = d.orderLog; window.saveJ('snack-orders-v1', orderLog); }
+    if (d.orderCounter) localStorage.setItem('snack-ord-counter', String(d.orderCounter));
+    if (d.restockHistory) { restockHistory = d.restockHistory; window.saveJ('snack-restock-v1', restockHistory); }
     if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
     window.renderOrder(); window.renderAdmin(); window.renderCustomerList(); window.renderOrderHistoryAdmin();
   };
