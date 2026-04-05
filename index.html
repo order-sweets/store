@@ -2644,56 +2644,81 @@ function fbPushAll() {
 }
 
 var _fbPushTimer = null;
-var _fbLocalVersion = 0;
-var _fbRemoteVersion = 0;
+var _fbLocalVersion = 0; // timestamp of last write by THIS device
 
 function _fbDebouncedPush() {
   clearTimeout(_fbPushTimer);
   _fbPushTimer = setTimeout(fbPushAll, 200);
 }
 
-var _fbFirstLoad = true;
-var _fbLastAppliedVersion = 0; // track the last version we applied from Firebase
-
-function fbPoll() {
-  fetch(_FB_URL + '/store.json')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (!d) { _fbStatus('✓ Synced', '#38a169'); _fbFirstLoad = false; return; }
-      var remoteV = d._v || 0;
-
-      if (_fbFirstLoad) {
-        _fbLastAppliedVersion = remoteV;
-        _fbSetAllData(d);
-        _fbStatus('✓ Synced', '#38a169');
-        _fbFirstLoad = false;
-        return;
-      }
-
-      // If WE recently wrote, skip anything older than or equal to our write
-      if (_fbLocalVersion > 0 && remoteV <= _fbLocalVersion) {
-        _fbStatus('✓ In sync', '#38a169');
-        return;
-      }
-
-      // Skip if we already applied this version
-      if (remoteV <= _fbLastAppliedVersion) {
-        _fbStatus('✓ In sync', '#38a169');
-        return;
-      }
-
-      // Genuine new version from another device — apply it
-      _fbLastAppliedVersion = remoteV;
-      _fbSetAllData(d);
-      _fbStatus('✓ Updated', '#38a169');
-    })
-    .catch(function() { _fbStatus('Offline', '#e53e3e'); });
-}
-
+// Use Firebase SSE streaming — true real-time, no polling race conditions
 function fbLoad() {
   _fbStatus('Syncing…', 'orange');
-  fbPoll();
-  setInterval(fbPoll, 8000);
+
+  try {
+    var es = new EventSource(_FB_URL + '/store.json');
+    var firstEvent = true;
+
+    es.addEventListener('put', function(e) {
+      try {
+        var msg = JSON.parse(e.data);
+        var d = msg.path === '/' ? msg.data : null;
+        if (!d) return;
+
+        var remoteV = d._v || 0;
+
+        // Skip if this is our own write echoed back
+        if (!firstEvent && _fbLocalVersion > 0 && remoteV <= _fbLocalVersion) {
+          _fbStatus('✓ In sync', '#38a169');
+          return;
+        }
+
+        _fbSetAllData(d);
+        _fbStatus(firstEvent ? '✓ Synced' : '✓ Updated', '#38a169');
+        firstEvent = false;
+
+      } catch(err) { _fbStatus('Sync error', '#e53e3e'); }
+    });
+
+    es.addEventListener('patch', function(e) {
+      // patch events are incremental — do a full fetch to get latest state
+      fetch(_FB_URL + '/store.json')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if(!d) return;
+          var remoteV = d._v || 0;
+          if(_fbLocalVersion > 0 && remoteV <= _fbLocalVersion) return;
+          _fbSetAllData(d);
+          _fbStatus('✓ Updated', '#38a169');
+        }).catch(function(){});
+    });
+
+    es.onerror = function() {
+      _fbStatus('Offline', '#e53e3e');
+      es.close();
+      // Retry connection after 5 seconds
+      setTimeout(fbLoad, 5000);
+    };
+
+  } catch(e) {
+    // EventSource not supported — fallback to polling
+    _fbStatus('Polling…', '#2D3748');
+    fetch(_FB_URL + '/store.json')
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d) _fbSetAllData(d); _fbStatus('✓ Synced','#38a169'); })
+      .catch(function(){ _fbStatus('Offline','#e53e3e'); });
+    setInterval(function(){
+      fetch(_FB_URL + '/store.json')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if(!d) return;
+          var remoteV = d._v || 0;
+          if(_fbLocalVersion > 0 && remoteV <= _fbLocalVersion) return;
+          _fbSetAllData(d);
+          _fbStatus('✓ Updated','#38a169');
+        }).catch(function(){ _fbStatus('Offline','#e53e3e'); });
+    }, 8000);
+  }
 }
 
 function _fbHookSaves() {} // no-op — saves patched directly in main app
