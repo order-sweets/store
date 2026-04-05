@@ -2532,23 +2532,11 @@ document.addEventListener('click',function(e){
 <!-- Load Google Translate script -->
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-<!-- ═══ FIREBASE SYNC ═══ -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- FIREBASE SYNC (REST API) -->
 <script>
-// ── Firebase config ──
-var _fbApp = firebase.initializeApp({
-  apiKey: "AIzaSyDz9gGz8wTC8lCeZ7tsjvEPaNCj4AUFm40",
-  authDomain: "store-and-invoicing.firebaseapp.com",
-  databaseURL: "https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "store-and-invoicing",
-  storageBucket: "store-and-invoicing.firebasestorage.app",
-  messagingSenderId: "368263477365",
-  appId: "1:368263477365:web:6bf726257078b336c9203c"
-});
-var _fbDb = firebase.database(_fbApp);
+var _FB_URL = "https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app";
+var _FB_KEY = "AIzaSyDz9gGz8wTC8lCeZ7tsjvEPaNCj4AUFm40";
 
-// ── Sync status indicator ──
 function _fbStatus(msg, colour) {
   var el = document.getElementById('fb-status');
   if (!el) return;
@@ -2561,142 +2549,61 @@ function _fbStatus(msg, colour) {
   }
 }
 
-// ── Write to Firebase + localStorage ──
 function fbSet(path, data) {
-  _fbDb.ref(path).set(data).catch(function(e) {
-    _fbStatus('Sync failed', '#e53e3e');
-  });
+  fetch(_FB_URL + '/' + path + '.json?key=' + _FB_KEY, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).catch(function() { _fbStatus('Sync failed', '#e53e3e'); });
 }
 
-// ── Real-time listener — fires on load AND whenever ANY device saves ──
-var _fbFirstLoad = true;
-function fbLoad() {
-  _fbStatus('Syncing…', 'orange');
-  _fbDb.ref('store').on('value', function(snap) {
-    var d = snap.val();
-    if (!d) { _fbStatus('No cloud data yet', '#2D3748'); return; }
-
-    if (d.products) {
-      var p = d.products;
-      if (p.newArrivals) NEW_ARRIVALS = p.newArrivals;
-      if (p.hotSale) HOT_SALE = p.hotSale;
-      if (p.brands) BRANDS = p.brands;
-      saveJ(LS_PROD, {newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS});
-    }
-    if (d.inv) saveJ(LS_INV, d.inv);
-    if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
-    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); saveJ(LS_SETTINGS, SETTINGS); }
-    if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
-    if (d.orderLog) { orderLog = d.orderLog; saveJ(LS_ORDERS, orderLog); }
-    if (d.orderCounter) localStorage.setItem(LS_ORD_CTR, String(d.orderCounter));
-    if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
-    if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-
-    renderOrder();
-    renderAdmin();
-    renderCustomerList();
-    renderOrderHistoryAdmin();
-
-    if (_fbFirstLoad) {
-      _fbFirstLoad = false;
-      _fbStatus('\u2713 Synced', '#38a169');
-    } else {
-      _fbStatus('\u2713 Updated', '#38a169');
-    }
-  }, function(e) {
-    _fbStatus('Offline', '#e53e3e');
-  });
-}
-
-// ── Push ALL data to Firebase ──
 function fbPushAll() {
-  _fbStatus('Saving…', 'orange');
   var counter = parseInt(localStorage.getItem(LS_ORD_CTR) || '0', 10);
   var pending = JSON.parse(localStorage.getItem('beinv-pending') || '[]');
-  _fbDb.ref('store').set({
-    products: { newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS },
-    inv: getInv(),
-    customers: customers,
-    settings: SETTINGS,
-    photos: photos,
-    orderLog: orderLog,
-    orderCounter: counter,
-    restockHistory: restockHistory,
+  fbSet('store', {
+    products: {newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS},
+    inv: getInv(), customers: customers, settings: SETTINGS, photos: photos,
+    orderLog: orderLog, orderCounter: counter, restockHistory: restockHistory,
     pendingOrders: pending
-  }).then(function() {
-    _fbStatus('\u2713 Saved', '#38a169');
-  }).catch(function(e) {
-    _fbStatus('Save failed', '#e53e3e');
   });
 }
 
-// ── Hook save functions + load — all inside window.load so app is ready ──
-window.addEventListener('load', function() {
+function _fbApply(d) {
+  if (!d) return;
+  if (d.products) {
+    if (d.products.newArrivals) NEW_ARRIVALS = d.products.newArrivals;
+    if (d.products.hotSale) HOT_SALE = d.products.hotSale;
+    if (d.products.brands) BRANDS = d.products.brands;
+    saveJ(LS_PROD, {newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS});
+  }
+  if (d.inv) saveJ(LS_INV, d.inv);
+  if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
+  if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); saveJ(LS_SETTINGS, SETTINGS); }
+  if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
+  if (d.orderLog) { orderLog = d.orderLog; saveJ(LS_ORDERS, orderLog); }
+  if (d.orderCounter) localStorage.setItem(LS_ORD_CTR, String(d.orderCounter));
+  if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
+  if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
+  renderOrder(); renderAdmin(); renderCustomerList(); renderOrderHistoryAdmin();
+}
 
-  // Wrap save functions to also push to Firebase
-  var _origSaveProds = saveProds;
-  saveProds = function() {
-    _origSaveProds();
-    fbSet('store/products', { newArrivals: NEW_ARRIVALS, hotSale: HOT_SALE, brands: BRANDS });
-    fbSet('store/inv', getInv());
-  };
+var _fbFirstLoad = true;
+function fbPoll() {
+  fetch(_FB_URL + '/store.json?key=' + _FB_KEY)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      _fbApply(d);
+      _fbStatus(_fbFirstLoad ? '✓ Synced' : '✓ Updated', '#38a169');
+      _fbFirstLoad = false;
+    })
+    .catch(function() { _fbStatus('Offline', '#e53e3e'); });
+}
 
-  var _origSaveInv = saveInv;
-  saveInv = function(inv) {
-    _origSaveInv(inv);
-    fbSet('store/inv', inv);
-  };
-
-  var _origSaveSettings = saveSettings;
-  saveSettings = function() {
-    _origSaveSettings();
-    fbSet('store/settings', SETTINGS);
-  };
-
-  var _origSaveOrderLog = saveOrderLog;
-  saveOrderLog = function() {
-    _origSaveOrderLog();
-    fbSet('store/orderLog', orderLog);
-    var counter = parseInt(localStorage.getItem(LS_ORD_CTR) || '0', 10);
-    fbSet('store/orderCounter', counter);
-  };
-
-  var _origSaveRestockHistory = saveRestockHistory;
-  saveRestockHistory = function() {
-    _origSaveRestockHistory();
-    fbSet('store/restockHistory', restockHistory);
-  };
-
-  // Also sync customers and photos when saved
-  var _origAddCustomer = window.addCustomer;
-  window.addCustomer = function() {
-    _origAddCustomer && _origAddCustomer.apply(this, arguments);
-    setTimeout(function(){ fbSet('store/customers', customers); }, 100);
-  };
-
-  // Patch saveJ for customers and photos
-  var _origSaveJ = saveJ;
-  saveJ = function(k, v) {
-    _origSaveJ(k, v);
-    if (k === LS_CUST) fbSet('store/customers', v);
-    if (k === LS_PHOTOS) fbSet('store/photos', v);
-  };
-
-  // Sync pending orders + order counter to Firebase
-  var _origSetItem = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(key, value) {
-    _origSetItem(key, value);
-    if (key === 'beinv-pending') {
-      try { fbSet('store/pendingOrders', JSON.parse(value)); } catch(e){}
-    }
-    if (key === LS_ORD_CTR) {
-      fbSet('store/orderCounter', parseInt(value, 10));
-    }
-  };
-
-  // Start real-time listener
-  setTimeout(fbLoad, 500);
-});
+function fbLoad() {
+  _fbStatus('Syncing…', 'orange');
+  fbPoll();
+  setInterval(fbPoll, 5000);
+}
 </script>
 
 <!-- Sync status badge -->
