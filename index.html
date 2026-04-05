@@ -2535,7 +2535,6 @@ document.addEventListener('click',function(e){
 <!-- FIREBASE SYNC (REST API) -->
 <script>
 var _FB_URL = "https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app";
-var _FB_KEY = "AIzaSyDz9gGz8wTC8lCeZ7tsjvEPaNCj4AUFm40";
 
 function _fbStatus(msg, colour) {
   var el = document.getElementById('fb-status');
@@ -2550,7 +2549,7 @@ function _fbStatus(msg, colour) {
 }
 
 function fbSet(path, data) {
-  fetch(_FB_URL + '/' + path + '.json?key=' + _FB_KEY, {
+  fetch(_FB_URL + '/' + path + '.json', {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
@@ -2589,7 +2588,7 @@ function _fbApply(d) {
 
 var _fbFirstLoad = true;
 function fbPoll() {
-  fetch(_FB_URL + '/store.json?key=' + _FB_KEY)
+  fetch(_FB_URL + '/store.json')
     .then(function(r) { return r.json(); })
     .then(function(d) {
       _fbApply(d);
