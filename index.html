@@ -2462,6 +2462,43 @@ window.renderCustomerList=renderCustomerList;
 window.renderOrderHistoryAdmin=renderOrderHistoryAdmin;
 window.saveProds=saveProds;
 window.saveJ=saveJ;
+window.importDataFromFirebase=function(d){
+  if(!d)return;
+  // Write to localStorage only — importData handles the rest
+  function sj(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  if(d.products){sj('snack-products-v5',d.products);}
+  if(d.inv){sj('snack-inv-v5',d.inv);}
+  if(d.customers){sj('snack-customers-v2',d.customers);}
+  if(d.settings){sj('snack-settings-v1',d.settings);}
+  if(d.photos){sj('snack-photos-v1',d.photos);}
+  if(d.orderLog){sj('snack-orders-v1',d.orderLog);}
+  if(d.orderCounter){localStorage.setItem('snack-ord-counter',String(d.orderCounter));}
+  if(d.restockHistory){sj('snack-restock-v1',d.restockHistory);}
+  if(d.pendingOrders){sj('beinv-pending',d.pendingOrders);}
+  // Reload all data from localStorage into app vars and re-render
+  window.reloadFromStorage();
+};
+window.reloadFromStorage=function(){
+  // Trigger a full reload of app state from localStorage
+  // The cleanest way is to call the existing importData-style reload
+  var prods=JSON.parse(localStorage.getItem('snack-products-v5')||'null');
+  if(prods){
+    NEW_ARRIVALS=prods.newArrivals||NEW_ARRIVALS;
+    HOT_SALE=prods.hotSale||HOT_SALE;
+    BRANDS=prods.brands||BRANDS;
+  }
+  var custs=JSON.parse(localStorage.getItem('snack-customers-v2')||'null');
+  if(custs)customers=custs;
+  var setts=JSON.parse(localStorage.getItem('snack-settings-v1')||'null');
+  if(setts)SETTINGS=Object.assign(SETTINGS,setts);
+  var ph=JSON.parse(localStorage.getItem('snack-photos-v1')||'null');
+  if(ph)photos=ph;
+  var ol=JSON.parse(localStorage.getItem('snack-orders-v1')||'null');
+  if(ol)orderLog=ol;
+  var rh=JSON.parse(localStorage.getItem('snack-restock-v1')||'null');
+  if(rh)restockHistory=rh;
+  renderOrder();renderAdmin();renderCustomerList();renderOrderHistoryAdmin();
+};
 initGreeting();renderOrder();renderBasket();
 }());
 </script>
@@ -2533,25 +2570,7 @@ document.addEventListener('click',function(e){
   var onStore=!!document.querySelector('#page-order.active');
   btn.style.display=onStore?'':'none';
   if(!onStore&&el)el.style.display='none';
-  // ── Expose apply function for Firebase (inside IIFE so all vars are in scope) ──
-  window._appApplyFirebaseData = function(d) {
-    if (!d) return;
-    if (d.products) {
-      if (d.products.newArrivals) NEW_ARRIVALS = d.products.newArrivals;
-      if (d.products.hotSale !== undefined) HOT_SALE = d.products.hotSale;
-      if (d.products.brands) BRANDS = d.products.brands;
-      window.saveProds();
-    }
-    if (d.inv) window.saveJ('snack-inv-v5', d.inv);
-    if (d.customers) { customers = d.customers; window.saveJ('snack-customers-v2', customers); }
-    if (d.settings) { SETTINGS = Object.assign(SETTINGS, d.settings); window.saveJ('snack-settings-v1', SETTINGS); }
-    if (d.photos) { photos = d.photos; window.saveJ('snack-photos-v1', photos); }
-    if (d.orderLog) { orderLog = d.orderLog; window.saveJ('snack-orders-v1', orderLog); }
-    if (d.orderCounter) localStorage.setItem('snack-ord-counter', String(d.orderCounter));
-    if (d.restockHistory) { restockHistory = d.restockHistory; window.saveJ('snack-restock-v1', restockHistory); }
-    if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-    window.renderOrder(); window.renderAdmin(); window.renderCustomerList(); window.renderOrderHistoryAdmin();
-  };
+
 })();
 </script>
 <!-- Load Google Translate script -->
@@ -2589,11 +2608,11 @@ function _fbGetAllData() {
   };
 }
 
-// Apply Firebase data using the IIFE-exposed function (has access to all app vars)
+// Apply Firebase data — write to localStorage then reload app state
 function _fbSetAllData(d) {
   if (!d) return;
-  if (window._appApplyFirebaseData) {
-    window._appApplyFirebaseData(d);
+  if (window.importDataFromFirebase) {
+    window.importDataFromFirebase(d);
   }
 }
 
