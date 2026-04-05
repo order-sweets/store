@@ -946,7 +946,11 @@ window.markOrderDone=function(idx){
   orderLog[idx].status='done';
   saveOrderLog();
   renderOrderHistoryAdmin();
-  if(window._fbStarted){clearTimeout(_fbPushTimer);fbPushAll();}
+  if(window._fbStarted){
+    clearTimeout(_fbPushTimer);
+    _fbLocalVersion=Date.now();
+    fbPushAll();
+  }
 };
 
 window.deleteOrder=function(idx){
@@ -954,8 +958,11 @@ window.deleteOrder=function(idx){
   orderLog.splice(idx,1);
   saveOrderLog();
   renderOrderHistoryAdmin();
-  // Push immediately — no debounce delay
-  if(window._fbStarted){clearTimeout(_fbPushTimer);fbPushAll();}
+  if(window._fbStarted){
+    clearTimeout(_fbPushTimer);
+    _fbLocalVersion=Date.now(); // claim version immediately before async push
+    fbPushAll();
+  }
 };
 
 window.clearDoneOrders=function(){
@@ -963,8 +970,11 @@ window.clearDoneOrders=function(){
   orderLog=orderLog.filter(function(o){return o.status!=='done';});
   saveOrderLog();
   renderOrderHistoryAdmin();
-  // Push immediately — no debounce delay
-  if(window._fbStarted){clearTimeout(_fbPushTimer);fbPushAll();}
+  if(window._fbStarted){
+    clearTimeout(_fbPushTimer);
+    _fbLocalVersion=Date.now(); // claim version immediately before async push
+    fbPushAll();
+  }
 };
 
 window.toggleNewArrivals=function(on){
@@ -2653,7 +2663,6 @@ function fbPoll() {
       var remoteV = d._v || 0;
 
       if (_fbFirstLoad) {
-        // Always apply on first load — don't set _fbLocalVersion here
         _fbLastAppliedVersion = remoteV;
         _fbSetAllData(d);
         _fbStatus('✓ Synced', '#38a169');
@@ -2661,20 +2670,19 @@ function fbPoll() {
         return;
       }
 
-      // Skip only if: we wrote this exact version OR already applied it
-      if (remoteV <= _fbLastAppliedVersion) {
-        // But if remoteV > our last write, it's from another device — apply it
-        if (remoteV > _fbLocalVersion) {
-          _fbLastAppliedVersion = remoteV;
-          _fbSetAllData(d);
-          _fbStatus('✓ Updated', '#38a169');
-        } else {
-          _fbStatus('✓ In sync', '#38a169');
-        }
+      // If WE recently wrote, skip anything older than or equal to our write
+      if (_fbLocalVersion > 0 && remoteV <= _fbLocalVersion) {
+        _fbStatus('✓ In sync', '#38a169');
         return;
       }
 
-      // New version — apply it
+      // Skip if we already applied this version
+      if (remoteV <= _fbLastAppliedVersion) {
+        _fbStatus('✓ In sync', '#38a169');
+        return;
+      }
+
+      // Genuine new version from another device — apply it
       _fbLastAppliedVersion = remoteV;
       _fbSetAllData(d);
       _fbStatus('✓ Updated', '#38a169');
