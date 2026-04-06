@@ -2357,7 +2357,35 @@ window.renderCustomerList=renderCustomerList;
 window.saveProds=saveProds;
 window.saveJ=saveJ;
 // ── Firebase apply — inside IIFE so all vars are in scope ──
-window._fbApplyData = function(d) {
+// ── Detect if user is actively interacting with a form field ──
+var _fbPendingData = null;
+function _fbUserBusy() {
+  var ae = document.activeElement;
+  if (!ae) return false;
+  var tag = ae.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if (ae.isContentEditable) return true;
+  // Check if any dropdown/modal is open
+  if (document.querySelector('.search-dropdown.open, .outlet-modal-overlay.open')) return true;
+  return false;
+}
+
+function _fbFlushPending() {
+  if (!_fbPendingData) return;
+  if (_fbUserBusy()) return; // still busy, wait
+  var d = _fbPendingData;
+  _fbPendingData = null;
+  _fbApplyNow(d);
+}
+
+// Check every 1.5s if user finished interacting
+setInterval(_fbFlushPending, 1500);
+// Also flush on blur (user left the field)
+document.addEventListener('focusout', function() {
+  setTimeout(_fbFlushPending, 100);
+});
+
+function _fbApplyNow(d) {
   if (!d) return;
   if (d.products) {
     if (d.products.newArrivals !== undefined) NEW_ARRIVALS = d.products.newArrivals;
@@ -2374,8 +2402,36 @@ window._fbApplyData = function(d) {
   if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
   if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
   if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-  renderOrder(); renderAdmin(); renderCustomerList();   syncAdminSettings();
-  // Re-run greeting in case customer data changed (e.g. phone/address updated in Firebase)
+  renderOrder(); renderAdmin(); renderCustomerList(); syncAdminSettings();
+  if (urlCustId || urlCustName) initGreeting();
+}
+
+window._fbApplyData = function(d) {
+  if (!d) return;
+  // Always save data to localStorage immediately
+  if (d.products) {
+    if (d.products.newArrivals !== undefined) NEW_ARRIVALS = d.products.newArrivals;
+    if (d.products.hotSale !== undefined) HOT_SALE = d.products.hotSale;
+    if (d.products.brands) BRANDS = d.products.brands;
+    saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
+  }
+  if (d.inv) saveJ(LS_INV, d.inv);
+  if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
+  if (d.settings) {
+    Object.keys(d.settings).forEach(function(k){ SETTINGS[k] = d.settings[k]; });
+    saveJ(LS_SETTINGS, SETTINGS);
+  }
+  if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
+  if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
+  if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
+
+  // Defer UI re-render if user is busy typing/selecting
+  if (_fbUserBusy()) {
+    _fbPendingData = d;
+    _fbStatus('✓ Data saved (UI update pending)', '#38a169');
+    return;
+  }
+  renderOrder(); renderAdmin(); renderCustomerList(); syncAdminSettings();
   if (urlCustId || urlCustName) initGreeting();
 };
 initGreeting();renderOrder();renderBasket();
