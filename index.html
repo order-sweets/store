@@ -1,4 +1,4 @@
-<!-- BEE-EVENTS-STORE v20260406-144655 -->
+<!-- BEE-EVENTS-STORE v20260406-145425 -->
 <html lang="en" style="height: 100%;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -1610,14 +1610,19 @@ function doSend(){
 function _sendWA(fullMsg,orderId,sub){
   var enc=encodeURIComponent(fullMsg);
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  var isAndroid=/Android/.test(navigator.userAgent);
   if(isIOS){
-    // iPhone: use whatsapp:// deep link scheme — most reliable on iOS Safari
+    // iPhone: whatsapp:// deep link opens the app directly
     var url='whatsapp://send?phone='+WA_1+'&text='+enc;
     setTimeout(function(){ window.location.href=url; }, 150);
+  } else if(isAndroid){
+    // Android: intent:// scheme forces WhatsApp app instead of browser
+    var url='intent://send/'+WA_1+'#Intent;scheme=smsto;package=com.whatsapp;action=android.intent.action.SENDTO;S.sms_body='+enc+';end';
+    window.location.href=url;
   } else {
+    // Desktop: open wa.me in new tab
     var url='https://wa.me/'+WA_1+'?text='+enc;
-    var win=window.open(url,'_blank');
-    if(!win){ window.location.href=url; }
+    window.open(url,'_blank');
   }
   isRevision=false;
   // ── Push to invoice system's Pending Orders (beinv-pending) ──
