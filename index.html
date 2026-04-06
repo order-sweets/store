@@ -1,4 +1,4 @@
-<!-- BEE-EVENTS-STORE v20260406-143213 -->
+<!-- BEE-EVENTS-STORE v20260406-144003 -->
 <html lang="en" style="height: 100%;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -633,7 +633,7 @@ body{top:0!important;}
     <p style="margin-bottom:20px;">WhatsApp will open with your order message ready to send.</p>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="document.getElementById('confirm-send-modal').classList.remove('open')">GO BACK</button>
-      <button class="modal-confirm" id="csm-confirm-btn" onclick="document.getElementById('confirm-send-modal').classList.remove('open');doSend();">SEND ORDER</button>
+      <button class="modal-confirm" id="csm-confirm-btn">SEND ORDER</button>
     </div>
   </div>
 </div>
@@ -1664,6 +1664,7 @@ el('wa-btn').addEventListener('click',function(){
   }
 });
 el('modal-confirm-btn').addEventListener('click',function(){el('min-order-modal').classList.remove('open');if(pendingMinOrder)doSend();pendingMinOrder=false;});
+el('csm-confirm-btn').addEventListener('click',function(){el('confirm-send-modal').classList.remove('open');doSend();});
 el('f-phone').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,8);});
 // Show announcement popup on storefront load
 setTimeout(maybeShowPopup, 800);
@@ -2328,6 +2329,7 @@ window.reopenOutletModal=function(){
   document.body.style.overflow='hidden';
 };
 
+window.doSend=doSend;
 window.renderAdmin=renderAdmin;
 window.syncAdminSettings=syncAdminSettings;
 window.renderOrder=renderOrder;
