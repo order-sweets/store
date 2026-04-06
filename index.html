@@ -1581,8 +1581,8 @@ function doSend(){
       +'\n_We\'ll be in touch to confirm. Thank you!_';
   }
 
-  // Build edit link (only for fresh orders, not revisions)
-  var editLine='';
+  // Build edit link and shorten it, then send via WhatsApp
+  var editLinkFinal='(link unavailable)';
   if(!isRevision){
     try{
       var editItems=cartEntries.map(function(e){
@@ -1599,13 +1599,25 @@ function doSend(){
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var fullEditLink=baseUrl+editParams;
-      // Use full edit link directly — avoids async fetch breaking user-gesture chain on mobile
-      _sendWA(msg.replace('{EDITLINK}',fullEditLink),orderId,sub);
-      return;
-    }catch(e){editLine='';}
-    if(!editLine)msg=msg.replace('{EDITLINK}','(link unavailable)');
+      // Shorten the URL using TinyURL
+      try{
+        var xhr=new XMLHttpRequest();
+        xhr.open('GET','https://tinyurl.com/api-create.php?url='+encodeURIComponent(fullEditLink),false);
+        xhr.send();
+        if(xhr.status===200&&xhr.responseText.indexOf('http')===0){
+          editLinkFinal=xhr.responseText.trim();
+        } else {
+          editLinkFinal=fullEditLink;
+        }
+      }catch(se){
+        editLinkFinal=fullEditLink;
+      }
+    }catch(e){editLinkFinal='(link unavailable)';}
+  } else {
+    editLinkFinal='(see above)';
   }
-  _sendWA(msg.replace('{EDITLINK}','(see above)'),orderId,sub);
+  msg=msg.replace('{EDITLINK}',editLinkFinal);
+  _sendWA(msg,orderId,sub);
 }
 function _sendWA(fullMsg,orderId,sub){
   var enc=encodeURIComponent(fullMsg);
@@ -1616,8 +1628,8 @@ function _sendWA(fullMsg,orderId,sub){
     var url='whatsapp://send?phone='+WA_1+'&text='+enc;
     setTimeout(function(){ window.location.href=url; }, 150);
   } else if(isAndroid){
-    // Android: intent:// scheme forces WhatsApp app instead of browser
-    var url='intent://send/'+WA_1+'#Intent;scheme=smsto;package=com.whatsapp;action=android.intent.action.SENDTO;S.sms_body='+enc+';end';
+    // Android: whatsapp:// deep link opens the app directly with pre-typed message
+    var url='whatsapp://send?phone='+WA_1+'&text='+enc;
     window.location.href=url;
   } else {
     // Desktop: open wa.me in new tab
