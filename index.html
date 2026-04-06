@@ -1,4 +1,4 @@
-<!-- BEE-EVENTS-STORE v20260405-095419 -->
+<!-- BEE-EVENTS-STORE v20260406-140654 -->
 <html lang="en" style="height: 100%;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -628,6 +628,26 @@ body{top:0!important;}
   </div>
 </div>
 
+<!-- CONFIRM SEND MODAL -->
+<div class="modal-overlay" id="confirm-send-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('confirm-send-modal').classList.remove('open')">✕</button>
+    <h3>Confirm Order</h3>
+    <div style="background:var(--surface);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:14px;line-height:1.8;">
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Name</span><span id="csm-name" style="font-weight:600;"></span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Phone</span><span id="csm-phone" style="font-weight:600;"></span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Items</span><span id="csm-items" style="font-weight:600;"></span></div>
+      <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:8px;padding-top:8px;"><span style="font-weight:700;">Total</span><span id="csm-total" style="font-weight:800;color:var(--accent-text);font-size:16px;"></span></div>
+    </div>
+    <p style="margin-bottom:20px;">WhatsApp will open with your order message ready to send.</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="document.getElementById('confirm-send-modal').classList.remove('open')">GO BACK</button>
+      <button class="modal-confirm" id="csm-confirm-btn" onclick="document.getElementById('confirm-send-modal').classList.remove('open');doSend();">SEND ORDER</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- PLACED MODAL -->
 <div class="modal-overlay" id="placed-modal">
   <div class="placed-modal-box">
@@ -830,7 +850,8 @@ var NEW_ARRIVALS=savedP?savedP.newArrivals:DEFAULT_NEW;
 var HOT_SALE=savedP?savedP.hotSale||[]:[];
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
 var DEFAULT_CUSTOMERS=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5}]}];
-var customers=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":15.3,"minQty":1,"ppc":9}]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5}]}];/* loaded */
+var _BAKED_CUSTOMERS=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":15.3,"minQty":1,"ppc":9}]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5}]}];
+var customers=loadJ(LS_CUST)||_BAKED_CUSTOMERS;/* loaded */
 var photos=loadJ(LS_PHOTOS)||{};
 
 function loadJ(k){try{var s=localStorage.getItem(k);if(s)return JSON.parse(s);}catch(e){}return null;}
@@ -1707,13 +1728,18 @@ function doSend(){
   _sendWA(msg.replace('{EDITLINK}','(see above)'),orderId,sub);
 }
 function _sendWA(fullMsg,orderId,sub){
-  // Use anchor click instead of window.open to preserve emoji encoding
   var enc=encodeURIComponent(fullMsg);
   var url='https://wa.me/'+WA_1+'?text='+enc;
-  var a=document.createElement('a');
-  a.href=url;a.target='_blank';a.rel='noopener';
-  document.body.appendChild(a);a.click();
-  setTimeout(function(){document.body.removeChild(a);},100);
+  // iOS-compatible: use window.location.href for WhatsApp deep link
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  if(isIOS){
+    window.location.href=url;
+  } else {
+    var a=document.createElement('a');
+    a.href=url;a.target='_blank';a.rel='noopener';
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){document.body.removeChild(a);},100);
+  }
   isRevision=false;
   sessionOrders.push({id:orderId,total:sub,items:cartEntries.length});
   // Persist full order to orderLog for admin history
@@ -1764,7 +1790,21 @@ window.closePlacedModal=function(another){
   if(another){cartEntries=[];simpleState={};_pendingVar={};renderOrder();renderBasket();window.scrollTo({top:0,behavior:'smooth'});}
 };
 el('wa-btn').addEventListener('click',function(){
-  doSend();
+  // Show confirmation modal
+  var sub=getSub();
+  var name=el('f-name').value.trim()||'(not provided)';
+  var phone=el('f-phone').value.trim();
+  var confirmModal=el('confirm-send-modal');
+  if(confirmModal){
+    el('csm-name').textContent=name;
+    el('csm-phone').textContent=phone?'+65 '+phone:'(not provided)';
+    el('csm-total').textContent='$'+sub.toFixed(2);
+    var itemCount=cartEntries.reduce(function(s,e){return s+e.qty;},0);
+    el('csm-items').textContent=itemCount+' item'+(itemCount!==1?'s':'');
+    confirmModal.classList.add('open');
+  } else {
+    doSend();
+  }
 });
 el('modal-confirm-btn').addEventListener('click',function(){el('min-order-modal').classList.remove('open');if(pendingMinOrder)doSend();pendingMinOrder=false;});
 el('f-phone').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,8);});
@@ -2020,7 +2060,7 @@ window.saveAll=function(){
     var newData='var DEFAULT_NEW='+JSON.stringify(NEW_ARRIVALS)+';\nvar DEFAULT_BRANDS='+JSON.stringify(BRANDS)+';';
     src=src.replace(/var DEFAULT_NEW=\[[\s\S]*?\];\nvar DEFAULT_BRANDS=\[[\s\S]*?\];/,newData);
     var custData='var customers='+JSON.stringify(customers)+';';
-    src=src.replace(/var customers=loadJ\(LS_CUST\)\|\|DEFAULT_CUSTOMERS;\/\* loaded \*\//,custData+'/* loaded */');
+    src=src.replace(/var customers=loadJ\(LS_CUST\)\|\|_BAKED_CUSTOMERS;\/\* loaded \*\//,custData+'/* loaded */');
     src=src.replace(/var customers=\[[\s\S]*?\];\/\* loaded \*\//,custData+'/* loaded */');
     var blob=new Blob([src],{type:'text/html'});
     var now=new Date();
@@ -2500,6 +2540,8 @@ window._fbApplyData = function(d) {
   if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
   renderOrder(); renderAdmin(); renderCustomerList(); renderOrderHistoryAdmin();
   syncAdminSettings();
+  // Re-run greeting in case customer data changed (e.g. phone/address updated in Firebase)
+  if (urlCustId || urlCustName) initGreeting();
 };
 initGreeting();renderOrder();renderBasket();
 }());
