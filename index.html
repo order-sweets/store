@@ -1,4 +1,4 @@
-<!-- BEE-EVENTS-STORE v20260406-142725 -->
+<!-- BEE-EVENTS-STORE v20260406-143213 -->
 <html lang="en" style="height: 100%;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -1599,21 +1599,9 @@ function doSend(){
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var fullEditLink=baseUrl+editParams;
-      // Shorten via spoo.me (free, no signup, CORS friendly), fall back to full URL if it fails
-      fetch('https://spoo.me/',{
-        method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},
-        body:'url='+encodeURIComponent(fullEditLink)
-      })
-        .then(function(r){return r.json();})
-        .then(function(data){
-          var shortUrl=data&&data.short_url?data.short_url:fullEditLink;
-          _sendWA(msg.replace('{EDITLINK}',shortUrl),orderId,sub);
-        })
-        .catch(function(){
-          _sendWA(msg.replace('{EDITLINK}',fullEditLink),orderId,sub);
-        });
-      return; // wait for TinyURL before sending
+      // Use full edit link directly — avoids async fetch breaking user-gesture chain on mobile
+      _sendWA(msg.replace('{EDITLINK}',fullEditLink),orderId,sub);
+      return;
     }catch(e){editLine='';}
     if(!editLine)msg=msg.replace('{EDITLINK}','(link unavailable)');
   }
@@ -1622,15 +1610,11 @@ function doSend(){
 function _sendWA(fullMsg,orderId,sub){
   var enc=encodeURIComponent(fullMsg);
   var url='https://wa.me/'+WA_1+'?text='+enc;
-  // iOS-compatible: use window.location.href for WhatsApp deep link
-  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
-  if(isIOS){
+  // Open WhatsApp immediately to preserve user-gesture chain (required on mobile)
+  var win=window.open(url,'_blank');
+  if(!win){
+    // Popup blocked (common on iOS) — fall back to location.href
     window.location.href=url;
-  } else {
-    var a=document.createElement('a');
-    a.href=url;a.target='_blank';a.rel='noopener';
-    document.body.appendChild(a);a.click();
-    setTimeout(function(){document.body.removeChild(a);},100);
   }
   isRevision=false;
   // ── Push to invoice system's Pending Orders (beinv-pending) ──
