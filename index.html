@@ -1581,8 +1581,8 @@ function doSend(){
       +'\n_We\'ll be in touch to confirm. Thank you!_';
   }
 
-  // Build edit link and shorten it, then send via WhatsApp
-  var editLinkFinal='(link unavailable)';
+  // Build edit link (only for fresh orders, not revisions)
+  var editLine='';
   if(!isRevision){
     try{
       var editItems=cartEntries.map(function(e){
@@ -1599,25 +1599,13 @@ function doSend(){
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var fullEditLink=baseUrl+editParams;
-      // Shorten the URL using TinyURL
-      try{
-        var xhr=new XMLHttpRequest();
-        xhr.open('GET','https://tinyurl.com/api-create.php?url='+encodeURIComponent(fullEditLink),false);
-        xhr.send();
-        if(xhr.status===200&&xhr.responseText.indexOf('http')===0){
-          editLinkFinal=xhr.responseText.trim();
-        } else {
-          editLinkFinal=fullEditLink;
-        }
-      }catch(se){
-        editLinkFinal=fullEditLink;
-      }
-    }catch(e){editLinkFinal='(link unavailable)';}
-  } else {
-    editLinkFinal='(see above)';
+      // Use full edit link directly — avoids async fetch breaking user-gesture chain on mobile
+      _sendWA(msg.replace('{EDITLINK}',fullEditLink),orderId,sub);
+      return;
+    }catch(e){editLine='';}
+    if(!editLine)msg=msg.replace('{EDITLINK}','(link unavailable)');
   }
-  msg=msg.replace('{EDITLINK}',editLinkFinal);
-  _sendWA(msg,orderId,sub);
+  _sendWA(msg.replace('{EDITLINK}','(see above)'),orderId,sub);
 }
 function _sendWA(fullMsg,orderId,sub){
   var enc=encodeURIComponent(fullMsg);
@@ -1628,8 +1616,8 @@ function _sendWA(fullMsg,orderId,sub){
     var url='whatsapp://send?phone='+WA_1+'&text='+enc;
     setTimeout(function(){ window.location.href=url; }, 150);
   } else if(isAndroid){
-    // Android: whatsapp:// deep link opens the app directly with pre-typed message
-    var url='whatsapp://send?phone='+WA_1+'&text='+enc;
+    // Android: intent:// scheme forces WhatsApp app instead of browser
+    var url='intent://send/'+WA_1+'#Intent;scheme=smsto;package=com.whatsapp;action=android.intent.action.SENDTO;S.sms_body='+enc+';end';
     window.location.href=url;
   } else {
     // Desktop: open wa.me in new tab
@@ -1912,12 +1900,14 @@ window.removeVar=function(id,idx){
 };
 
 function renderAdmin(){
+  var openCards=Array.prototype.map.call(document.querySelectorAll('.prod-admin-body.open'),function(node){return node.id.replace('pab-','');});
   syncAdminSettings();
   el('admin-new').innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><p class="admin-brand-name" style="margin:0">New Arrivals</p><label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-new-arrivals" '+(SETTINGS.showNewArrivals?'checked':'')+' onchange="toggleNewArrivals(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div>'+(NEW_ARRIVALS.length?NEW_ARRIVALS.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No new arrivals.</p>');
   var sorted=BRANDS.slice().sort(function(a,b){return a.brand.localeCompare(b.brand);});
   var isHotNew=NEW_ARRIVALS.some(function(x){return x.id===x.id;}); // always true, used for clarity
   el('admin-hot').innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><p class="admin-brand-name" style="margin:0">Hot Sale!</p><label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-hot-sale" '+(SETTINGS.showHotSale?'checked':'')+' onchange="toggleHotSale(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div>'+(HOT_SALE.length?HOT_SALE.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No hot sale items.</p>');
   el('admin-brands').innerHTML=sorted.filter(function(b){return b.products.length;}).map(function(b){return'<div class="admin-brand-block"><p class="admin-brand-name">'+esc(b.brand)+'</p>'+b.products.map(function(p){return prodAdminCard(p);}).join('')+'</div>';}).join('');
+  openCards.forEach(function(id){var body=el('pab-'+id),chev=el('chev-'+id);if(body)body.classList.add('open');if(chev)chev.classList.add('open');});
   updateStats();updateBrandDatalist();
 }
 function updateBrandDatalist(){var dl=el('brand-datalist');if(!dl)return;dl.innerHTML=BRANDS.map(function(b){return'<option value="'+esc(b.brand)+'">'+esc(b.brand)+'</option>';}).join('');}
@@ -2356,59 +2346,78 @@ window.renderOrder=renderOrder;
 window.renderCustomerList=renderCustomerList;
 window.saveProds=saveProds;
 window.saveJ=saveJ;
-// ── Firebase apply — inside IIFE so all vars are in scope ──
-// ── Detect if user is actively interacting with a form field ──
-var _fbPendingData = null;
-function _fbUserBusy() {
-  var ae = document.activeElement;
-  if (!ae) return false;
-  var tag = ae.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
-  if (ae.isContentEditable) return true;
-  // Check if any dropdown/modal is open
-  if (document.querySelector('.search-dropdown.open, .outlet-modal-overlay.open')) return true;
+var _fbPendingData=null;
+var _fbBusyUntil=0;
+var _fbFlushTimer=null;
+var _fbLastAppliedVersion=0;
+
+function _fbMarkBusy(ms){
+  var until=Date.now()+(ms||5000);
+  if(until>_fbBusyUntil)_fbBusyUntil=until;
+}
+
+function _fbMatchTarget(target,selector){
+  return !!(target&&target.closest&&target.closest(selector));
+}
+
+function _fbInteractionHold(target){
+  var tag=target&&target.tagName?target.tagName.toUpperCase():'';
+  if(_fbMatchTarget(target,'#page-admin input, #page-admin textarea, #page-admin select, #page-admin .search-wrap')){
+    return tag==='SELECT'?30000:20000;
+  }
+  if(_fbMatchTarget(target,'#page-order input, #page-order textarea, #page-order select, #page-order .search-wrap')){
+    return tag==='SELECT'?12000:6000;
+  }
+  return 0;
+}
+
+function _fbUserBusy(){
+  if(Date.now()<_fbBusyUntil)return true;
+  var ae=document.activeElement;
+  if(ae){
+    var tag=(ae.tagName||'').toUpperCase();
+    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||ae.isContentEditable)return true;
+  }
+  var dd=el('search-dropdown');
+  if(dd&&dd.classList.contains('open'))return true;
   return false;
 }
 
-function _fbFlushPending() {
-  if (!_fbPendingData) return;
-  if (_fbUserBusy()) return; // still busy, wait
-  var d = _fbPendingData;
-  _fbPendingData = null;
-  _fbApplyNow(d);
+function _fbRenderSyncedViews(){
+  renderOrder();renderAdmin();renderCustomerList();syncAdminSettings();
+  if(urlCustId||urlCustName)initGreeting();
 }
 
-// Check every 1.5s if user finished interacting
-setInterval(_fbFlushPending, 1500);
-// Also flush on blur (user left the field)
-document.addEventListener('focusout', function() {
-  setTimeout(_fbFlushPending, 100);
+function _fbFlushPending(){
+  if(!_fbPendingData||_fbUserBusy())return;
+  _fbPendingData=null;
+  _fbRenderSyncedViews();
+  _fbStatus('✓ Updated','#38a169');
+}
+
+function _fbQueueFlush(delay){
+  clearTimeout(_fbFlushTimer);
+  _fbFlushTimer=setTimeout(_fbFlushPending,delay||400);
+}
+
+['focusin','input','change','keydown','touchstart','pointerdown'].forEach(function(type){
+  document.addEventListener(type,function(e){
+    var hold=_fbInteractionHold(e.target);
+    if(!hold)return;
+    _fbMarkBusy(hold);
+    _fbQueueFlush(hold+300);
+  },true);
 });
 
-function _fbApplyNow(d) {
-  if (!d) return;
-  if (d.products) {
-    if (d.products.newArrivals !== undefined) NEW_ARRIVALS = d.products.newArrivals;
-    if (d.products.hotSale !== undefined) HOT_SALE = d.products.hotSale;
-    if (d.products.brands) BRANDS = d.products.brands;
-    saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
-  }
-  if (d.inv) saveJ(LS_INV, d.inv);
-  if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
-  if (d.settings) {
-    Object.keys(d.settings).forEach(function(k){ SETTINGS[k] = d.settings[k]; });
-    saveJ(LS_SETTINGS, SETTINGS);
-  }
-  if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
-  if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
-  if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-  renderOrder(); renderAdmin(); renderCustomerList(); syncAdminSettings();
-  if (urlCustId || urlCustName) initGreeting();
-}
-
+document.addEventListener('focusout',function(){_fbQueueFlush(400);},true);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)_fbQueueFlush(400);});
+setInterval(function(){if(!_fbUserBusy())_fbFlushPending();},1000);
+// ── Firebase apply — inside IIFE so all vars are in scope ──
 window._fbApplyData = function(d) {
-  if (!d) return;
-  // Always save data to localStorage immediately
+  if (!d) return 'ignored';
+  var incomingVersion=Number(d._v||0);
+  if (incomingVersion && incomingVersion===_fbLastAppliedVersion) return 'ignored';
+  if (incomingVersion) _fbLastAppliedVersion=incomingVersion;
   if (d.products) {
     if (d.products.newArrivals !== undefined) NEW_ARRIVALS = d.products.newArrivals;
     if (d.products.hotSale !== undefined) HOT_SALE = d.products.hotSale;
@@ -2424,15 +2433,13 @@ window._fbApplyData = function(d) {
   if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
   if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
   if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-
-  // Defer UI re-render if user is busy typing/selecting
   if (_fbUserBusy()) {
-    _fbPendingData = d;
-    _fbStatus('✓ Data saved (UI update pending)', '#38a169');
-    return;
+    _fbPendingData=d;
+    return 'queued';
   }
-  renderOrder(); renderAdmin(); renderCustomerList(); syncAdminSettings();
-  if (urlCustId || urlCustName) initGreeting();
+  _fbPendingData=null;
+  _fbRenderSyncedViews();
+  return 'applied';
 };
 initGreeting();renderOrder();renderBasket();
 }());
@@ -2543,10 +2550,11 @@ function _fbGetAllData() {
 
 // Apply Firebase data using IIFE-scoped function
 function _fbSetAllData(d) {
-  if (!d) return;
+  if (!d) return 'ignored';
   if (window._fbApplyData) {
-    window._fbApplyData(d);
+    return window._fbApplyData(d);
   }
+  return 'ignored';
 }
 
 function fbSet(path, data) {
@@ -2604,8 +2612,9 @@ function fbLoad() {
           return;
         }
 
-        _fbSetAllData(d);
-        _fbStatus(firstEvent ? '✓ Synced' : '✓ Updated', '#38a169');
+        var applyState=_fbSetAllData(d);
+        if (applyState==='queued') _fbStatus('Update queued', 'orange');
+        else if (applyState!=='ignored') _fbStatus(firstEvent ? '✓ Synced' : '✓ Updated', '#38a169');
         firstEvent = false;
 
       } catch(err) { _fbStatus('Sync error', '#e53e3e'); }
@@ -2619,8 +2628,9 @@ function fbLoad() {
           if(!d) return;
           var remoteV = d._v || 0;
           if(_fbLocalVersion > 0 && remoteV <= _fbLocalVersion) return;
-          _fbSetAllData(d);
-          _fbStatus('✓ Updated', '#38a169');
+          var applyState=_fbSetAllData(d);
+          if (applyState==='queued') _fbStatus('Update queued', 'orange');
+          else if (applyState!=='ignored') _fbStatus('✓ Updated', '#38a169');
         }).catch(function(){});
     });
 
@@ -2636,7 +2646,7 @@ function fbLoad() {
     _fbStatus('Polling…', '#2D3748');
     fetch(_FB_URL + '/store.json')
       .then(function(r){ return r.json(); })
-      .then(function(d){ if(d) _fbSetAllData(d); _fbStatus('✓ Synced','#38a169'); })
+      .then(function(d){ var applyState=d?_fbSetAllData(d):'ignored'; _fbStatus(applyState==='queued'?'Update queued':'✓ Synced',applyState==='queued'?'orange':'#38a169'); })
       .catch(function(){ _fbStatus('Offline','#e53e3e'); });
     setInterval(function(){
       fetch(_FB_URL + '/store.json')
@@ -2645,8 +2655,9 @@ function fbLoad() {
           if(!d) return;
           var remoteV = d._v || 0;
           if(_fbLocalVersion > 0 && remoteV <= _fbLocalVersion) return;
-          _fbSetAllData(d);
-          _fbStatus('✓ Updated','#38a169');
+          var applyState=_fbSetAllData(d);
+          if(applyState==='queued') _fbStatus('Update queued','orange');
+          else if(applyState!=='ignored') _fbStatus('✓ Updated','#38a169');
         }).catch(function(){ _fbStatus('Offline','#e53e3e'); });
     }, 8000);
   }
