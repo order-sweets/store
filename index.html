@@ -1,4 +1,4 @@
-<!-- BEE-EVENTS-STORE v20260406-140654 -->
+<!-- BEE-EVENTS-STORE v20260406-142725 -->
 <html lang="en" style="height: 100%;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -108,13 +108,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .added-toast.show .added-toast-circle{transform:scale(1);}
 .added-toast-tick{font-size:64px;line-height:1;color:#fff;}
 .added-toast-label{font-size:18px;font-weight:800;color:#fff;letter-spacing:.02em;}
-
-/* ORDER HISTORY */
-.order-history-bar{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:1.5rem;display:none;overflow-x:hidden;word-break:break-word;}
-.order-history-bar.show{display:block;}
-.oh-title{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
-.oh-list{display:flex;flex-direction:column;gap:4px;width:100%;overflow:hidden;}
-.oh-item{font-size:12px;color:var(--text-muted);}.oh-item strong{color:var(--text);}
+.oh-item strong{color:var(--text);}
 
 /* PRODUCT LIST */
 .prod-list{display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;}
@@ -535,10 +529,7 @@ body{top:0!important;}
     <div class="search-dropdown" id="search-dropdown"></div>
   </div>
 
-  <div class="order-history-bar" id="order-history-bar">
-    <div class="oh-title">Orders placed this session</div>
-    <div class="oh-list" id="oh-list"></div>
-  </div>
+
 
   <div id="new-arrivals-section">
   <p class="slabel">New Arrivals</p>
@@ -722,7 +713,6 @@ body{top:0!important;}
   <div class="admin-tabs">
     <button class="admin-tab active" onclick="switchTab('tab-products')">📦 Products</button>
     <button class="admin-tab" onclick="switchTab('tab-customers')">👥 Customers</button>
-    <button class="admin-tab" onclick="switchTab('tab-orders')">📋 Order History</button>
   </div>
 
   <!-- PRODUCTS TAB -->
@@ -788,15 +778,6 @@ body{top:0!important;}
 
   <!-- ORDERS TAB -->
 
-  <!-- ORDER HISTORY TAB -->
-  <div class="admin-tab-panel" id="tab-orders">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <p class="slabel" style="font-size:18px;margin:0">📋 Order History</p>
-<button class="ghost-btn" style="font-size:12px;padding:6px 12px;" onclick="clearDoneOrders()">Clear completed</button>
-    </div>
-    <div id="admin-order-log"><p style="font-size:14px;color:var(--text-hint);font-style:italic;">No orders yet.</p></div>
-  </div>
-
   <!-- CUSTOMERS TAB -->
   <div class="admin-tab-panel" id="tab-customers">
     <div class="section-card">
@@ -826,12 +807,9 @@ body{top:0!important;}
 var ADMIN_PW='admin123';
 var MIN_ORDER=80.00;
 var WA_1='6581648864';
-var LS_PROD='snack-products-v5',LS_INV='snack-inv-v5',LS_CUST='snack-customers-v2',LS_PHOTOS='snack-photos-v1',LS_SETTINGS='snack-settings-v1',LS_ORDERS='snack-orders-v1',LS_ORD_CTR='snack-ord-counter';
+var LS_PROD='snack-products-v5',LS_INV='snack-inv-v5',LS_CUST='snack-customers-v2',LS_PHOTOS='snack-photos-v1',LS_SETTINGS='snack-settings-v1',LS_ORD_CTR='snack-ord-counter';
 var delMode='delivery';
 var pendingMinOrder=false;
-var sessionOrders=[];
-var orderLog=loadJ(LS_ORDERS)||[]; // persisted order history
-function saveOrderLog(){saveJ(LS_ORDERS,orderLog);if(window._fbStarted)_fbDebouncedPush();}
 var cartEntries=[];
 var simpleState={};
 var entryCounter=0;
@@ -907,96 +885,10 @@ window.doRestock=function(pid){
   setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},2500);
 };
 
-/* ── ORDER HISTORY (admin) ── */
-function renderOrderHistoryAdmin(){
-  var el2=el('admin-order-log');
-  if(!el2)return;
-  if(!orderLog.length){el2.innerHTML='<p style="font-size:14px;color:var(--text-hint);font-style:italic;">No orders yet.</p>';return;}
-  // Build set of known custIds
-  var knownIds={};
-  customers.forEach(function(cu){knownIds[cu.id]=true;});
-  // Group by customer — unknown custId or no match → "Others"
-  var grouped={};var custOrder=[];
-  orderLog.forEach(function(o,i){
-    var key=(o.custId&&knownIds[o.custId])?o.custId:'__others__';
-    var name=(o.custId&&knownIds[o.custId])?(o.custName||'Unknown'):'Others';
-    if(!grouped[key]){grouped[key]={name:name,orders:[]};custOrder.push(key);}
-    grouped[key].orders.push({o:o,i:i});
-  });
-  // Sort so __others__ is always last
-  custOrder.sort(function(a,b){
-    if(a==='__others__')return 1;
-    if(b==='__others__')return -1;
-    return grouped[a].name.localeCompare(grouped[b].name);
-  });
-  el2.innerHTML=custOrder.map(function(key){
-    var grp=grouped[key];
-    var rows=grp.orders.map(function(item){
-      var o=item.o,i=item.i;
-      var d=new Date(o.ts);
-      var pad=function(n){return n<10?'0'+n:n;};
-      var ds=pad(d.getDate())+'/'+(pad(d.getMonth()+1))+'/'+d.getFullYear();
-      var badge=o.status==='done'
-        ?'<span class="order-status-badge done">Done</span>'
-        :'<span class="order-status-badge pending">Pending</span>';
-      var lines=(o.lines||[]).map(function(l){return'<div style="font-size:11px;color:var(--text-muted);padding-left:4px;">'+esc(l)+'</div>';}).join('');
-      var doneBtn=o.status!=='done'
-        ?'<button class="mark-done-btn" onclick="markOrderDone('+i+')">✓ Done</button>':'';
-      return'<div class="oh-row">'
-        +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
-        +'<span class="order-log-id" style="font-size:12px;">'+esc(o.id)+'</span>'
-        +'<span style="font-size:11px;color:var(--text-muted);">'+ds+'</span>'
-        +badge
-        +'<span style="margin-left:auto;font-weight:700;font-size:13px;font-family:monospace;">$'+Number(o.total).toFixed(2)+'</span>'
-        +(doneBtn?doneBtn:'')
-        +'<button class="delete-order-btn" onclick="deleteOrder('+i+')" style="margin-left:4px;">✕</button>'
-        +'</div>'
-        +(lines?'<div style="margin-top:3px;">'+lines+'</div>':'')
-        +'</div>';
-    }).join('');
-    return'<div class="oh-customer-group">'
-      +'<div class="oh-customer-name">'+esc(grp.name)+'</div>'
-      +rows
-      +'</div>';
-  }).join('');
-}
 
 
-window.markOrderDone=function(idx){
-  if(!orderLog[idx])return;
-  orderLog[idx].status='done';
-  saveOrderLog();
-  renderOrderHistoryAdmin();
-  if(window._fbStarted){
-    clearTimeout(_fbPushTimer);
-    _fbLocalVersion=Date.now();
-    fbPushAll();
-  }
-};
 
-window.deleteOrder=function(idx){
-  if(!confirm('Remove this order from history?'))return;
-  orderLog.splice(idx,1);
-  saveOrderLog();
-  renderOrderHistoryAdmin();
-  if(window._fbStarted){
-    clearTimeout(_fbPushTimer);
-    _fbLocalVersion=Date.now(); // claim version immediately before async push
-    fbPushAll();
-  }
-};
 
-window.clearDoneOrders=function(){
-  if(!confirm('Remove all completed orders from history?'))return;
-  orderLog=orderLog.filter(function(o){return o.status!=='done';});
-  saveOrderLog();
-  renderOrderHistoryAdmin();
-  if(window._fbStarted){
-    clearTimeout(_fbPushTimer);
-    _fbLocalVersion=Date.now(); // claim version immediately before async push
-    fbPushAll();
-  }
-};
 
 window.toggleNewArrivals=function(on){
   SETTINGS.showNewArrivals=on;
@@ -1346,7 +1238,7 @@ window.switchTab=function(tabId){
   document.querySelectorAll('.admin-tab-panel').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.admin-tab').forEach(function(t){t.classList.remove('active');});
   el(tabId).classList.add('active');
-  var idx=['tab-products','tab-customers','tab-orders'].indexOf(tabId);
+  var idx=['tab-products','tab-customers'].indexOf(tabId);
   document.querySelectorAll('.admin-tab')[idx].classList.add('active');
 };
 
@@ -1741,17 +1633,6 @@ function _sendWA(fullMsg,orderId,sub){
     setTimeout(function(){document.body.removeChild(a);},100);
   }
   isRevision=false;
-  sessionOrders.push({id:orderId,total:sub,items:cartEntries.length});
-  // Persist full order to orderLog for admin history
-  var custId=urlCustId||null;
-  var custName=el('f-name').value.trim()||'(unknown)';
-  var orderLines=cartEntries.map(function(e){
-    var p=findProduct(e.pid);
-    return (p?p.name:e.pid)+' '+(e.unit==='case'?'Box':'Piece')+(e.variation?' ['+e.variation+']':'')+' ×'+e.qty;
-  });
-  var now=new Date();
-  orderLog.unshift({id:orderId,custId:custId,custName:custName,total:sub,lines:orderLines,ts:now.toISOString(),status:'pending'});
-  saveOrderLog();
   // ── Push to invoice system's Pending Orders (beinv-pending) ──
   var beinvPending=JSON.parse(localStorage.getItem('beinv-pending')||'[]');
   var invItems=cartEntries.map(function(e){
@@ -1773,16 +1654,8 @@ function _sendWA(fullMsg,orderId,sub){
     _fromStore:true
   });
   localStorage.setItem('beinv-pending',JSON.stringify(beinvPending));
-  renderOrderHistoryAdmin();
-  updateOrderHistory();
-  el('placed-order-id').textContent=orderId;
+    el('placed-order-id').textContent=orderId;
   el('placed-modal').classList.add('open');
-}
-function updateOrderHistory(){
-  var bar=el('order-history-bar'),list=el('oh-list');
-  if(!sessionOrders.length){bar.classList.remove('show');return;}
-  bar.classList.add('show');
-  list.innerHTML=sessionOrders.map(function(o){return'<div class="oh-item"><strong>'+o.id+'</strong> — '+o.items+' line(s) · <strong>$'+o.total.toFixed(2)+'</strong></div>';}).join('');
 }
 window.closePlacedModal=function(another){
   el('placed-modal').classList.remove('open');
@@ -2086,8 +1959,6 @@ window.exportData=function(){
     photos:photos,
     inv:loadJ(LS_INV)||{},
     settings:loadJ(LS_SETTINGS)||{},
-    orderLog:orderLog,
-    orderCounter:parseInt(localStorage.getItem(LS_ORD_CTR)||'0',10),
     restockHistory:restockHistory
   };
   var now=new Date();
@@ -2152,19 +2023,6 @@ window.exportCSV=function(){
     ]);
   });
 
-  // ── ORDER HISTORY ──
-  rows.push([]);
-  rows.push([]);
-  rows.push(['ORDER HISTORY']);
-  rows.push(['Order ID','Date','Customer','Items','Total','Status']);
-  orderLog.forEach(function(o){
-    var d=new Date(o.ts);
-    var pad2=function(n){return n<10?'0'+n:n;};
-    var ds=pad2(d.getDate())+'/'+(pad2(d.getMonth()+1))+'/'+d.getFullYear();
-    var items=(o.lines||[]).join(' | ');
-    rows.push([o.id,ds,o.custName||'',items,'$'+Number(o.total).toFixed(2),o.status||'pending']);
-  });
-
   var csv=rows.map(function(r){return r.map(q).join(',');}).join('\n');
   var now=new Date();
   var pad=function(n){return n<10?'0'+n:n;};
@@ -2198,10 +2056,6 @@ window.importData=function(input){
       if(data.photos)saveJ(LS_PHOTOS,data.photos);
       // Restore settings
       if(data.settings){saveJ(LS_SETTINGS,data.settings);SETTINGS=data.settings;}
-      // Restore order history
-      if(data.orderLog){orderLog=data.orderLog;saveOrderLog();}
-      // Restore order counter
-      if(data.orderCounter)localStorage.setItem(LS_ORD_CTR,String(data.orderCounter));
       // Restore restock history
       if(data.restockHistory){restockHistory=data.restockHistory;saveRestockHistory();}
       // Save everything to localStorage
@@ -2217,11 +2071,8 @@ window.importData=function(input){
         if(inv['vd_'+p.id]===undefined)inv['vd_'+p.id]=p.visDist!==undefined?p.visDist:1;
       });
       saveJ(LS_INV,inv);
-      renderAdmin();renderCustomerList();renderOrder();renderBasket();renderOrderHistoryAdmin();
-      var restored=[];
+      renderAdmin();renderCustomerList();renderOrder();renderBasket();      var restored=[];
       restored.push('Products, customers, inventory');
-      if(data.orderLog&&data.orderLog.length)restored.push(data.orderLog.length+' orders');
-      if(data.orderCounter)restored.push('order counter (up to ORD-'+String(data.orderCounter).padStart(4,'0')+')');
       if(data.restockHistory)restored.push('restock history');
       var t=el('toast');t.style.display='inline-block';
       t.textContent='\u2713 Restored: '+restored.join(', ');
@@ -2389,24 +2240,6 @@ window.removeCustomPrice=function(cid,pid,unit){
   renderProducts(); // reflect on storefront immediately
 };
 
-function custOrderHistoryHTML(custId){
-  var orders=orderLog.filter(function(o){return o.custId===custId;});
-  if(!orders.length)return'<p style="font-size:12px;color:var(--text-hint);font-style:italic;margin:4px 14px 8px;">No orders yet.</p>';
-  return orders.slice(0,5).map(function(o){
-    var d=new Date(o.ts);
-    var pad=function(n){return n<10?'0'+n:n;};
-    var ds=pad(d.getDate())+'/'+(pad(d.getMonth()+1))+'/'+d.getFullYear();
-    var badge=o.status==='done'
-      ?'<span style="font-size:10px;background:var(--green-bg);color:var(--green-text);padding:1px 6px;border-radius:20px;font-weight:600;">Done</span>'
-      :'<span style="font-size:10px;background:var(--amber-bg);color:var(--amber-text);padding:1px 6px;border-radius:20px;font-weight:600;">Pending</span>';
-    return'<div class="cust-order-history-row">'
-      +'<span style="color:var(--text-muted);min-width:70px;">'+ds+'</span>'
-      +'<span style="font-weight:600;font-family:monospace;font-size:11px;">'+esc(o.id)+'</span>'
-      +'<span style="color:var(--accent-text);font-weight:700;min-width:52px;text-align:right;">$'+Number(o.total).toFixed(2)+'</span>'
-      +badge
-      +'</div>';
-  }).join('');
-}
 
 function renderCustomerList(){
   var list=el('customer-list');
@@ -2515,7 +2348,6 @@ window.renderAdmin=renderAdmin;
 window.syncAdminSettings=syncAdminSettings;
 window.renderOrder=renderOrder;
 window.renderCustomerList=renderCustomerList;
-window.renderOrderHistoryAdmin=renderOrderHistoryAdmin;
 window.saveProds=saveProds;
 window.saveJ=saveJ;
 // ── Firebase apply — inside IIFE so all vars are in scope ──
@@ -2534,12 +2366,9 @@ window._fbApplyData = function(d) {
     saveJ(LS_SETTINGS, SETTINGS);
   }
   if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
-  if (d.orderLog !== undefined) { orderLog = d.orderLog; saveJ(LS_ORDERS, orderLog); }
-  if (d.orderCounter) localStorage.setItem(LS_ORD_CTR, String(d.orderCounter));
   if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
   if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-  renderOrder(); renderAdmin(); renderCustomerList(); renderOrderHistoryAdmin();
-  syncAdminSettings();
+  renderOrder(); renderAdmin(); renderCustomerList();   syncAdminSettings();
   // Re-run greeting in case customer data changed (e.g. phone/address updated in Firebase)
   if (urlCustId || urlCustName) initGreeting();
 };
@@ -2645,8 +2474,6 @@ function _fbGetAllData() {
     customers: lj('snack-customers-v2') || [],
     settings:  lj('snack-settings-v1') || {},
     photos:    lj('snack-photos-v1') || {},
-    orderLog:  lj('snack-orders-v1') || [],
-    orderCounter: parseInt(localStorage.getItem('snack-ord-counter')||'0',10),
     restockHistory: lj('snack-restock-v1') || {},
     pendingOrders: lj('beinv-pending') || []
   };
