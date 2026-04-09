@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <!-- BEE-EVENTS-STORE v20260406-145425 -->
 <html lang="en" style="height: 100%;"><head>
 <meta charset="UTF-8">
@@ -824,7 +823,42 @@ var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads 
 var savedP=loadJ(LS_PROD);
 var _rawSettings=loadJ(LS_SETTINGS)||{};
 var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||''};
-function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted){clearTimeout(_fbPushTimer);_fbPushTimer=setTimeout(fbPushAll,0);}}
+var _fbApplyingRemote=false;
+window._fbApplyingRemote=false; // mirror for IIFE access
+var _fbLastAppliedVersion=0; // track last applied remote version
+
+// ── DELETION TOMBSTONES ──
+// Tracks deleted product/customer IDs with timestamps so other devices never resurrect them
+var LS_TOMBSTONES='snack-tombstones-v1';
+var _tombstones=loadJ(LS_TOMBSTONES)||{products:{},customers:{}};
+function saveTombstones(){saveJ(LS_TOMBSTONES,_tombstones);}
+function markProductDeleted(id){_tombstones.products[id]=Date.now();saveTombstones();}
+function markCustomerDeleted(id){_tombstones.customers[id]=Date.now();saveTombstones();}
+function isProductDeleted(id){return !!_tombstones.products[id];}
+function isCustomerDeleted(id){return !!_tombstones.customers[id];}
+// Merge remote tombstones with local — union, keeping latest timestamp
+function mergeTombstones(remote){
+  if(!remote)return;
+  ['products','customers'].forEach(function(cat){
+    if(!remote[cat])return;
+    if(!_tombstones[cat])_tombstones[cat]={};
+    Object.keys(remote[cat]).forEach(function(id){
+      if(!_tombstones[cat][id]||remote[cat][id]>_tombstones[cat][id])
+        _tombstones[cat][id]=remote[cat][id];
+    });
+  });
+  saveTombstones();
+}
+// Filter out tombstoned products from arrays
+function filterTombstonedProducts(arr){
+  if(!arr)return arr;
+  return arr.filter(function(p){return !_tombstones.products[p.id];});
+}
+function filterTombstonedCustomers(arr){
+  if(!arr)return arr;
+  return arr.filter(function(c){return !_tombstones.customers[c.id];});
+}
+function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
 var NEW_ARRIVALS=savedP?savedP.newArrivals:DEFAULT_NEW;
 var HOT_SALE=savedP?savedP.hotSale||[]:[];
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
@@ -834,18 +868,18 @@ var customers=loadJ(LS_CUST)||_BAKED_CUSTOMERS;/* loaded */
 var photos=loadJ(LS_PHOTOS)||{};
 
 function loadJ(k){try{var s=localStorage.getItem(k);if(s)return JSON.parse(s);}catch(e){}return null;}
-function saveJ(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}if(window._fbStarted&&(k===LS_CUST||k===LS_PHOTOS))_fbDebouncedPush();}
+function saveJ(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote&&(k===LS_CUST||k===LS_PHOTOS))_fbDebouncedPush();}
 function getAllProducts(){return NEW_ARRIVALS.concat(HOT_SALE).concat(BRANDS.reduce(function(a,b){return a.concat(b.products);},[])); }
 function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getInv(){return loadJ(LS_INV)||{};}
-function saveInv(inv){saveJ(LS_INV,inv);if(window._fbStarted)_fbDebouncedPush();}
-function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted){clearTimeout(_fbPushTimer);_fbPushTimer=setTimeout(fbPushAll,0);}}
+function saveInv(inv){saveJ(LS_INV,inv);if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
+function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
 
 /* ── RESTOCK LOG ── */
 var LS_RESTOCK='snack-restock-v1';
 var restockHistory=loadJ(LS_RESTOCK)||{}; // {pid:[{boxes,ts},...]}
-function saveRestockHistory(){saveJ(LS_RESTOCK,restockHistory);if(window._fbStarted)_fbDebouncedPush();}
+function saveRestockHistory(){saveJ(LS_RESTOCK,restockHistory);if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
 
 function restockLogHTML(pid){
   var entries=(restockHistory[pid]||[]).slice(-3).reverse(); // last 3
@@ -981,7 +1015,7 @@ function maybeShowPopup(){
   }
 }
 function findProduct(id){return getAllProducts().find(function(x){return x.id===id;});}
-function genOrderId(){var n=(parseInt(localStorage.getItem(LS_ORD_CTR)||'0')+1);localStorage.setItem(LS_ORD_CTR,String(n));if(window._fbStarted)_fbDebouncedPush();return'ORD-'+String(n).padStart(4,'0');}
+function genOrderId(){var n=(parseInt(localStorage.getItem(LS_ORD_CTR)||'0')+1);localStorage.setItem(LS_ORD_CTR,String(n));if(window._fbStarted&&!window._fbApplyingRemote)_fbDebouncedPush();return'ORD-'+String(n).padStart(4,'0');}
 function getSimple(id){if(!simpleState[id])simpleState[id]={pieceQty:0,caseQty:0};return simpleState[id];}
 
 /* ── PRICING HELPERS (tier-aware) ── */
@@ -1868,6 +1902,7 @@ window.saveProductEdits=function(id){
 
 window.deleteProduct=function(id){
   if(!confirm('Delete this product permanently?'))return;
+  markProductDeleted(id); // tombstone so other devices won't resurrect it
   NEW_ARRIVALS=NEW_ARRIVALS.filter(function(x){return x.id!==id;});
   HOT_SALE=HOT_SALE.filter(function(x){return x.id!==id;});
   BRANDS.forEach(function(b){b.products=b.products.filter(function(x){return x.id!==id;});});
@@ -2181,7 +2216,7 @@ window.addCustomer=function(){
   el('nc-name').value='';el('nc-phone').value='';el('nc-addr').value='';
   renderCustomerList();
 };
-window.deleteCustomer=function(id){if(!confirm('Remove this customer?'))return;customers=customers.filter(function(c){return c.id!==id;});saveJ(LS_CUST,customers);renderCustomerList();};
+window.deleteCustomer=function(id){if(!confirm('Remove this customer?'))return;markCustomerDeleted(id);customers=customers.filter(function(c){return c.id!==id;});saveJ(LS_CUST,customers);renderCustomerList();};
 window.saveCustomerEdits=function(id){
   var cust=customers.find(function(c){return c.id===id;});if(!cust)return;
   var ni=el('cedit-name-'+id),pi=el('cedit-phone-'+id),ai=el('cedit-addr-'+id),ti=el('cedit-tier-'+id);
@@ -2418,21 +2453,43 @@ window._fbApplyData = function(d) {
   if (!d) return 'ignored';
   // Skip our own echo
   if (d._pushId && d._pushId === _fbLastPushId) return 'ignored';
-  if (d.products) {
-    if (d.products.newArrivals !== undefined) NEW_ARRIVALS = d.products.newArrivals;
-    if (d.products.hotSale !== undefined) HOT_SALE = d.products.hotSale;
-    if (d.products.brands) BRANDS = d.products.brands;
-    saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
+  // Version check — never apply older data over newer
+  if (d._v && window._fbLastAppliedVersion && d._v < window._fbLastAppliedVersion) return 'ignored';
+
+  // SET THE GUARD — prevent saveJ/saveProds/saveInv from re-triggering a push
+  _fbApplyingRemote = true;
+  window._fbApplyingRemote = true;
+
+  try {
+    // Merge tombstones FIRST so we know what's been deleted
+    if (d.tombstones) mergeTombstones(d.tombstones);
+
+    if (d.products) {
+      if (d.products.newArrivals !== undefined) NEW_ARRIVALS = filterTombstonedProducts(d.products.newArrivals);
+      if (d.products.hotSale !== undefined) HOT_SALE = filterTombstonedProducts(d.products.hotSale);
+      if (d.products.brands) {
+        BRANDS = d.products.brands.map(function(b){
+          return Object.assign({},b,{products:filterTombstonedProducts(b.products)});
+        }).filter(function(b){return b.products.length>0;});
+      }
+      saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
+    }
+    if (d.inv) saveJ(LS_INV, d.inv);
+    if (d.customers) { customers = filterTombstonedCustomers(d.customers); saveJ(LS_CUST, customers); }
+    if (d.settings) {
+      Object.keys(d.settings).forEach(function(k){ SETTINGS[k] = d.settings[k]; });
+      saveJ(LS_SETTINGS, SETTINGS);
+    }
+    if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
+    if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
+    if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
+    if (d._v) window._fbLastAppliedVersion = d._v;
+  } finally {
+    // ALWAYS clear the guard
+    _fbApplyingRemote = false;
+    window._fbApplyingRemote = false;
   }
-  if (d.inv) saveJ(LS_INV, d.inv);
-  if (d.customers) { customers = d.customers; saveJ(LS_CUST, customers); }
-  if (d.settings) {
-    Object.keys(d.settings).forEach(function(k){ SETTINGS[k] = d.settings[k]; });
-    saveJ(LS_SETTINGS, SETTINGS);
-  }
-  if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
-  if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
-  if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
+
   if (_fbUserBusy()) {
     _fbPendingData=d;
     return 'queued';
@@ -2537,14 +2594,28 @@ function _fbStatus(msg, colour) {
 // Read all data straight from localStorage — no IIFE vars needed
 function _fbGetAllData() {
   function lj(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+  var tombstones = lj('snack-tombstones-v1') || {products:{},customers:{}};
+  var prods = lj('snack-products-v5') || {};
+  var custs = lj('snack-customers-v2') || [];
+
+  // Filter out tombstoned items before pushing — so we never send deleted items
+  function filterProds(arr){ if(!arr)return arr; return arr.filter(function(p){return !tombstones.products[p.id];}); }
+  if(prods.newArrivals) prods.newArrivals = filterProds(prods.newArrivals);
+  if(prods.hotSale) prods.hotSale = filterProds(prods.hotSale);
+  if(prods.brands) prods.brands = prods.brands.map(function(b){
+    return Object.assign({},b,{products:filterProds(b.products)});
+  }).filter(function(b){return b.products.length>0;});
+  custs = custs.filter(function(c){return !tombstones.customers[c.id];});
+
   return {
-    products:  lj('snack-products-v5') || {},
+    products:  prods,
     inv:       lj('snack-inv-v5') || {},
-    customers: lj('snack-customers-v2') || [],
+    customers: custs,
     settings:  lj('snack-settings-v1') || {},
     photos:    lj('snack-photos-v1') || {},
     restockHistory: lj('snack-restock-v1') || {},
-    pendingOrders: lj('beinv-pending') || []
+    pendingOrders: lj('beinv-pending') || [],
+    tombstones: tombstones
   };
 }
 
@@ -2566,12 +2637,17 @@ function fbSet(path, data) {
 }
 
 function fbPushAll() {
+  // Don't push while applying remote data
+  if (window._fbApplyingRemote) return;
   var pushId = _fbDeviceId + '_' + Date.now();
   _fbLastPushId = pushId;
   var data = _fbGetAllData();
-  data._v = Date.now();
+  var now = Date.now();
+  data._v = now;
   data._pushId = pushId;
   data._deviceId = _fbDeviceId;
+  // Update our own version tracker so we don't accept older remote data
+  window._fbLastAppliedVersion = now;
   // Show saving indicator
   _fbStatus('Saving…', 'orange');
   fetch(_FB_URL + '/store.json', {
@@ -2590,8 +2666,9 @@ var _fbDeviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2
 var _fbLastPushId = ''; // the _pushId we last sent, to skip our own echo
 
 function _fbDebouncedPush() {
+  if (window._fbApplyingRemote) return; // extra safety
   clearTimeout(_fbPushTimer);
-  _fbPushTimer = setTimeout(fbPushAll, 200);
+  _fbPushTimer = setTimeout(fbPushAll, 500); // 500ms debounce to coalesce rapid changes
 }
 
 // Use Firebase SSE streaming — true real-time, no polling race conditions
