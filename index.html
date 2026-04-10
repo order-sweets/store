@@ -804,7 +804,7 @@ body{top:0!important;}
 
 <script>
 (function(){
-var ADMIN_PW='nnnn';
+var ADMIN_PW='admin123';
 var MIN_ORDER=80.00;
 var WA_1='6581648864';
 var LS_PROD='snack-products-v5',LS_INV='snack-inv-v5',LS_CUST='snack-customers-v2',LS_PHOTOS='snack-photos-v1',LS_SETTINGS='snack-settings-v1',LS_ORD_CTR='snack-ord-counter';
@@ -1262,7 +1262,7 @@ window.tryLogin=function(){
   var pw=el('pw-input').value;
   if(pw===ADMIN_PW){
     el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';
-    renderAdmin();renderCustomerList();window.showPage('page-admin');if(typeof fbLoad==='function'&&!window._fbStarted){window._fbStarted=true;_fbHookSaves();fbLoad();}
+    renderAdmin();renderCustomerList();window.showPage('page-admin');if(!window._fbStarted){window._fbStarted=true;_fbHookSaves();}if(window._fbEnsureListening)window._fbEnsureListening();else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
   }
   else{el('pw-input').classList.add('err-i');el('login-err').style.display='block';}
 };
@@ -2471,13 +2471,20 @@ window._fbApplyData = function(d) {
   // Skip our own echo
   if (d._pushId && d._pushId === _fbLastPushId) return 'ignored';
 
+  var tombstoneProductCountBefore=Object.keys((_tombstones&&_tombstones.products)||{}).length;
+  var tombstoneCustomerCountBefore=Object.keys((_tombstones&&_tombstones.customers)||{}).length;
+  var remoteDeleteApplied=false;
+
   // SET THE GUARD — prevent saveJ/saveProds/saveInv from re-triggering a push
   _fbApplyingRemote = true;
   window._fbApplyingRemote = true;
 
   try {
     // Merge tombstones FIRST so we know what's been deleted
-    if (d.tombstones) mergeTombstones(d.tombstones);
+    if (d.tombstones) {
+      mergeTombstones(d.tombstones);
+      remoteDeleteApplied=Object.keys(_tombstones.products||{}).length>tombstoneProductCountBefore||Object.keys(_tombstones.customers||{}).length>tombstoneCustomerCountBefore;
+    }
 
     if (d.products) {
       if (d.products.newArrivals !== undefined) NEW_ARRIVALS = filterTombstonedProducts(d.products.newArrivals);
@@ -2506,11 +2513,11 @@ window._fbApplyData = function(d) {
 
   if (_fbUserBusy()) {
     _fbPendingData=d;
-    return 'queued';
+    return remoteDeleteApplied?'delete-queued':'queued';
   }
   _fbPendingData=null;
   _fbRenderSyncedViews();
-  return 'applied';
+  return remoteDeleteApplied?'deleted':'applied';
 };
 initGreeting();renderOrder();renderBasket();
 }());
@@ -2705,6 +2712,33 @@ var _fbPushInFlight = false;
 var _fbPushQueued = false;
 var _fbDeviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
 var _fbLastPushId = ''; // the _pushId we last sent, to skip our own echo
+window._fbListening = !!window._fbListening;
+
+function _fbEnsureListening() {
+  if (window._fbListening) return;
+  window._fbListening = true;
+  fbLoad();
+}
+
+window._fbEnsureListening = _fbEnsureListening;
+
+function _fbShowApplyStatus(applyState, successMsg) {
+  if (applyState === 'delete-queued') {
+    _fbStatus('Delete queued', 'orange');
+    return;
+  }
+  if (applyState === 'queued') {
+    _fbStatus('Update queued', 'orange');
+    return;
+  }
+  if (applyState === 'deleted') {
+    _fbStatus(successMsg || '✓ Deleted on another device', '#38a169');
+    return;
+  }
+  if (applyState !== 'ignored') {
+    _fbStatus(successMsg || '✓ Updated', '#38a169');
+  }
+}
 
 function _fbDebouncedPush() {
   if (window._fbApplyingRemote) return; // extra safety
@@ -2733,8 +2767,7 @@ function fbLoad() {
         }
 
         var applyState=_fbSetAllData(d);
-        if (applyState==='queued') _fbStatus('Update queued', 'orange');
-        else if (applyState!=='ignored') _fbStatus(firstEvent ? '✓ Synced' : '✓ Updated', '#38a169');
+        _fbShowApplyStatus(applyState, firstEvent ? '✓ Synced' : (applyState==='deleted' ? '✓ Deleted on another device' : '✓ Updated'));
         firstEvent = false;
 
       } catch(err) { _fbStatus('Sync error', '#e53e3e'); }
@@ -2749,8 +2782,7 @@ function fbLoad() {
           // Skip our own echo
           if(d._pushId && d._pushId === _fbLastPushId) return;
           var applyState=_fbSetAllData(d);
-          if (applyState==='queued') _fbStatus('Update queued', 'orange');
-          else if (applyState!=='ignored') _fbStatus('✓ Updated', '#38a169');
+          _fbShowApplyStatus(applyState, applyState==='deleted' ? '✓ Deleted on another device' : '✓ Updated');
         }).catch(function(){});
     });
 
@@ -2766,7 +2798,7 @@ function fbLoad() {
     _fbStatus('Polling…', '#2D3748');
     fetch(_FB_URL + '/store.json')
       .then(function(r){ return r.json(); })
-      .then(function(d){ var applyState=d?_fbSetAllData(d):'ignored'; _fbStatus(applyState==='queued'?'Update queued':'✓ Synced',applyState==='queued'?'orange':'#38a169'); })
+      .then(function(d){ var applyState=d?_fbSetAllData(d):'ignored'; _fbShowApplyStatus(applyState,'✓ Synced'); })
       .catch(function(){ _fbStatus('Offline','#e53e3e'); });
     setInterval(function(){
       fetch(_FB_URL + '/store.json')
@@ -2775,14 +2807,14 @@ function fbLoad() {
           if(!d) return;
           if(d._pushId && d._pushId === _fbLastPushId) return;
           var applyState=_fbSetAllData(d);
-          if(applyState==='queued') _fbStatus('Update queued','orange');
-          else if(applyState!=='ignored') _fbStatus('✓ Updated','#38a169');
+          _fbShowApplyStatus(applyState,applyState==='deleted' ? '✓ Deleted on another device' : '✓ Updated');
         }).catch(function(){ _fbStatus('Offline','#e53e3e'); });
     }, 8000);
   }
 }
 
 function _fbHookSaves() {} // no-op — saves patched directly in main app
+window._fbEnsureListening();
 </script>
 
 <!-- Sync status badge -->
