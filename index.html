@@ -1089,11 +1089,15 @@ function allowedUnits(p){
 
 // Visibility
 function getVisRetail(p){
-  if(p.visRetail!==undefined)return p.visRetail;
+  var inv=getInv();
+  if(inv['vr_'+p.id]!==undefined)return !!inv['vr_'+p.id];
+  if(p.visRetail!==undefined)return !!p.visRetail;
   return true;
 }
 function getVisDist(p){
-  if(p.visDist!==undefined)return p.visDist;
+  var inv=getInv();
+  if(inv['vd_'+p.id]!==undefined)return !!inv['vd_'+p.id];
+  if(p.visDist!==undefined)return !!p.visDist;
   return true;
 }
 function isVisible(p){
@@ -1907,7 +1911,12 @@ window.deleteProduct=function(id){
   HOT_SALE=HOT_SALE.filter(function(x){return x.id!==id;});
   BRANDS.forEach(function(b){b.products=b.products.filter(function(x){return x.id!==id;});});
   BRANDS=BRANDS.filter(function(b){return b.products.length>0;});
+  var inv=getInv();
+  delete inv[id];delete inv['disc_'+id];delete inv['rp_'+id];delete inv['dp_'+id];delete inv['rcp_'+id];delete inv['dcp_'+id];delete inv['vr_'+id];delete inv['vd_'+id];
+  saveInv(inv);
+  if(photos[id]!==undefined){delete photos[id];saveJ(LS_PHOTOS,photos);}
   saveProds();renderAdmin();renderOrder();
+  if(window._fbStarted){clearTimeout(_fbPushTimer);fbPushAll();}
 };
 window.setPhotoURL=function(id){
   var inp=el('photo-url-'+id);if(!inp)return;
@@ -2216,7 +2225,14 @@ window.addCustomer=function(){
   el('nc-name').value='';el('nc-phone').value='';el('nc-addr').value='';
   renderCustomerList();
 };
-window.deleteCustomer=function(id){if(!confirm('Remove this customer?'))return;markCustomerDeleted(id);customers=customers.filter(function(c){return c.id!==id;});saveJ(LS_CUST,customers);renderCustomerList();};
+window.deleteCustomer=function(id){
+  if(!confirm('Remove this customer?'))return;
+  markCustomerDeleted(id);
+  customers=customers.filter(function(c){return c.id!==id;});
+  saveJ(LS_CUST,customers);
+  renderCustomerList();
+  if(window._fbStarted){clearTimeout(_fbPushTimer);fbPushAll();}
+};
 window.saveCustomerEdits=function(id){
   var cust=customers.find(function(c){return c.id===id;});if(!cust)return;
   var ni=el('cedit-name-'+id),pi=el('cedit-phone-'+id),ai=el('cedit-addr-'+id),ti=el('cedit-tier-'+id);
@@ -2398,22 +2414,23 @@ function _fbMatchTarget(target,selector){
 
 function _fbInteractionHold(target){
   var tag=target&&target.tagName?target.tagName.toUpperCase():'';
-  if(_fbMatchTarget(target,'#page-admin input, #page-admin textarea, #page-admin select, #page-admin .search-wrap')){
-    return tag==='SELECT'?30000:20000;
+  var type=target&&target.type?String(target.type).toLowerCase():'';
+  var textLike=tag==='TEXTAREA'||(tag==='INPUT'&&['text','number','search','tel','url','email','password'].indexOf(type)!==-1)||!!(target&&target.isContentEditable);
+  if(_fbMatchTarget(target,'#page-admin .search-wrap'))return 4000;
+  if(_fbMatchTarget(target,'#page-order .search-wrap'))return 2000;
+  if(_fbMatchTarget(target,'#page-admin input, #page-admin textarea, #page-admin select')){
+    if(tag==='SELECT')return 4000;
+    return textLike?6000:0;
   }
-  if(_fbMatchTarget(target,'#page-order input, #page-order textarea, #page-order select, #page-order .search-wrap')){
-    return tag==='SELECT'?12000:6000;
+  if(_fbMatchTarget(target,'#page-order input, #page-order textarea, #page-order select')){
+    if(tag==='SELECT')return 2000;
+    return textLike?2500:0;
   }
   return 0;
 }
 
 function _fbUserBusy(){
   if(Date.now()<_fbBusyUntil)return true;
-  var ae=document.activeElement;
-  if(ae){
-    var tag=(ae.tagName||'').toUpperCase();
-    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||ae.isContentEditable)return true;
-  }
   var dd=el('search-dropdown');
   if(dd&&dd.classList.contains('open'))return true;
   return false;
@@ -2453,8 +2470,6 @@ window._fbApplyData = function(d) {
   if (!d) return 'ignored';
   // Skip our own echo
   if (d._pushId && d._pushId === _fbLastPushId) return 'ignored';
-  // Version check — never apply older data over newer
-  if (d._v && window._fbLastAppliedVersion && d._v < window._fbLastAppliedVersion) return 'ignored';
 
   // SET THE GUARD — prevent saveJ/saveProds/saveInv from re-triggering a push
   _fbApplyingRemote = true;
@@ -2483,7 +2498,6 @@ window._fbApplyData = function(d) {
     if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
     if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
     if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
-    if (d._v) window._fbLastAppliedVersion = d._v;
   } finally {
     // ALWAYS clear the guard
     _fbApplyingRemote = false;
@@ -2636,32 +2650,59 @@ function fbSet(path, data) {
   }).catch(function() { _fbStatus('Sync failed', '#e53e3e'); });
 }
 
+function _fbPrepareOutbound() {
+  return fetch(_FB_URL + '/store.json')
+    .then(function(r){ return r.json(); })
+    .then(function(remote){
+      if(remote && remote.tombstones) mergeTombstones(remote.tombstones);
+      return _fbGetAllData();
+    })
+    .catch(function(){
+      return _fbGetAllData();
+    });
+}
+
 function fbPushAll() {
   // Don't push while applying remote data
-  if (window._fbApplyingRemote) return;
+  clearTimeout(_fbPushTimer);
+  if (window._fbApplyingRemote) return Promise.resolve('ignored');
+  if (_fbPushInFlight) {
+    _fbPushQueued = true;
+    return Promise.resolve('queued');
+  }
+  _fbPushInFlight = true;
+  _fbPushQueued = false;
   var pushId = _fbDeviceId + '_' + Date.now();
   _fbLastPushId = pushId;
-  var data = _fbGetAllData();
-  var now = Date.now();
-  data._v = now;
-  data._pushId = pushId;
-  data._deviceId = _fbDeviceId;
-  // Update our own version tracker so we don't accept older remote data
-  window._fbLastAppliedVersion = now;
-  // Show saving indicator
   _fbStatus('Saving…', 'orange');
-  fetch(_FB_URL + '/store.json', {
-    method: 'PUT',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
-  }).then(function() {
-    _fbStatus('✓ Saved', '#38a169');
+  return _fbPrepareOutbound().then(function(data) {
+    var now = Date.now();
+    data._v = now;
+    data._pushId = pushId;
+    data._deviceId = _fbDeviceId;
+    return fetch(_FB_URL + '/store.json', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    }).then(function() {
+      _fbStatus('✓ Saved', '#38a169');
+      return 'saved';
+    });
   }).catch(function() {
     _fbStatus('Save failed', '#e53e3e');
+    return 'failed';
+  }).finally(function() {
+    _fbPushInFlight = false;
+    if (_fbPushQueued) {
+      _fbPushQueued = false;
+      fbPushAll();
+    }
   });
 }
 
 var _fbPushTimer = null;
+var _fbPushInFlight = false;
+var _fbPushQueued = false;
 var _fbDeviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
 var _fbLastPushId = ''; // the _pushId we last sent, to skip our own echo
 
