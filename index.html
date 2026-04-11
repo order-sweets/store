@@ -1988,9 +1988,9 @@ window.saveAll=function(){
     // Bake products and customers
     var newData='var DEFAULT_BRANDS='+JSON.stringify(BRANDS)+';';
     src=src.replace(/var DEFAULT_BRANDS=\[[\s\S]*?\];/,newData);
-    // Also bake new arrivals and hot sale into the page's var declarations
-    var naStr='var NEW_ARRIVALS=savedP?savedP.newArrivals||[]:[];';
-    src=src.replace(/var NEW_ARRIVALS=savedP\?savedP\.newArrivals\|\|\[\]:\[\];/,naStr);
+    // Bake new arrivals and hot sale as real data so fresh loads have correct state
+    src=src.replace(/var NEW_ARRIVALS=savedP\?savedP\.newArrivals\|\|\[\]:\[\];/,'var NEW_ARRIVALS=savedP?savedP.newArrivals||'+JSON.stringify(NEW_ARRIVALS)+':'+JSON.stringify(NEW_ARRIVALS)+';');
+    src=src.replace(/var HOT_SALE=savedP\?savedP\.hotSale\|\|\[\]:\[\];/,'var HOT_SALE=savedP?savedP.hotSale||'+JSON.stringify(HOT_SALE)+':'+JSON.stringify(HOT_SALE)+';');
     var custData='var customers='+JSON.stringify(customers)+';';
     src=src.replace(/var customers=loadJ\(LS_CUST\)\|\|_BAKED_CUSTOMERS;\/\* loaded \*\//,custData+'/* loaded */');
     src=src.replace(/var customers=\[[\s\S]*?\];\/\* loaded \*\//,custData+'/* loaded */');
@@ -2467,8 +2467,6 @@ window._fbApplyData = function(d) {
   // Skip our own echo
   if (d._pushId && d._pushId === _fbLastPushId) return 'ignored';
 
-  console.log('[FB-APPLY] start. d.products keys='+JSON.stringify(d.products?Object.keys(d.products):null));
-  console.log('[FB-APPLY] before: NEW_ARRIVALS='+NEW_ARRIVALS.length+' HOT_SALE='+HOT_SALE.length);
 
   var tombstoneProductCountBefore=Object.keys((_tombstones&&_tombstones.products)||{}).length;
   var tombstoneCustomerCountBefore=Object.keys((_tombstones&&_tombstones.customers)||{}).length;
@@ -2502,7 +2500,6 @@ window._fbApplyData = function(d) {
         remoteDeleteApplied = true;
       }
       saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
-      console.log('[FB-APPLY] after: NEW_ARRIVALS='+NEW_ARRIVALS.length+' HOT_SALE='+HOT_SALE.length);
     }
     if (d.inv) saveJ(LS_INV, d.inv);
     if (d.customers) { customers = filterTombstonedCustomers(d.customers); saveJ(LS_CUST, customers); }
@@ -2521,11 +2518,9 @@ window._fbApplyData = function(d) {
 
   if (_fbUserBusy()) {
     _fbPendingData=d;
-    console.log('[FB-APPLY] user busy — queued. remoteDeleteApplied='+remoteDeleteApplied);
     return remoteDeleteApplied?'delete-queued':'queued';
   }
   _fbPendingData=null;
-  console.log('[FB-APPLY] calling _fbRenderSyncedViews. remoteDeleteApplied='+remoteDeleteApplied);
   _fbRenderSyncedViews();
   return remoteDeleteApplied?'deleted':'applied';
 };
@@ -2684,15 +2679,10 @@ function _fbApplyLatestSnapshot(successMsg) {
 }
 
 function _fbPrepareOutbound() {
-  return fetch(_FB_URL + '/store.json')
-    .then(function(r){ return r.json(); })
-    .then(function(remote){
-      if(remote && remote.tombstones) mergeTombstones(remote.tombstones);
-      return _fbGetAllData();
-    })
-    .catch(function(){
-      return _fbGetAllData();
-    });
+  // Read directly from localStorage — no pre-GET needed.
+  // The pre-GET was a race condition source: it could return stale Firebase data
+  // and re-populate deleted products back into localStorage before the push fired.
+  return Promise.resolve(_fbGetAllData());
 }
 
 function fbPushAll() {
@@ -2786,7 +2776,6 @@ function fbLoad() {
     es.addEventListener('put', function(e) {
       try {
         var msg = JSON.parse(e.data);
-        console.log('[FB-SSE] put path='+msg.path+' pushId='+(msg.data&&msg.data._pushId||'none')+' lastPushId='+_fbLastPushId+' inFlight='+_fbPushInFlight);
         if (msg.path !== '/') {
           var initialSync = firstEvent;
           firstEvent = false;
@@ -2799,7 +2788,6 @@ function fbLoad() {
         // Skip only our own echo (same pushId we just sent)
         if (!firstEvent && d._pushId && d._pushId === _fbLastPushId) {
           _fbStatus('✓ In sync', '#38a169');
-          console.log('[FB-SSE] skipped own echo');
           return;
         }
 
@@ -2809,17 +2797,14 @@ function fbLoad() {
         if (_fbPushInFlight && !firstEvent) {
           _fbPendingData = d;
           _fbStatus('Syncing…', 'orange');
-          console.log('[FB-SSE] queued (push in flight)');
           return;
         }
 
-        console.log('[FB-SSE] applying. newArrivals='+JSON.stringify(d.products&&d.products.newArrivals)+' hotSale='+JSON.stringify(d.products&&d.products.hotSale));
         var applyState=_fbSetAllData(d);
-        console.log('[FB-SSE] applyState='+applyState);
         _fbShowApplyStatus(applyState, firstEvent ? '✓ Synced' : (applyState==='deleted' ? '✓ Deleted on another device' : '✓ Updated'));
         firstEvent = false;
 
-      } catch(err) { _fbStatus('Sync error', '#e53e3e'); console.error('[FB-SSE] error',err); }
+      } catch(err) { _fbStatus('Sync error', '#e53e3e'); }
     });
 
     es.addEventListener('patch', function(e) {
