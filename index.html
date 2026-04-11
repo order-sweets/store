@@ -39,6 +39,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
 /* BRAND TABS (A) */
 #brand-tabs-wrap{position:sticky;top:0;z-index:100;background:var(--bg);padding:10px 0 8px;margin:-4px 0 12px;border-bottom:1px solid var(--border);}
+#brand-tabs-wrap .search-wrap{margin-bottom:8px;}
 #brand-tabs{display:flex;flex-wrap:wrap;gap:6px;}
 .brand-tab{flex:0 0 auto;padding:3px 12px;border:1.5px solid var(--accent);border-radius:50px;font-size:13px;font-weight:400;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;color:var(--accent-text);background:#fff;cursor:pointer;white-space:nowrap;transition:all .18s;}
 .brand-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
@@ -540,12 +541,6 @@ body{top:0!important;position:relative!important;}
     <div class="how-arrow">→</div>
     <div class="how-step"><span class="how-num">3</span><span class="how-text">Check &amp;<br>Send Order</span></div>
   </div>
-  <div class="search-wrap">
-    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-    <input class="search-input" type="text" id="search-inp" placeholder="Search products…" oninput="onSearch()" autocomplete="off">
-    <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
-    <div class="search-dropdown" id="search-dropdown"></div>
-  </div>
 
 
   <div id="new-arrivals-section" class="new-arrivals-wrap">
@@ -563,8 +558,14 @@ body{top:0!important;position:relative!important;}
 
   <p class="slabel">Products Available</p>
 
-  <!-- Brand Tabs (A) -->
+  <!-- Brand Tabs (A) + sticky search -->
   <div id="brand-tabs-wrap">
+    <div class="search-wrap" style="margin-bottom:8px;">
+      <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+      <input class="search-input" type="text" id="search-inp" placeholder="Search products…" oninput="onSearch()" autocomplete="off">
+      <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
     <div id="brand-tabs"></div>
   </div>
 
@@ -2573,9 +2574,9 @@ initGreeting();renderOrder();renderBasket();
   var activeFilter='all';
 
   function scrollToEl(el){
-    // Offset for the sticky brand-tabs-wrap bar height (~57px)
+    // Offset for the sticky brand-tabs-wrap bar height (search + tabs)
     var tabsWrap=document.getElementById('brand-tabs-wrap');
-    var offset=tabsWrap?tabsWrap.offsetHeight+8:65;
+    var offset=tabsWrap?tabsWrap.offsetHeight+8:110;
     var top=el.getBoundingClientRect().top+window.scrollY-offset;
     window.scrollTo({top:top,behavior:'smooth'});
   }
@@ -2586,14 +2587,15 @@ initGreeting();renderOrder();renderBasket();
     document.querySelectorAll('.brand-tab').forEach(function(t){
       t.classList.toggle('active', t.dataset.brand===filter);
     });
-    // Make sure all sections are visible
+    // Make sure all sections are visible (respecting admin toggles)
     document.querySelectorAll('#brand-catalog .brand-group').forEach(function(g){
       g.style.display='';
     });
     var newSec=document.getElementById('new-arrivals-section');
     var hotSec=document.getElementById('hot-sale-section');
-    if(newSec) newSec.style.display='';
-    if(hotSec) hotSec.style.display='';
+    var settings=window.SETTINGS||{};
+    if(newSec) newSec.style.display=(settings.showNewArrivals===false)?'none':'';
+    if(hotSec) hotSec.style.display=(settings.showHotSale===false)?'none':'';
 
     // Scroll to the target section
     if(filter==='new'){
@@ -2628,8 +2630,9 @@ initGreeting();renderOrder();renderBasket();
       if(t) brands.push(t.textContent.trim());
     });
 
-    var hasNew=!!(document.getElementById('new-arrivals-section') && document.getElementById('new-arrivals-section').querySelector('.item-card'));
-    var hasHot=!!(document.getElementById('hot-sale-section') && document.getElementById('hot-sale-section').querySelector('.item-card'));
+    var settings=window.SETTINGS||{};
+    var hasNew=settings.showNewArrivals!==false && !!(document.getElementById('new-arrivals-section') && document.getElementById('new-arrivals-section').querySelector('.item-card'));
+    var hasHot=settings.showHotSale!==false && !!(document.getElementById('hot-sale-section') && document.getElementById('hot-sale-section').querySelector('.item-card'));
     var totalSections=brands.length+(hasNew?1:0)+(hasHot?1:0);
 
     if(totalSections<2){
