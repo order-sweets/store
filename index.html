@@ -2723,6 +2723,9 @@ function fbPushAll() {
     if (_fbPushQueued) {
       _fbPushQueued = false;
       fbPushAll();
+    } else {
+      // Apply any SSE data that was queued while push was in flight
+      _fbQueueFlush(200);
     }
   });
 }
@@ -2789,6 +2792,15 @@ function fbLoad() {
         // Skip only our own echo (same pushId we just sent)
         if (!firstEvent && d._pushId && d._pushId === _fbLastPushId) {
           _fbStatus('✓ In sync', '#38a169');
+          return;
+        }
+
+        // If a push is in flight, don't let incoming SSE overwrite our pending local changes —
+        // the outbound _fbPrepareOutbound GET could read the stale re-applied data and push
+        // the deleted product back. Queue it; _fbFlushPending re-renders once push completes.
+        if (_fbPushInFlight && !firstEvent) {
+          _fbPendingData = d;
+          _fbStatus('Syncing…', 'orange');
           return;
         }
 
