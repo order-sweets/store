@@ -753,18 +753,18 @@ body{top:0!important;}
       </button>
       <div id="add-prod-body" style="display:none;border:1.5px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:16px;background:#fff;">
     <div class="form-grid">
-        <div class="form-field"><label>Product Name</label><input type="text" id="add-name" placeholder="e.g. Nerds Rope Rainbow"></div>
-        <div class="form-field"><label>Brand</label><input type="text" id="add-brand" list="brand-datalist" placeholder="Type or choose brand"><datalist id="brand-datalist"><option value="Airheads">Airheads</option><option value="Nerds">Nerds</option><option value="Bee Events">Bee Events</option></datalist></div>
+        <div class="form-field"><label>Product Name</label><input type="text" id="add-name" placeholder=""></div>
+        <div class="form-field"><label>Brand</label><input type="text" id="add-brand" list="brand-datalist" placeholder=""><datalist id="brand-datalist"><option value="Airheads">Airheads</option><option value="Nerds">Nerds</option><option value="Bee Events">Bee Events</option></datalist></div>
         <div class="form-field"><label>Section</label><select id="add-section"><option value="catalog">Products Available</option><option value="new">New Arrivals</option><option value="hot">Hot Sale!</option></select></div>
-        <div class="form-field"><label>Description</label><input type="text" id="add-desc" placeholder="Short description"></div>
-        <div class="form-field"><label>Weight per Piece</label><input type="text" id="add-weight" placeholder="e.g. 26g"></div>
-        <div class="form-field"><label>Discount % (both tiers)</label><input type="number" id="add-disc" placeholder="0" min="0" max="100" inputmode="numeric"></div>
-        <div class="form-field"><label>Opening Stock (Boxes)</label><input type="number" id="add-stock" placeholder="e.g. 10" min="0" inputmode="numeric"></div>
-        <div class="form-field"><label>Pieces per Box</label><input type="number" id="add-ppc" placeholder="24" min="1" inputmode="numeric"></div>
-        <div class="form-field"><label>Retailers Piece Price ($)</label><input type="number" id="add-price" placeholder="2.80" min="0" step="0.01" inputmode="decimal"></div>
-        <div class="form-field"><label>Retailers Box Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price" placeholder="auto" min="0" step="0.01" inputmode="decimal"></div>
-        <div class="form-field"><label>Distributor Piece Price ($)</label><input type="number" id="add-price-dist" placeholder="2.20" min="0" step="0.01" inputmode="decimal"></div>
-        <div class="form-field"><label>Distributor Box Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price-dist" placeholder="auto" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Description</label><input type="text" id="add-desc" placeholder=""></div>
+        <div class="form-field"><label>Weight per Piece</label><input type="text" id="add-weight" placeholder=""></div>
+        <div class="form-field"><label>Discount % (both tiers)</label><input type="number" id="add-disc" placeholder="" min="0" max="100" inputmode="numeric"></div>
+        <div class="form-field"><label>Opening Stock (Boxes)</label><input type="number" id="add-stock" placeholder="" min="0" inputmode="numeric"></div>
+        <div class="form-field"><label>Pieces per Box</label><input type="number" id="add-ppc" placeholder="" min="1" inputmode="numeric"></div>
+        <div class="form-field"><label>Retailers Piece Price ($)</label><input type="number" id="add-price" placeholder="" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Retailers Box Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price" placeholder="" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Distributor Piece Price ($)</label><input type="number" id="add-price-dist" placeholder="" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Distributor Box Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price-dist" placeholder="" min="0" step="0.01" inputmode="decimal"></div>
         <div class="form-field"><label>Visible to Retailers</label><select id="add-vis-retail"><option value="1">Yes</option><option value="0">No</option></select></div>
         <div class="form-field"><label>Visible to Distributors</label><select id="add-vis-dist"><option value="1">Yes</option><option value="0">No</option></select></div>
         <div class="form-field"><label style="color:var(--blue-text);font-weight:600">🏪 Retailers can order by</label><select id="add-units-retail"><option value="both">Piece &amp; Box</option><option value="piece">Piece only</option><option value="case">Box only</option></select></div>
@@ -795,7 +795,7 @@ body{top:0!important;}
       <div class="form-grid">
         <div class="form-field"><label>Customer / Company Name</label><input type="text" id="nc-name" placeholder=""></div>
         <div class="form-field"><label>Phone (+65)</label><input type="tel" id="nc-phone" placeholder="" maxlength="8" inputmode="numeric"></div>
-        <div class="form-field full"><label>Default Delivery Address</label><input type="text" id="nc-addr" placeholder="Block, street, unit number (optional)"></div>
+        <div class="form-field full"><label>Default Delivery Address</label><input type="text" id="nc-addr" placeholder=""></div>
         <div class="form-field"><label>Pricing Tier</label>
           <select id="nc-tier">
             <option value="retail">Retailers</option>
@@ -2188,8 +2188,8 @@ window.addProduct=function(){
   var stockPieces=stockCases*(ppc||1);
   var weight=el('add-weight').value.trim(),desc=el('add-desc').value.trim()||'';
   var disc=parseInt(el('add-disc').value)||0,section=el('add-section').value;
-  var visRetail=parseInt(el('add-vis-retail').value)||1;
-  var visDist=parseInt(el('add-vis-dist').value)||1;
+  var visRetail=parseInt(el('add-vis-retail').value);if(isNaN(visRetail))visRetail=1;
+  var visDist=parseInt(el('add-vis-dist').value);if(isNaN(visDist))visDist=1;
   var unitsRetail=el('add-units-retail').value||'both';
   var unitsDist=el('add-units-dist').value||'both';
   if(!name){alert('Please enter a product name.');return;}if(!price){alert('Please enter a retail price.');return;}
