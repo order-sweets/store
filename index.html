@@ -2467,6 +2467,9 @@ window._fbApplyData = function(d) {
   // Skip our own echo
   if (d._pushId && d._pushId === _fbLastPushId) return 'ignored';
 
+  console.log('[FB-APPLY] start. d.products keys='+JSON.stringify(d.products?Object.keys(d.products):null));
+  console.log('[FB-APPLY] before: NEW_ARRIVALS='+NEW_ARRIVALS.length+' HOT_SALE='+HOT_SALE.length);
+
   var tombstoneProductCountBefore=Object.keys((_tombstones&&_tombstones.products)||{}).length;
   var tombstoneCustomerCountBefore=Object.keys((_tombstones&&_tombstones.customers)||{}).length;
   var remoteDeleteApplied=false;
@@ -2499,6 +2502,7 @@ window._fbApplyData = function(d) {
         remoteDeleteApplied = true;
       }
       saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
+      console.log('[FB-APPLY] after: NEW_ARRIVALS='+NEW_ARRIVALS.length+' HOT_SALE='+HOT_SALE.length);
     }
     if (d.inv) saveJ(LS_INV, d.inv);
     if (d.customers) { customers = filterTombstonedCustomers(d.customers); saveJ(LS_CUST, customers); }
@@ -2517,9 +2521,11 @@ window._fbApplyData = function(d) {
 
   if (_fbUserBusy()) {
     _fbPendingData=d;
+    console.log('[FB-APPLY] user busy — queued. remoteDeleteApplied='+remoteDeleteApplied);
     return remoteDeleteApplied?'delete-queued':'queued';
   }
   _fbPendingData=null;
+  console.log('[FB-APPLY] calling _fbRenderSyncedViews. remoteDeleteApplied='+remoteDeleteApplied);
   _fbRenderSyncedViews();
   return remoteDeleteApplied?'deleted':'applied';
 };
@@ -2780,6 +2786,7 @@ function fbLoad() {
     es.addEventListener('put', function(e) {
       try {
         var msg = JSON.parse(e.data);
+        console.log('[FB-SSE] put path='+msg.path+' pushId='+(msg.data&&msg.data._pushId||'none')+' lastPushId='+_fbLastPushId+' inFlight='+_fbPushInFlight);
         if (msg.path !== '/') {
           var initialSync = firstEvent;
           firstEvent = false;
@@ -2792,6 +2799,7 @@ function fbLoad() {
         // Skip only our own echo (same pushId we just sent)
         if (!firstEvent && d._pushId && d._pushId === _fbLastPushId) {
           _fbStatus('✓ In sync', '#38a169');
+          console.log('[FB-SSE] skipped own echo');
           return;
         }
 
@@ -2801,14 +2809,17 @@ function fbLoad() {
         if (_fbPushInFlight && !firstEvent) {
           _fbPendingData = d;
           _fbStatus('Syncing…', 'orange');
+          console.log('[FB-SSE] queued (push in flight)');
           return;
         }
 
+        console.log('[FB-SSE] applying. newArrivals='+JSON.stringify(d.products&&d.products.newArrivals)+' hotSale='+JSON.stringify(d.products&&d.products.hotSale));
         var applyState=_fbSetAllData(d);
+        console.log('[FB-SSE] applyState='+applyState+' NEW_ARRIVALS after='+JSON.stringify(NEW_ARRIVALS));
         _fbShowApplyStatus(applyState, firstEvent ? '✓ Synced' : (applyState==='deleted' ? '✓ Deleted on another device' : '✓ Updated'));
         firstEvent = false;
 
-      } catch(err) { _fbStatus('Sync error', '#e53e3e'); }
+      } catch(err) { _fbStatus('Sync error', '#e53e3e'); console.error('[FB-SSE] error',err); }
     });
 
     es.addEventListener('patch', function(e) {
