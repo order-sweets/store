@@ -2201,7 +2201,7 @@ window.addProduct=function(){
   inv['vr_'+id]=visRetail;inv['vd_'+id]=visDist;
   if(cpRetail>0)inv['rcp_'+id]=cpRetail;
   if(cpDist>0)inv['dcp_'+id]=cpDist;
-  var newProd={id:id,name:name,desc:desc,price:price,priceDist:priceDist,ppc:ppc,stockPieces:stockPieces,weight:weight,discount:disc,section:section,variations:[],visRetail:visRetail,visDist:visDist,unitsRetail:unitsRetail,unitsDist:unitsDist};
+  var newProd={id:id,name:name,brand:brand,desc:desc,price:price,priceDist:priceDist,ppc:ppc,stockPieces:stockPieces,weight:weight,discount:disc,section:section,variations:[],visRetail:visRetail,visDist:visDist,unitsRetail:unitsRetail,unitsDist:unitsDist};
   if(section==='new'){NEW_ARRIVALS.push(newProd);}else if(section==='hot'){HOT_SALE.push(newProd);}
   else{var found=BRANDS.find(function(b){return b.brand.toLowerCase()===brand.toLowerCase();});if(found){found.products.push(newProd);}else{BRANDS.push({brand:brand,products:[newProd]});}}
   commitProductCatalogChange(inv,false);
