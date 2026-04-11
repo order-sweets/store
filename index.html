@@ -858,9 +858,9 @@ function mergeTombstones(remote){
   });
   saveTombstones();
 }
-// Filter out tombstoned products from arrays
+// Filter out tombstoned products from arrays — always returns an array
 function filterTombstonedProducts(arr){
-  if(!arr)return arr;
+  if(!arr)return [];
   return arr.filter(function(p){return !_tombstones.products[p.id];});
 }
 function filterTombstonedCustomers(arr){
@@ -2483,12 +2483,20 @@ window._fbApplyData = function(d) {
     }
 
     if (d.products) {
+      var prevNewCount = NEW_ARRIVALS.length;
+      var prevHotCount = HOT_SALE.length;
+      var prevBrandProdCount = BRANDS.reduce(function(n,b){return n+b.products.length;},0);
       if (d.products.newArrivals !== undefined) NEW_ARRIVALS = filterTombstonedProducts(d.products.newArrivals);
       if (d.products.hotSale !== undefined) HOT_SALE = filterTombstonedProducts(d.products.hotSale);
       if (d.products.brands) {
         BRANDS = d.products.brands.map(function(b){
           return Object.assign({},b,{products:filterTombstonedProducts(b.products)});
         }).filter(function(b){return b.products.length>0;});
+      }
+      // Detect product deletions in any section
+      var newBrandProdCount = BRANDS.reduce(function(n,b){return n+b.products.length;},0);
+      if (NEW_ARRIVALS.length < prevNewCount || HOT_SALE.length < prevHotCount || newBrandProdCount < prevBrandProdCount) {
+        remoteDeleteApplied = true;
       }
       saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
     }
@@ -2616,7 +2624,7 @@ function _fbGetAllData() {
   var custs = lj('snack-customers-v2') || [];
 
   // Filter out tombstoned items before pushing — so we never send deleted items
-  function filterProds(arr){ if(!arr)return arr; return arr.filter(function(p){return !tombstones.products[p.id];}); }
+  function filterProds(arr){ if(!arr)return []; return arr.filter(function(p){return !tombstones.products[p.id];}); }
   if(prods.newArrivals) prods.newArrivals = filterProds(prods.newArrivals);
   if(prods.hotSale) prods.hotSale = filterProds(prods.hotSale);
   if(prods.brands) prods.brands = prods.brands.map(function(b){
