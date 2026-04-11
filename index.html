@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Time to Order</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&amp;display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -90,7 +90,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .search-result-item:hover{background:var(--surface);}
 .sri-name{font-size:14px;font-weight:500;}.sri-brand{font-size:12px;color:var(--text-muted);}.sri-price{font-size:13px;font-weight:600;color:var(--accent-text);margin-left:auto;}
 .search-no-results{padding:16px;font-size:13px;color:var(--text-hint);text-align:center;font-style:italic;}
-.slabel{font-family:'Bebas Neue',sans-serif;font-size:24px;font-weight:400;color:var(--text);margin:0 0 14px;letter-spacing:1.5px;text-transform:uppercase;}
+.slabel{font-size:20px;font-weight:700;color:var(--text);margin:0 0 14px;}
 
 /* HOW TO ORDER STEPS */
 .how-to-order{display:flex;align-items:flex-start;justify-content:center;gap:0;background:var(--surface);border-radius:var(--r);padding:12px 8px;margin-bottom:1.25rem;flex-wrap:nowrap;width:100%;}
@@ -113,21 +113,21 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 /* PRODUCT LIST */
 .prod-list{display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;}
 .brand-group{margin-bottom:1.75rem;}
-.brand-group-title{font-family:'Bebas Neue',sans-serif;font-size:20px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:var(--text);padding:4px 10px;border-left:4px solid var(--accent);margin-bottom:12px;background:linear-gradient(90deg,rgba(216,90,48,.07) 0%,transparent 100%);}
+.brand-group-title{font-size:17.5px;font-weight:700;color:var(--text);padding:6px 0;border-bottom:2px solid var(--border-md);margin-bottom:12px;}
 .ps-empty{font-size:14px;color:var(--text-hint);font-style:italic;padding:8px 0 24px;text-align:center;}
 
 /* ITEM CARD */
 .item-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:row;}
 .item-card.has-qty{border:2.5px solid var(--accent);background:var(--accent-bg);}
 .item-card.oos{opacity:.42;background:var(--surface);}
-.card-img{width:150px;height:150px;flex-shrink:0;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden;align-self:center;margin:10px 0 10px 10px;border-radius:8px;}
+.card-img{width:150px;height:150px;flex-shrink:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden;align-self:center;margin:10px 0 10px 10px;border-radius:8px;}
 @media(max-width:420px){
   .card-img{width:115px;height:115px;align-self:center;margin:8px 0 8px 8px;}
   .card-body{padding:10px 11px;}
   .order-wrap{padding:3rem 0.85rem 8rem;}
   .unit-qty-ctrl{gap:6px;}
 }
-.card-img img{width:100%;height:100%;object-fit:contain;object-position:center;background:var(--surface);}
+.card-img img{width:100%;height:100%;object-fit:contain;object-position:center;background:transparent;}
 .card-img-placeholder{font-size:38px;line-height:1;}
 .card-body{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;}
 .card-units{display:none;}
@@ -139,7 +139,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 /* NEW ARRIVALS SECTION */
 .new-arrivals-wrap{margin-bottom:1.5rem;}
 .new-arrivals-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.new-arrivals-title{font-family:'Bebas Neue',sans-serif;font-size:24px;font-weight:400;color:var(--text);margin:0 0 14px;letter-spacing:1.5px;text-transform:uppercase;}
+.new-arrivals-title{font-size:20px;font-weight:700;color:var(--text);margin:0 0 14px;}
 
 
 .badge-low{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:var(--amber-bg);color:var(--amber-text);margin-bottom:4px;}
@@ -298,8 +298,8 @@ body{top:0!important;}
 .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:900;align-items:center;justify-content:center;padding:1.5rem;}
 .lightbox.open{display:flex;}
 .lightbox-inner{position:relative;max-width:420px;width:100%;}
-.lightbox-content{width:100%;border-radius:var(--r-lg);background:var(--surface);aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.lightbox-content img{width:100%;height:100%;object-fit:cover;}
+.lightbox-content{width:100%;border-radius:var(--r-lg);background:var(--surface);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.lightbox-content img{max-width:100%;max-height:80vh;width:auto;height:auto;object-fit:contain;display:block;border-radius:var(--r-lg);}
 .lightbox-close{position:absolute;top:-16px;right:-16px;width:40px;height:40px;background:#fff;border-radius:50%;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.25);z-index:10;}
 
 /* LOGIN */
@@ -1608,7 +1608,7 @@ function doSend(){
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'\n*Notes:* '+notes:'')
-      +'\n_Edit Order (within 3 days):_ {EDITLINK}'
+      +'\n_Edit order (3 days):_ {EDITLINK}'
       +'\n----------------------------------------------------'
       +'\n*\u2713ITEMS:*\n'+lines.join('\n')
       +'\n\nTotal: $'+sub.toFixed(2)
@@ -1621,7 +1621,7 @@ function doSend(){
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'\n*Notes:* '+notes:'')
-      +'\n_Edit Order (within 3 days):_ {EDITLINK}'
+      +'\n_Edit order (3 days):_ {EDITLINK}'
       +'\n----------------------------------------------------'
       +'\n*\u2713ITEMS:*\n'+lines.join('\n')
       +'\n\nTotal: $'+sub.toFixed(2)
