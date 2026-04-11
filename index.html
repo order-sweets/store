@@ -2487,8 +2487,10 @@ window._fbApplyData = function(d) {
       var prevNewCount = NEW_ARRIVALS.length;
       var prevHotCount = HOT_SALE.length;
       var prevBrandProdCount = BRANDS.reduce(function(n,b){return n+b.products.length;},0);
-      if (d.products.newArrivals !== undefined) NEW_ARRIVALS = filterTombstonedProducts(d.products.newArrivals);
-      if (d.products.hotSale !== undefined) HOT_SALE = filterTombstonedProducts(d.products.hotSale);
+      // Firebase strips empty arrays to null or omits the key entirely.
+      // So we must default to [] when the key is absent — not skip the update.
+      NEW_ARRIVALS = filterTombstonedProducts(d.products.newArrivals || []);
+      HOT_SALE = filterTombstonedProducts(d.products.hotSale || []);
       if (d.products.brands) {
         BRANDS = d.products.brands.map(function(b){
           return Object.assign({},b,{products:filterTombstonedProducts(b.products)});
@@ -2624,10 +2626,10 @@ function _fbGetAllData() {
   var prods = lj('snack-products-v5') || {};
   var custs = lj('snack-customers-v2') || [];
 
-  // Filter out tombstoned items before pushing — so we never send deleted items
+  // Filter out tombstoned items before pushing — always include the key even if array is empty
   function filterProds(arr){ if(!arr)return []; return arr.filter(function(p){return !tombstones.products[p.id];}); }
-  if(prods.newArrivals) prods.newArrivals = filterProds(prods.newArrivals);
-  if(prods.hotSale) prods.hotSale = filterProds(prods.hotSale);
+  prods.newArrivals = filterProds(prods.newArrivals);
+  prods.hotSale = filterProds(prods.hotSale);
   if(prods.brands) prods.brands = prods.brands.map(function(b){
     return Object.assign({},b,{products:filterProds(b.products)});
   }).filter(function(b){return b.products.length>0;});
