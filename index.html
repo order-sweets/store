@@ -2815,7 +2815,7 @@ function fbLoad() {
 
         console.log('[FB-SSE] applying. newArrivals='+JSON.stringify(d.products&&d.products.newArrivals)+' hotSale='+JSON.stringify(d.products&&d.products.hotSale));
         var applyState=_fbSetAllData(d);
-        console.log('[FB-SSE] applyState='+applyState+' NEW_ARRIVALS after='+JSON.stringify(NEW_ARRIVALS));
+        console.log('[FB-SSE] applyState='+applyState);
         _fbShowApplyStatus(applyState, firstEvent ? '✓ Synced' : (applyState==='deleted' ? '✓ Deleted on another device' : '✓ Updated'));
         firstEvent = false;
 
