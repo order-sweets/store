@@ -1751,7 +1751,7 @@ function invDisplay(p){
     +'<div class="inv-box"><div class="inv-box-val">'+total+'</div><div class="inv-box-lbl">Total Pieces</div></div>'
   +'</div>';
 }
-function getBrandOfProduct(id){var b=BRANDS.find(function(br){return br.products.some(function(p){return p.id===id;});});return b?b.brand:'';}
+function getBrandOfProduct(id){var b=BRANDS.find(function(br){return br.products.some(function(p){return p.id===id;});});if(b)return b.brand;var p=findProduct(id);return(p&&p.brand)||'';}
 
 function prodAdminCard(p){
   var stock=getStockPieces(p);
@@ -1881,6 +1881,8 @@ window.saveProductEdits=function(id){
 
   p.name=newName;p.ppc=newPpc;p.weight=newWeight;p.desc=newDesc;p.discount=newDisc;p.price=newRp;p.priceDist=newDp;
   p.unitsRetail=newUnitR;p.unitsDist=newUnitD;
+  // Always preserve brand on the product object so it survives moves to/from New Arrivals/Hot Sale
+  if(newBrand)p.brand=newBrand;
 
   var inv=getInv();
   inv[id]=newStock;
@@ -1898,11 +1900,17 @@ window.saveProductEdits=function(id){
   var oldBrand=getBrandOfProduct(id);
   var isNew=NEW_ARRIVALS.some(function(x){return x.id===id;});
   var isHotSave=HOT_SALE.some(function(x){return x.id===id;});
-  if((isHotSave&&newSec!=='hot')||(!isHotSave&&newSec==='hot')||(!isHotSave&&oldBrand.toLowerCase()!==newBrand.toLowerCase())){
-if(isNew){NEW_ARRIVALS=NEW_ARRIVALS.filter(function(x){return x.id!==id;});}if(isHotSave){HOT_SALE=HOT_SALE.filter(function(x){return x.id!==id;});}
-    else{BRANDS.forEach(function(b){b.products=b.products.filter(function(x){return x.id!==id;});});BRANDS=BRANDS.filter(function(b){return b.products.length>0;});}
+  var sectionChanged=(isNew&&newSec!=='new')||(isHotSave&&newSec!=='hot')||(!isNew&&!isHotSave&&(newSec==='new'||newSec==='hot'));
+  var brandChanged=(!isNew&&!isHotSave&&newSec==='catalog'&&newBrand&&oldBrand.toLowerCase()!==newBrand.toLowerCase());
+  if(sectionChanged||brandChanged){
+    // Remove from wherever it currently lives
+    NEW_ARRIVALS=NEW_ARRIVALS.filter(function(x){return x.id!==id;});
+    HOT_SALE=HOT_SALE.filter(function(x){return x.id!==id;});
+    BRANDS.forEach(function(b){b.products=b.products.filter(function(x){return x.id!==id;});});
+    BRANDS=BRANDS.filter(function(b){return b.products.length>0;});
     p.section=newSec;
-    if(newSec==='new'){NEW_ARRIVALS.push(p);}else if(newSec==='hot'){HOT_SALE.push(p);}
+    if(newSec==='new'){NEW_ARRIVALS.push(p);}
+    else if(newSec==='hot'){HOT_SALE.push(p);}
     else{var found=BRANDS.find(function(b){return b.brand.toLowerCase()===newBrand.toLowerCase();});if(found){found.products.push(p);}else{BRANDS.push({brand:newBrand,products:[p]});}}
   }
 
