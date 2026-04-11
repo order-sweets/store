@@ -39,8 +39,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
 /* BRAND TABS (A) */
 #brand-tabs-wrap{position:sticky;top:0;z-index:100;background:var(--bg);padding:10px 0 8px;margin:-4px 0 12px;border-bottom:1px solid var(--border);}
-#brand-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
-#brand-tabs::-webkit-scrollbar{display:none;}
+#brand-tabs{display:flex;flex-wrap:wrap;gap:6px;}
 .brand-tab{flex:0 0 auto;padding:3px 12px;border:1.5px solid var(--accent);border-radius:50px;font-size:13px;font-weight:400;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;color:var(--accent-text);background:#fff;cursor:pointer;white-space:nowrap;transition:all .18s;}
 .brand-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .brand-tab:not(.active):hover{background:var(--accent-bg);}
