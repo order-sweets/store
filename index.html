@@ -1616,6 +1616,7 @@ function doSend(){
     msg='*\u2713REVISED ORDER! | '+orderId+'*'
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
+      +'*Address:* '+(addr&&addr!=='(not provided)'?addr:'(not provided)')+'\n'
       +(notes?'\n*Notes:* '+notes:'')
       +'\n_Edit order (3 days):_ {EDITLINK}'
       +'\n-------------------------------'
@@ -1629,6 +1630,7 @@ function doSend(){
     msg='*\u2713ORDER RECEIVED! | '+orderId+'*'
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
+      +'*Address:* '+(addr&&addr!=='(not provided)'?addr:'(not provided)')+'\n'
       +(notes?'\n*Notes:* '+notes:'')
       +'\n_Edit order (3 days):_ {EDITLINK}'
       +'\n-------------------------------'
