@@ -1618,26 +1618,26 @@ function doSend(){
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'\n*Notes:* '+notes:'')
       +'\n_Edit order (3 days):_ {EDITLINK}'
-      +'\n----------------------------------------------------'
+      +'\n-------------------------------'
       +'\n*\u2713ITEMS:*\n'+lines.join('\n')
       +'\n\nTotal: $'+sub.toFixed(2)
       +'\nCash on Delivery'
-      +'\n----------------------------------------------------'
+      +'\n-------------------------------'
       +minNote
-      +'\n_We\'ll be in touch to confirm. Thank you!_';
+      +'\n\n_We\'ll be in touch to confirm. Thank you!_';
   } else {
     msg='*\u2713ORDER RECEIVED! | '+orderId+'*'
       +'\n\n*Name:* '+name+'\n'
       +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
       +(notes?'\n*Notes:* '+notes:'')
       +'\n_Edit order (3 days):_ {EDITLINK}'
-      +'\n----------------------------------------------------'
+      +'\n-------------------------------'
       +'\n*\u2713ITEMS:*\n'+lines.join('\n')
       +'\n\nTotal: $'+sub.toFixed(2)
       +'\nCash on Delivery'
-      +'\n----------------------------------------------------'
+      +'\n-------------------------------'
       +minNote
-      +'\n_We\'ll be in touch to confirm. Thank you!_';
+      +'\n\n_We\'ll be in touch to confirm. Thank you!_';
   }
 
   // Build edit link (only for fresh orders, not revisions)
