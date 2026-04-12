@@ -20,8 +20,9 @@
 html{-webkit-text-size-adjust:100%;}
 body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;}
 .page{display:none;min-height:100vh;}.page.active{display:block;}
-#lock-btn{position:fixed;top:16px;left:16px;z-index:500;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+#lock-btn{position:fixed;top:16px;left:16px;z-index:500;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .3s,transform .3s;}
 #lock-btn svg{width:20px;height:20px;stroke:var(--text-muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+#lock-btn.scrolled-away{opacity:0;transform:translateY(-8px);pointer-events:none;}
 
 /* FLOATING BASKET BUTTON */
 #float-basket{position:fixed;bottom:100px;right:16px;z-index:499;width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;box-shadow:0 2px 12px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;}
@@ -265,7 +266,8 @@ body{top:0!important;}
 #goog-gt-tt{display:none!important;}
 .goog-te-balloon-frame{display:none!important;}
 .page-admin-active .translate-btn,.page-login-active .translate-btn{display:none!important;}
-.translate-btn{position:fixed;top:16px;right:16px;z-index:490;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.translate-btn{position:fixed;top:16px;right:16px;z-index:490;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .3s,transform .3s;}
+.translate-btn.scrolled-away{opacity:0;transform:translateY(-8px);pointer-events:none;}
 .translate-btn img{width:28px;height:28px;object-fit:contain;}
 .translate-btn:hover{box-shadow:0 3px 14px rgba(0,0,0,.22);}
 /* STICKY */
@@ -2843,6 +2845,24 @@ function fbLoad() {
 
 function _fbHookSaves() {} // no-op — saves patched directly in main app
 window._fbEnsureListening();
+
+// Hide top-corner buttons on scroll (storefront only)
+(function(){
+  var THRESHOLD = 60;
+  var ticking = false;
+  function updateScrolled(){
+    var scrolled = window.scrollY > THRESHOLD;
+    var onStore = document.getElementById('page-order') && document.getElementById('page-order').classList.contains('active');
+    var lockBtn = document.getElementById('lock-btn');
+    var transBtn = document.getElementById('translate-btn');
+    if(lockBtn){ lockBtn.classList.toggle('scrolled-away', scrolled && onStore); }
+    if(transBtn){ transBtn.classList.toggle('scrolled-away', scrolled && onStore); }
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ requestAnimationFrame(updateScrolled); ticking = true; }
+  }, {passive:true});
+})();
 </script>
 
 <!-- Sync status badge -->
