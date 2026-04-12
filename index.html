@@ -575,10 +575,10 @@ body{top:0!important;}
   <div class="field-grid">
     <div class="field full"><label>Full Name / Company Name</label><input type="text" id="f-name" placeholder="" autocomplete="name"></div>
     <div class="field full"><label>Phone Number</label>
-      <div class="phone-row"><span class="phone-pfx">+65</span><input type="tel" id="f-phone" placeholder="" maxlength="8" inputmode="numeric"></div>
+      <div class="phone-row"><span class="phone-pfx">+65</span><input type="tel" id="f-phone" placeholder="" maxlength="9" inputmode="numeric" oninput="fmtPhone(this)"></div>
     </div>
-    <div class="field full" id="addr-field"><label>Delivery Address</label><input type="text" id="f-address" placeholder="Block, street, unit number"></div>
-    <div class="field full"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Any allergies, special requests…"></textarea></div>
+    <div class="field full" id="addr-field"><label>Delivery Address</label><input type="text" id="f-address" placeholder="" autocomplete="off"></div>
+    <div class="field full"><label>Notes (optional)</label><textarea id="f-notes" placeholder=""></textarea></div>
   </div>
 </div><!-- /order-wrap -->
 
@@ -1149,7 +1149,7 @@ function initGreeting(){
     el('greeting-banner').style.display='';
     el('cust-name-display').textContent=cust.name;
     el('f-name').value=cust.name;
-    if(cust.phone)el('f-phone').value=cust.phone;
+    if(cust.phone){var ph=el('f-phone');ph.value=cust.phone;fmtPhone(ph);}
     if(cust.address)el('f-address').value=cust.address;
     if(cust.outlets&&cust.outlets.length){
       // Build inline outlet buttons (used by change-outlet sync)
@@ -1583,10 +1583,17 @@ window.bSet=function(entryId,val){
 };
 function updateDelNotice(){} // delivery section removed
 
+/* ── PHONE FORMAT ── */
+function fmtPhone(inp){
+  var digits=inp.value.replace(/\D/g,'').slice(0,8);
+  inp.value=digits.length>4?digits.slice(0,4)+' '+digits.slice(4):digits;
+}
+window.fmtPhone=fmtPhone;
+
 /* ── SEND ── */
 function doSend(){
   var name=el('f-name').value.trim()||'(not provided)';
-  var phone=el('f-phone').value.trim();
+  var phone=el('f-phone').value.replace(/\s/g,'').trim();
   var addr=el('f-address').value.trim()||'(not provided)';
   var notes=el('f-notes').value.trim();
   var sub=getSub();
