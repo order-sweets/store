@@ -1693,11 +1693,11 @@ function _sendWA(fullMsg,orderId,sub){
   });
   beinvPending.unshift({
     id:orderId,
-    custName:custName,
-    custId:custId||'',
+    custName:el('f-name')?el('f-name').value.trim()||'(not provided)':'(not provided)',
+    custId:urlCustId||'',
     addr:(el('f-address')?el('f-address').value.trim():''),
     outlet:'',
-    date:now.toISOString().split('T')[0],
+    date:new Date().toISOString().split('T')[0],
     delivery:(typeof delMode!=='undefined'?delMode:''),
     items:invItems,
     notes:(el('f-notes')?el('f-notes').value.trim():''),
@@ -1705,7 +1705,7 @@ function _sendWA(fullMsg,orderId,sub){
     _fromStore:true
   });
   localStorage.setItem('beinv-pending',JSON.stringify(beinvPending));
-  if(window._fbStarted&&!window._fbApplyingRemote)_fbDebouncedPush();
+  if(!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
     el('placed-order-id').textContent=orderId;
   el('placed-modal').classList.add('open');
 }
@@ -2521,7 +2521,7 @@ window._fbApplyData = function(d) {
     }
     if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
     if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
-    if (d.pendingOrders) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
+    if (Object.prototype.hasOwnProperty.call(d,'pendingOrders')) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders || []));
   } finally {
     // ALWAYS clear the guard
     _fbApplyingRemote = false;
