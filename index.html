@@ -245,9 +245,9 @@ body{top:0!important;}
 .skiptranslate{display:none!important;}
 .notranslate{font-style:normal!important;}
 /* Restock */
-.restock-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 4px;}
-.restock-inp{width:80px;padding:6px 10px;border:1.5px solid var(--border-md);border-radius:8px;font-size:13px;font-family:inherit;outline:none;}
-.restock-btn{padding:6px 14px;background:var(--green);border:none;border-radius:8px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;}
+.restock-row{display:flex;align-items:center;gap:6px;margin:0 0 4px;flex-direction:column;width:100%;}
+.restock-inp{width:100%;padding:6px 10px;border:1.5px solid var(--border-md);border-radius:8px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;}
+.restock-btn{width:100%;padding:6px 10px;background:var(--green);border:none;border-radius:8px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;}
 .restock-log{font-size:11px;color:var(--text-muted);font-style:italic;}
 /* Order history admin */
 .order-log-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
@@ -362,7 +362,7 @@ body{top:0!important;}
 .prod-admin-thumb{width:44px;height:44px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;}
 .prod-admin-thumb img{width:100%;height:100%;object-fit:cover;}
 .prod-admin-info{flex:1;min-width:0;}
-.prod-admin-name{font-size:14px;font-weight:600;}
+.prod-admin-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .prod-admin-price{font-size:12px;color:var(--text-muted);}
 .prod-admin-stock-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;}
 .pah-stock-chip{font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--surface);color:var(--text-muted);border:1px solid var(--border);white-space:nowrap;}
@@ -372,9 +372,13 @@ body{top:0!important;}
 .pah-box-label{font-size:11px;color:var(--text-muted);font-weight:500;}
 .prod-admin-chevron{font-size:12px;color:var(--text-hint);transition:transform .2s;flex-shrink:0;}
 .prod-admin-chevron.open{transform:rotate(180deg);}
+@media(max-width:480px){
+  .prod-admin-thumb{width:34px;height:34px;font-size:18px;}
+  .prod-admin-header{padding:10px 10px;gap:8px;}
+}
 .prod-admin-body{display:none;padding:0 14px 14px;border-top:1px solid var(--border);}
 .prod-admin-body.open{display:block;}
-.inv-display{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin:10px 0 4px;align-items:center;}
+.inv-display{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0 4px;align-items:center;}
 .inv-box{background:var(--surface);border-radius:8px;padding:10px;text-align:center;}
 .inv-box-val{font-size:20px;font-weight:700;}
 .inv-box-lbl{font-size:10px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
