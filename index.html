@@ -1702,11 +1702,18 @@ function doSend(){
       var expiry=Date.now()+(3*24*60*60*1000);
       var baseUrl=window.location.href.split('?')[0];
       // Save cart to Firebase — hardcoded URL avoids _FB_URL scope issue inside IIFE
-      fetch('https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/store/editOrders/'+orderId+'.json',{
+      var _saveUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/store/editOrders/'+orderId+'.json';
+      var _saveBody=JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''});
+      alert('DEBUG SAVE: Saving to\n'+_saveUrl+'\nBody length='+_saveBody.length);
+      fetch(_saveUrl,{
         method:'PUT',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''})
-      }).catch(function(){});
+        body:_saveBody
+      }).then(function(r){
+        alert('DEBUG SAVE: Firebase save responded, status='+r.status);
+      }).catch(function(err){
+        alert('DEBUG SAVE: Firebase save FAILED: '+err);
+      });
       // Short link — no items in URL
       var editParams='?edit='+orderId+'&exp='+expiry;
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
