@@ -1685,17 +1685,15 @@ function doSend(){
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var fullEditLink=baseUrl+editParams;
-      // Shorten via spoo.me async fetch, fall back to full link on failure
-      fetch('https://spoo.me/',{
-        method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},
-        body:'url='+encodeURIComponent(fullEditLink)
-      }).then(function(r){return r.json();}).then(function(data){
-        var shortUrl=data&&data.short_url?data.short_url:fullEditLink;
-        _sendWA(msg.replace('{EDITLINK}',shortUrl),orderId,sub);
-      }).catch(function(){
-        _sendWA(msg.replace('{EDITLINK}',fullEditLink),orderId,sub);
-      });
+      // Shorten via TinyURL (simple GET, no auth, no CORS issues), fall back to full link
+      fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(fullEditLink))
+        .then(function(r){return r.text();})
+        .then(function(short){
+          var editLink=(short&&short.startsWith('http'))?short.trim():fullEditLink;
+          _sendWA(msg.replace('{EDITLINK}',editLink),orderId,sub);
+        }).catch(function(){
+          _sendWA(msg.replace('{EDITLINK}',fullEditLink),orderId,sub);
+        });
       return;
     }catch(e){}
     msg=msg.replace('{EDITLINK}','(link unavailable)');
