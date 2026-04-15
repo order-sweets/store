@@ -1414,7 +1414,7 @@ function cartEntriesHTML(pid){
   var entries=cartEntries.filter(function(e){return e.pid===pid;});
   if(!entries.length)return'';
   return'<div class="cart-entries">'+entries.map(function(e){
-    var price=e.unit==='case'?casePrice(p):piecePrice(p);
+    var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var label=(e.variation?'['+esc(e.variation)+'] ':(e.unit==='case'?'Box':'Piece'))+(e.unit==='case'?' ('+p.ppc+' pcs)':'')+' × '+e.qty+' = $'+(price*e.qty).toFixed(2);
     return'<div class="cart-entry"><span class="cart-entry-label">'+label+'</span><button class="cart-entry-remove" onclick="removeEntry(\''+e.entryId+'\')">✕</button></div>';
   }).join('')+'</div>';
@@ -1557,7 +1557,7 @@ window.selDel=function(m){
 function getSub(){
   return cartEntries.reduce(function(s,e){
     var p=findProduct(e.pid);if(!p)return s;
-    return s+(e.unit==='case'?casePrice(p):piecePrice(p))*e.qty;
+    return s+(e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p))*e.qty;
   },0);
 }
 function renderBasket(){
@@ -1588,7 +1588,7 @@ function renderBasket(){
   }
   el('basket-body').innerHTML=cartEntries.map(function(e){
     var p=findProduct(e.pid);if(!p)return'';
-    var price=e.unit==='case'?casePrice(p):piecePrice(p);
+    var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var varStr=e.variation?' ['+esc(e.variation)+']':'';
     return'<div class="basket-item">'
       +'<div class="basket-item-info"><div class="basket-item-name">'+esc(p.name)+varStr+'</div><div class="basket-item-sub">'+(e.unit==='case'?'Box ('+p.ppc+' pcs)':'Piece')+' × '+e.qty+'</div></div>'
@@ -1601,7 +1601,7 @@ function renderBasket(){
   var sub=getSub();
   el('basket-lines').innerHTML=cartEntries.map(function(e){
     var p=findProduct(e.pid);if(!p)return'';
-    var price=e.unit==='case'?casePrice(p):piecePrice(p);
+    var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var varStr=e.variation?' ['+esc(e.variation)+']':'';
     return'<div class="basket-row dim"><span>'+esc(p.name)+varStr+' ('+(e.unit==='case'?'Box':'Piece')+') × '+e.qty+'</span><span class="notranslate">$'+(price*e.qty).toFixed(2)+'</span></div>';
   }).join('');
@@ -2543,6 +2543,10 @@ window._fbApplyData = function(d) {
     if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
     if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
     if (Object.prototype.hasOwnProperty.call(d,'pendingOrders')) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders || []));
+    if (d.ordCounter != null) {
+      var localOrd = parseInt(localStorage.getItem(LS_ORD_CTR)||'0',10);
+      if (d.ordCounter > localOrd) localStorage.setItem(LS_ORD_CTR, String(d.ordCounter));
+    }
   } finally {
     // ALWAYS clear the guard
     _fbApplyingRemote = false;
@@ -2674,7 +2678,8 @@ function _fbGetAllData() {
     photos:    lj('snack-photos-v1') || {},
     restockHistory: lj('snack-restock-v1') || {},
     pendingOrders: lj('beinv-pending') || [],
-    tombstones: tombstones
+    tombstones: tombstones,
+    ordCounter: parseInt(localStorage.getItem('snack-ord-counter')||'0')
   };
 }
 
