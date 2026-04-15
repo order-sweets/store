@@ -1685,20 +1685,17 @@ function doSend(){
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var fullEditLink=baseUrl+editParams;
-      // Try spoo.me synchronous shortening — keeps user-gesture chain intact for window.open
-      var editLink=fullEditLink;
-      try{
-        var xhr=new XMLHttpRequest();
-        xhr.open('POST','https://spoo.me/',false);
-        xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
-        xhr.setRequestHeader('Accept','application/json');
-        xhr.send('url='+encodeURIComponent(fullEditLink));
-        if(xhr.status===200){
-          var res=JSON.parse(xhr.responseText);
-          if(res&&res.short_url)editLink=res.short_url;
-        }
-      }catch(spooErr){/* fall back to full link */}
-      _sendWA(msg.replace('{EDITLINK}',editLink),orderId,sub);
+      // Shorten via spoo.me async fetch, fall back to full link on failure
+      fetch('https://spoo.me/',{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},
+        body:'url='+encodeURIComponent(fullEditLink)
+      }).then(function(r){return r.json();}).then(function(data){
+        var shortUrl=data&&data.short_url?data.short_url:fullEditLink;
+        _sendWA(msg.replace('{EDITLINK}',shortUrl),orderId,sub);
+      }).catch(function(){
+        _sendWA(msg.replace('{EDITLINK}',fullEditLink),orderId,sub);
+      });
       return;
     }catch(e){}
     msg=msg.replace('{EDITLINK}','(link unavailable)');
