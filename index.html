@@ -1721,7 +1721,7 @@ function doSend(){
       var editLink=baseUrl+editParams;
       _sendWA(msg.replace('{EDITLINK}',editLink),orderId,sub);
       return;
-    }catch(e){}
+    }catch(e){alert('DEBUG CATCH: try block failed: '+e);}
     msg=msg.replace('{EDITLINK}','(link unavailable)');
   }
   _sendWA(msg.replace('{EDITLINK}','(see above)'),orderId,sub);
