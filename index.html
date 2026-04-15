@@ -1293,12 +1293,21 @@ function initGreeting(){
       }catch(err){_applyEditData([],expiry);}
     } else {
       // New: fetch cart from Firebase
-      fetch('https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/store/editOrders/'+urlEditOrder+'.json')
-        .then(function(r){return r.json();})
+      var _fbEditUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/store/editOrders/'+urlEditOrder+'.json';
+      alert('DEBUG: Fetching from Firebase\n'+_fbEditUrl);
+      fetch(_fbEditUrl)
+        .then(function(r){
+          alert('DEBUG: Firebase responded, status='+r.status);
+          return r.json();
+        })
         .then(function(d){
+          alert('DEBUG: Firebase data=\n'+JSON.stringify(d));
           _applyEditData(d&&d.items?d.items:[],d&&d.expiry?d.expiry:expiry);
         })
-        .catch(function(){_applyEditData([],expiry);});
+        .catch(function(err){
+          alert('DEBUG: Firebase fetch FAILED: '+err);
+          _applyEditData([],expiry);
+        });
     }
   }
 }
