@@ -1293,7 +1293,7 @@ function initGreeting(){
       }catch(err){_applyEditData([],expiry);}
     } else {
       // New: fetch items from Firebase
-      fetch(_FB_URL+'/store/editOrders/'+urlEditOrder+'.json')
+      fetch('https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/store/editOrders/'+urlEditOrder+'.json')
         .then(function(r){return r.json();})
         .then(function(d){
           _applyEditData(d&&d.items?d.items:[],d&&d.expiry?d.expiry:expiry);
