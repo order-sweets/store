@@ -1286,13 +1286,13 @@ function initGreeting(){
     }
 
     if(urlEditItems){
-      // Legacy: items encoded in URL (old orders)
+      // Legacy support: old links that still have items in URL
       try{
         var decoded=JSON.parse(decodeURIComponent(escape(atob(urlEditItems))));
         _applyEditData(decoded,expiry);
       }catch(err){_applyEditData([],expiry);}
     } else {
-      // New: fetch items from Firebase
+      // New: fetch cart from Firebase
       fetch('https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/store/editOrders/'+urlEditOrder+'.json')
         .then(function(r){return r.json();})
         .then(function(d){
@@ -1692,14 +1692,13 @@ function doSend(){
       });
       var expiry=Date.now()+(3*24*60*60*1000);
       var baseUrl=window.location.href.split('?')[0];
-      // Save edit data to Firebase — keeps the link short (no items in URL)
-      var editPayload={items:editItems,expiry:expiry};
-      fetch(_FB_URL+'/store/editOrders/'+orderId+'.json',{
+      // Save cart to Firebase — hardcoded URL avoids _FB_URL scope issue inside IIFE
+      fetch('https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/store/editOrders/'+orderId+'.json',{
         method:'PUT',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(editPayload)
+        body:JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''})
       }).catch(function(){});
-      // Build short edit link — just the order ID + customer params
+      // Short link — no items in URL
       var editParams='?edit='+orderId+'&exp='+expiry;
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
@@ -2532,6 +2531,7 @@ window._fbApplyData = function(d) {
       var localOrd = parseInt(localStorage.getItem(LS_ORD_CTR)||'0',10);
       if (d.ordCounter > localOrd) localStorage.setItem(LS_ORD_CTR, String(d.ordCounter));
     }
+
   } finally {
     // ALWAYS clear the guard
     _fbApplyingRemote = false;
