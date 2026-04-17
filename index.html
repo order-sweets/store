@@ -1153,6 +1153,58 @@ var urlEditExpiry=params.get('exp')||'';   // expiry timestamp (ms)
 var urlEditItems=params.get('items')||'';  // base64-encoded cart items
 var isRevision=false; // set to true if editing an existing order
 
+function encodeEditItems(items){
+  try{
+    var compact=(items||[]).map(function(e){
+      return [e.pid||'',e.unit==='case'?1:0,Math.max(0,parseInt(e.qty,10)||0),e.variation||''];
+    }).filter(function(e){return e[0]&&e[2]>0;});
+    return btoa(unescape(encodeURIComponent(JSON.stringify(compact))));
+  }catch(err){
+    console.error('Edit items encode failed:', err);
+    return '';
+  }
+}
+function decodeEditItems(raw){
+  if(!raw)return[];
+  try{
+    var decoded=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(!Array.isArray(decoded))return[];
+    return decoded.map(function(e){
+      if(Array.isArray(e)){
+        return{pid:e[0]||'',unit:e[1]===1?'case':(e[1]==='case'?'case':'piece'),qty:Math.max(0,parseInt(e[2],10)||0),variation:e[3]||''};
+      }
+      return{pid:e.pid||'',unit:e.unit==='case'?'case':'piece',qty:Math.max(0,parseInt(e.qty,10)||0),variation:e.variation||''};
+    }).filter(function(e){return e.pid&&e.qty>0;});
+  }catch(err){
+    console.error('Edit items decode failed:', err);
+    return[];
+  }
+}
+function restoreCartEntries(items){
+  simpleState={};
+  _pendingVar={};
+  cartEntries=(Array.isArray(items)?items:[]).map(function(e){
+    return{entryId:'e'+(++entryCounter),pid:e.pid,unit:e.unit==='case'?'case':'piece',qty:Math.max(0,parseInt(e.qty,10)||0),variation:e.variation||''};
+  }).filter(function(e){return e.pid&&e.qty>0;});
+  cartEntries.forEach(function(e){
+    var p=findProduct(e.pid);
+    if(!p||(p.variations&&p.variations.length>0))return;
+    var st=getSimple(e.pid);
+    if(e.unit==='case')st.caseQty+=e.qty;
+    else st.pieceQty+=e.qty;
+  });
+}
+function showEditRestoreIssue(message){
+  var existing=el('edit-restore-issue');
+  if(existing){existing.textContent=message;return;}
+  var banner=document.createElement('div');
+  banner.id='edit-restore-issue';
+  banner.style.cssText='background:#FCEBEB;color:#791F1F;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:14px;font-weight:600;text-align:center;';
+  banner.textContent=message;
+  var wrap=el('order-wrap');
+  if(wrap)wrap.insertBefore(banner,wrap.firstChild);
+}
+
 function initGreeting(){
   var cust=null;
   if(urlCustId)cust=customers.find(function(c){return c.id===urlCustId;});
@@ -1260,12 +1312,9 @@ function initGreeting(){
       } else {
         // Valid — restore basket
         isRevision=true;
-        if(Array.isArray(items)&&items.length){
-          cartEntries=items.map(function(e){
-            return{entryId:'e'+(++entryCounter),pid:e.pid,unit:e.unit,qty:e.qty,variation:e.variation||''};
-          });
-          renderOrder();renderBasket();
-        }
+        restoreCartEntries(items);
+        renderOrder();renderBasket();
+        if(!cartEntries.length)showEditRestoreIssue('This edit link could not load its saved cart. Please resend a new order link from the updated HTML.');
         // Show editing banner
         var editBanner=document.createElement('div');
         editBanner.style.cssText='background:var(--amber-bg);color:var(--amber-text);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:14px;font-weight:600;text-align:center;border:1.5px solid #E8C87A;';
@@ -1287,15 +1336,15 @@ function initGreeting(){
 
     if(urlEditItems){
       // Legacy support: old links that still have items in URL
-      try{
-        var decoded=JSON.parse(decodeURIComponent(escape(atob(urlEditItems))));
-        _applyEditData(decoded,expiry);
-      }catch(err){_applyEditData([],expiry);}
+      _applyEditData(decodeEditItems(urlEditItems),expiry);
     } else {
       // New: fetch cart from Firebase — stored OUTSIDE /store to survive admin PUT overwrites
       var _fbEditUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/editOrders/'+urlEditOrder+'.json';
       fetch(_fbEditUrl)
-        .then(function(r){ return r.json(); })
+        .then(function(r){
+          if(!r.ok)throw new Error('HTTP '+r.status);
+          return r.json();
+        })
         .then(function(d){
           _applyEditData(d&&d.items?d.items:[],d&&d.expiry?d.expiry:expiry);
         })
@@ -1696,14 +1745,15 @@ function doSend(){
       });
       var expiry=Date.now()+(3*24*60*60*1000);
       var baseUrl=window.location.href.split('?')[0];
-      // Save cart to Firebase — hardcoded URL avoids _FB_URL scope issue inside IIFE
-      var _saveUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/editOrders/'+orderId+'.json';
-      var _saveBody=JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''});
-      // Build the edit link
+      var encodedEditItems=encodeEditItems(editItems);
       var editParams='?edit='+orderId+'&exp='+expiry;
+      if(encodedEditItems)editParams+='&items='+encodeURIComponent(encodedEditItems);
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var editLink=baseUrl+editParams;
+      // Save cart to Firebase — hardcoded URL avoids _FB_URL scope issue inside IIFE
+      var _saveUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/editOrders/'+orderId+'.json';
+      var _saveBody=JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''});
       // CRITICAL: await the save BEFORE opening WhatsApp.
       // Opening wa.me navigates the page (mobile) and aborts in-flight fetches,
       // which is why previously-saved edit orders appeared empty when reopened.
