@@ -126,7 +126,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .prod-list.grid-view{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
 @media(max-width:480px){.prod-list.grid-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}}
 .gc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;}
-.gc-img{width:100%;aspect-ratio:1;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden;}
+.gc-img{width:100%;aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden;}
 .gc-img img{width:100%;height:100%;object-fit:contain;object-position:center;}
 .gc-img-placeholder{font-size:30px;line-height:1;}
 .gc-body{padding:7px;flex:1;display:flex;flex-direction:column;gap:5px;background:#fff;align-items:center;text-align:center;}
@@ -140,7 +140,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .gc-inp{width:32px;height:24px;border-radius:6px;border:1px solid var(--border-md);background:#fff;text-align:center;font-size:12px;color:var(--text);font-family:inherit;}
 .gc-divider{height:1px;background:var(--border);margin:2px 0;width:100%;}
 .gc.has-qty{border-color:var(--accent);}
-.gc.oos{opacity:.55;}
+.gc.oos{opacity:.3;}
+.gc-price{font-size:10.5px;color:var(--text-muted);margin-top:1px;}
 
 /* ITEM CARD */
 .item-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:row;}
@@ -197,6 +198,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .uq-inp:focus{border-color:var(--accent);}
 .add-to-cart-btn{margin-top:8px;width:100%;padding:8px;background:var(--text);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
 .add-to-cart-btn:disabled{opacity:.35;cursor:not-allowed;}
+.var-select{width:100%;padding:5px 8px;border:1.5px solid var(--border-md);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text);background:var(--bg);cursor:pointer;margin-bottom:4px;}
+.gc .var-select{font-size:11px;padding:4px 6px;margin-bottom:4px;}
 .cart-entries{margin-top:6px;display:flex;flex-direction:column;gap:4px;}
 .cart-entry{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.7);border-radius:7px;padding:5px 8px;font-size:11px;}
 .cart-entry-label{flex:1;min-width:0;font-weight:500;}
@@ -1470,16 +1473,23 @@ window.setViewMode=function(m){
 function gridCardHTML(p){
   var stock=getStockPieces(p);
   var oos=stock<=0;
+  var hasVar=p.variations&&p.variations.length>0;
   var photo=getPhoto(p.id);
   var imgHTML=photo?'<img src="'+photo+'" alt="">':'<span class="gc-img-placeholder">\uD83D\uDCE6</span>';
-  var st=getSimple(p.id);
-  var hasQty=(st.pieceQty>0||st.caseQty>0);
+  var st=hasVar?{pieceQty:0,caseQty:0}:getSimple(p.id);
+  var hasQty=hasVar?cartEntries.some(function(e){return e.pid===p.id;}):(st.pieceQty>0||st.caseQty>0);
+  var pendingVar=_pendingVar[p.id]||'';
   var units=allowedUnits(p);
   var html='<div class="gc'+(hasQty?' has-qty':'')+(oos?' oos':'')+'" id="card-'+p.id+'">';
   html+='<div class="gc-img" onclick="openLightbox(\''+p.id+'\')" title="Tap to enlarge">'+imgHTML+'</div>';
   html+='<div class="gc-body">';
   html+='<div class="gc-name">'+esc(p.name)+'</div>';
   if(p.desc)html+='<div class="gc-desc">'+esc(p.desc)+'</div>';
+  if(hasVar){
+    html+='<select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select variation</option>'
+      +p.variations.map(function(v){return'<option value="'+esc(v)+'"'+(pendingVar===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')
+    +'</select>';
+  }
   var showDivider=false;
   if(units==='piece'||units==='both'){
     var pSpec='1pc'+(p.weight?' \xD7 '+p.weight:'');
@@ -1489,7 +1499,9 @@ function gridCardHTML(p){
     html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',-1)"'+(oos?' disabled':'')+'>−</button>';
     html+='<input class="gc-inp" type="number" min="0" max="'+stock+'" value="'+(st.pieceQty||0)+'" inputmode="numeric" id="uqinp-piece-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'piece\',this.value)">';
     html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',1)"'+(oos?' disabled':'')+'>+</button>';
-    html+='</div></div>';
+    html+='</div>';
+    html+='<div class="gc-price">$'+effectivePiecePrice(p).toFixed(2)+'</div>';
+    html+='</div>';
     showDivider=true;
   }
   if(p.ppc>0&&(units==='case'||units==='both')){
@@ -1501,7 +1513,13 @@ function gridCardHTML(p){
     html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'case\',-1)"'+(maxCase<=0?' disabled':'')+'>−</button>';
     html+='<input class="gc-inp" type="number" min="0" max="'+maxCase+'" value="'+(st.caseQty||0)+'" inputmode="numeric" id="uqinp-case-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'case\',this.value)">';
     html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'case\',1)"'+(maxCase<=0?' disabled':'')+'>+</button>';
-    html+='</div></div>';
+    html+='</div>';
+    html+='<div class="gc-price">$'+effectiveCasePrice(p).toFixed(2)+'</div>';
+    html+='</div>';
+  }
+  if(hasVar){
+    html+='<button class="add-to-cart-btn" onclick="addVarToCart(\''+p.id+'\')"'+(oos?' disabled':'')+'>+ Add to cart</button>';
+    html+=cartEntriesHTML(p.id);
   }
   html+='</div></div>';
   return html;
@@ -1518,9 +1536,9 @@ function cardHTML(p,isNew){
   var pendingVar=_pendingVar[p.id]||'';
   var varHTML='';
   if(hasVar){
-    varHTML='<div class="var-section"><div class="var-label">Choose flavour / type</div><div class="var-btns">'
-      +p.variations.map(function(v){return'<button class="var-btn'+(pendingVar===v?' active':'')+'" onclick="setPendingVar(\''+p.id+'\',\''+esc(v)+'\')">'+esc(v)+'</button>';}).join('')
-    +'</div></div>';
+    varHTML='<div class="var-section"><select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select variation</option>'
+      +p.variations.map(function(v){return'<option value="'+esc(v)+'"'+(pendingVar===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')
+    +'</select></div>';
   }
   var stockBadge=oos?'<span class="badge-out">Out of Stock</span>':(getStockCases(p)<=1&&p.ppc>0?'<span class="badge-low">Low Stock</span>':'');
   return'<div class="item-card'+(hasQty?' has-qty':'')+(oos?' oos':'')+'" id="card-'+p.id+'">'
@@ -1566,10 +1584,11 @@ function renderOrder(){
   if(!hasAny)bc.innerHTML='<div class="ps-empty">No products available.</div>';
 }
 
+window._svp=function(sel){setPendingVar(sel.getAttribute('data-pid'),sel.value);};
 window.setPendingVar=function(pid,v){
-  _pendingVar[pid]=(_pendingVar[pid]===v?'':v);
-  var card=el('card-'+pid);
-  if(card)card.querySelectorAll('.var-btn').forEach(function(b){b.classList.toggle('active',b.textContent===v&&_pendingVar[pid]===v);});
+  _pendingVar[pid]=v;
+  var sel=document.getElementById('varsel-'+pid);
+  if(sel&&sel.value!==v)sel.value=v;
 };
 window.addVarToCart=function(pid){
   var p=findProduct(pid);if(!p)return;
