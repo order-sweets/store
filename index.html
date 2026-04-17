@@ -1699,8 +1699,9 @@ function doSend(){
       // Save cart to Firebase — hardcoded URL avoids _FB_URL scope issue inside IIFE
       var _saveUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/editOrders/'+orderId+'.json';
       var _saveBody=JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''});
-      // Short link — no items in URL
-      var editParams='?edit='+orderId+'&exp='+expiry;
+      // Build edit link — includes base64 items as fallback if Firebase fetch fails/401
+      var _itemsB64=btoa(unescape(encodeURIComponent(JSON.stringify(editItems))));
+      var editParams='?edit='+orderId+'&exp='+expiry+'&items='+encodeURIComponent(_itemsB64);
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var editLink=baseUrl+editParams;
