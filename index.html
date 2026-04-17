@@ -117,6 +117,31 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .brand-group-title{font-family:'Bebas Neue',sans-serif;font-size:20px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:var(--text);padding:4px 10px;border-left:4px solid var(--accent);margin-bottom:12px;background:linear-gradient(90deg,rgba(216,90,48,.07) 0%,transparent 100%);}
 .ps-empty{font-size:14px;color:var(--text-hint);font-style:italic;padding:8px 0 24px;text-align:center;}
 
+/* VIEW TOGGLE */
+.view-toggle-bar{display:flex;align-items:center;gap:6px;margin-bottom:1rem;}
+.view-toggle-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;border:1px solid var(--border-md);background:var(--bg);font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);font-family:inherit;transition:background .15s,color .15s;}
+.view-toggle-btn.active{background:var(--surface);color:var(--text);border-color:var(--border-md);}
+.view-toggle-btn svg{width:13px;height:13px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+/* GRID VIEW */
+.prod-list.grid-view{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+@media(max-width:480px){.prod-list.grid-view{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}}
+.gc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;}
+.gc-img{width:100%;aspect-ratio:1;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden;}
+.gc-img img{width:100%;height:100%;object-fit:contain;object-position:center;}
+.gc-img-placeholder{font-size:30px;line-height:1;}
+.gc-body{padding:7px;flex:1;display:flex;flex-direction:column;gap:5px;background:#fff;align-items:center;text-align:center;}
+.gc-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;}
+.gc-desc{font-size:11px;color:var(--text-muted);line-height:1.3;}
+.gc-unit{display:flex;flex-direction:column;gap:3px;align-items:center;}
+.gc-unit-label{font-size:10.5px;color:var(--text-muted);}
+.gc-ctrl{display:flex;align-items:center;justify-content:center;gap:3px;}
+.gc-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--border-md);background:#fff;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-family:inherit;flex-shrink:0;}
+.gc-btn:disabled{opacity:.35;cursor:default;}
+.gc-inp{width:32px;height:24px;border-radius:6px;border:1px solid var(--border-md);background:#fff;text-align:center;font-size:12px;color:var(--text);font-family:inherit;}
+.gc-divider{height:1px;background:var(--border);margin:2px 0;width:100%;}
+.gc.has-qty{border-color:var(--accent);}
+.gc.oos{opacity:.55;}
+
 /* ITEM CARD */
 .item-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:row;}
 .item-card.has-qty{border:2.5px solid var(--accent);background:var(--accent-bg);}
@@ -564,6 +589,14 @@ body{top:0!important;}
   </div><!-- /hot-sale-section -->
 
   <p class="slabel">Products Available</p>
+  <div class="view-toggle-bar">
+    <button class="view-toggle-btn active" id="btn-view-list" onclick="setViewMode('list')">
+      <svg viewBox="0 0 13 13"><rect x="0" y="0" width="13" height="3" rx="1"/><rect x="0" y="5" width="13" height="3" rx="1"/><rect x="0" y="10" width="13" height="3" rx="1"/></svg>List
+    </button>
+    <button class="view-toggle-btn" id="btn-view-grid" onclick="setViewMode('grid')">
+      <svg viewBox="0 0 13 13"><rect x="0" y="0" width="5" height="5" rx="1"/><rect x="8" y="0" width="5" height="5" rx="1"/><rect x="0" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>Grid
+    </button>
+  </div>
   <div id="brand-catalog"><div class="brand-group"><div class="brand-group-title">Bee Events</div><div class="prod-list"><div class="item-card" id="card-p_1774654791150"><div class="card-img" onclick="openLightbox('p_1774654791150')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Cotton Candy</div><div class="item-desc"></div><div class="unit-rows"><div class="unit-row" id="urow-piece-p_1774654791150"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 38g</span></span><span class="unit-row-price notranslate">$1.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('p_1774654791150','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="1000" value="0" inputmode="numeric" id="uqinp-piece-p_1774654791150" onchange="setUnitQty('p_1774654791150','piece',this.value)"><button class="uq-btn" onclick="chgUnit('p_1774654791150','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-p_1774654791150"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">15 pcs × 38g</span></span><span class="unit-row-price notranslate">$27.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('p_1774654791150','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="66" value="0" inputmode="numeric" id="uqinp-case-p_1774654791150" onchange="setUnitQty('p_1774654791150','case',this.value)"><button class="uq-btn" onclick="chgUnit('p_1774654791150','case',1)">+</button></div></div></div></div></div></div></div><div class="brand-group"><div class="brand-group-title">Airheads</div><div class="prod-list"><div class="item-card" id="card-a1"><div class="card-img" onclick="openLightbox('a1')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Airheads Bars</div><div class="item-desc">Chewy taffy candy bar</div><div class="unit-rows"><div class="unit-row" id="urow-piece-a1"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 37g</span></span><span class="unit-row-price notranslate">$2.50</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a1','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="720" value="0" inputmode="numeric" id="uqinp-piece-a1" onchange="setUnitQty('a1','piece',this.value)"><button class="uq-btn" onclick="chgUnit('a1','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-a1"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">36 pcs × 37g</span></span><span class="unit-row-price notranslate">$90.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a1','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-a1" onchange="setUnitQty('a1','case',this.value)"><button class="uq-btn" onclick="chgUnit('a1','case',1)">+</button></div></div></div></div></div><div class="item-card" id="card-a2"><div class="card-img" onclick="openLightbox('a2')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Airheads Bites</div><div class="item-desc">Bite-sized chewy candy</div><div class="unit-rows"><div class="unit-row" id="urow-piece-a2"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 57g</span></span><span class="unit-row-price notranslate">$3.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a2','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="480" value="0" inputmode="numeric" id="uqinp-piece-a2" onchange="setUnitQty('a2','piece',this.value)"><button class="uq-btn" onclick="chgUnit('a2','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-a2"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">24 pcs × 57g</span></span><span class="unit-row-price notranslate">$72.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a2','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-a2" onchange="setUnitQty('a2','case',this.value)"><button class="uq-btn" onclick="chgUnit('a2','case',1)">+</button></div></div></div></div></div></div></div><div class="brand-group"><div class="brand-group-title">Nerds</div><div class="prod-list"><div class="item-card" id="card-nb1"><div class="card-img" onclick="openLightbox('nb1')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Nerds Grape &amp; Strawberry</div><div class="item-desc">Tiny crunchy candy</div><div class="unit-rows"><div class="unit-row" id="urow-piece-nb1"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 46.7g</span></span><span class="unit-row-price notranslate">$2.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb1','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="720" value="0" inputmode="numeric" id="uqinp-piece-nb1" onchange="setUnitQty('nb1','piece',this.value)"><button class="uq-btn" onclick="chgUnit('nb1','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-nb1"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">36 pcs × 46.7g</span></span><span class="unit-row-price notranslate">$100.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb1','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-nb1" onchange="setUnitQty('nb1','case',this.value)"><button class="uq-btn" onclick="chgUnit('nb1','case',1)">+</button></div></div></div></div></div><div class="item-card" id="card-nb2"><div class="card-img" onclick="openLightbox('nb2')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Nerds Rope Rainbow</div><div class="item-desc">Chewy rope covered in Nerds</div><div class="unit-rows"><div class="unit-row" id="urow-piece-nb2"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 26g</span></span><span class="unit-row-price notranslate">$3.20</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb2','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="480" value="0" inputmode="numeric" id="uqinp-piece-nb2" onchange="setUnitQty('nb2','piece',this.value)"><button class="uq-btn" onclick="chgUnit('nb2','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-nb2"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">24 pcs × 26g</span></span><span class="unit-row-price notranslate">$76.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb2','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-nb2" onchange="setUnitQty('nb2','case',this.value)"><button class="uq-btn" onclick="chgUnit('nb2','case',1)">+</button></div></div></div></div></div></div></div></div>
 
   <p class="slabel">🧺 Your Basket</p>
@@ -1425,6 +1458,55 @@ function cartEntriesHTML(pid){
   }).join('')+'</div>';
 }
 
+var _viewMode='list';
+window.setViewMode=function(m){
+  _viewMode=m;
+  var bl=el('btn-view-list'),bg=el('btn-view-grid');
+  if(bl)bl.classList.toggle('active',m==='list');
+  if(bg)bg.classList.toggle('active',m==='grid');
+  renderOrder();
+};
+
+function gridCardHTML(p){
+  var stock=getStockPieces(p);
+  var oos=stock<=0;
+  var photo=getPhoto(p.id);
+  var imgHTML=photo?'<img src="'+photo+'" alt="">':'<span class="gc-img-placeholder">\uD83D\uDCE6</span>';
+  var st=getSimple(p.id);
+  var hasQty=(st.pieceQty>0||st.caseQty>0);
+  var units=allowedUnits(p);
+  var html='<div class="gc'+(hasQty?' has-qty':'')+(oos?' oos':'')+'" id="card-'+p.id+'">';
+  html+='<div class="gc-img" onclick="openLightbox(\''+p.id+'\')" title="Tap to enlarge">'+imgHTML+'</div>';
+  html+='<div class="gc-body">';
+  html+='<div class="gc-name">'+esc(p.name)+'</div>';
+  if(p.desc)html+='<div class="gc-desc">'+esc(p.desc)+'</div>';
+  var showDivider=false;
+  if(units==='piece'||units==='both'){
+    var pSpec='1pc'+(p.weight?' \xD7 '+p.weight:'');
+    if(showDivider)html+='<div class="gc-divider"></div>';
+    html+='<div class="gc-unit"><div class="gc-unit-label">Piece \u00B7 '+esc(pSpec)+'</div>';
+    html+='<div class="gc-ctrl">';
+    html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',-1)"'+(oos?' disabled':'')+'>−</button>';
+    html+='<input class="gc-inp" type="number" min="0" max="'+stock+'" value="'+(st.pieceQty||0)+'" inputmode="numeric" id="uqinp-piece-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'piece\',this.value)">';
+    html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',1)"'+(oos?' disabled':'')+'>+</button>';
+    html+='</div></div>';
+    showDivider=true;
+  }
+  if(p.ppc>0&&(units==='case'||units==='both')){
+    var maxCase=Math.floor(stock/p.ppc);
+    var cSpec=p.ppc+' pcs'+(p.weight?' \xD7 '+p.weight:'');
+    if(showDivider)html+='<div class="gc-divider"></div>';
+    html+='<div class="gc-unit"><div class="gc-unit-label">Box \u00B7 '+esc(cSpec)+'</div>';
+    html+='<div class="gc-ctrl">';
+    html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'case\',-1)"'+(maxCase<=0?' disabled':'')+'>−</button>';
+    html+='<input class="gc-inp" type="number" min="0" max="'+maxCase+'" value="'+(st.caseQty||0)+'" inputmode="numeric" id="uqinp-case-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'case\',this.value)">';
+    html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'case\',1)"'+(maxCase<=0?' disabled':'')+'>+</button>';
+    html+='</div></div>';
+  }
+  html+='</div></div>';
+  return html;
+}
+
 function cardHTML(p,isNew){
   var stock=getStockPieces(p);
   var oos=stock<=0;
@@ -1479,7 +1561,7 @@ function renderOrder(){
     var visProd=b.products.filter(isVisible).slice().sort(function(a,c){return a.name.localeCompare(c.name);});
     if(!visProd.length)return'';
     hasAny=true;
-    return'<div class="brand-group"><div class="brand-group-title">'+esc(b.brand)+'</div><div class="prod-list">'+visProd.map(function(p){return cardHTML(p);}).join('')+'</div></div>';
+    return'<div class="brand-group"><div class="brand-group-title">'+esc(b.brand)+'</div><div class="prod-list'+(_viewMode==='grid'?' grid-view':'')+'">'+visProd.map(function(p){return _viewMode==='grid'?gridCardHTML(p):cardHTML(p);}).join('')+'</div></div>';
   }).join('');
   if(!hasAny)bc.innerHTML='<div class="ps-empty">No products available.</div>';
 }
