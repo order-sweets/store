@@ -1155,10 +1155,17 @@ var isRevision=false; // set to true if editing an existing order
 
 function encodeEditItems(items){
   try{
-    var compact=(items||[]).map(function(e){
-      return [e.pid||'',e.unit==='case'?1:0,Math.max(0,parseInt(e.qty,10)||0),e.variation||''];
-    }).filter(function(e){return e[0]&&e[2]>0;});
-    return btoa(unescape(encodeURIComponent(JSON.stringify(compact))));
+    // Compact format: pid{:|*}qty[|variation], joined by ~
+    // : = piece, * = case. Much shorter than base64+JSON.
+    var parts=(items||[]).map(function(e){
+      var pid=e.pid||'';var qty=Math.max(0,parseInt(e.qty,10)||0);
+      if(!pid||qty<=0)return'';
+      var sep=e.unit==='case'?'*':':';
+      var s=pid+sep+qty;
+      if(e.variation)s+='|'+encodeURIComponent(e.variation);
+      return s;
+    }).filter(Boolean);
+    return parts.join('~');
   }catch(err){
     console.error('Edit items encode failed:', err);
     return '';
@@ -1167,17 +1174,31 @@ function encodeEditItems(items){
 function decodeEditItems(raw){
   if(!raw)return[];
   try{
-    var decoded=JSON.parse(decodeURIComponent(escape(atob(raw))));
-    if(!Array.isArray(decoded))return[];
-    return decoded.map(function(e){
-      if(Array.isArray(e)){
-        return{pid:e[0]||'',unit:e[1]===1?'case':(e[1]==='case'?'case':'piece'),qty:Math.max(0,parseInt(e[2],10)||0),variation:e[3]||''};
-      }
-      return{pid:e.pid||'',unit:e.unit==='case'?'case':'piece',qty:Math.max(0,parseInt(e.qty,10)||0),variation:e.variation||''};
-    }).filter(function(e){return e.pid&&e.qty>0;});
-  }catch(err){
-    console.error('Edit items decode failed:', err);
-    return[];
+    // Legacy base64+JSON support (old links)
+    if(raw.charAt(0)==='W'||raw.indexOf('~')<0&&raw.indexOf(':')<0&&raw.indexOf('*')<0){
+      try{
+        var decoded=JSON.parse(decodeURIComponent(escape(atob(raw))));
+        if(Array.isArray(decoded)){
+          return decoded.map(function(e){
+            if(Array.isArray(e))return{pid:e[0]||'',unit:e[1]===1||e[1]==='case'?'case':'piece',qty:Math.max(0,parseInt(e[2],10)||0),variation:e[3]||''};
+            return{pid:e.pid||'',unit:e.unit==='case'?'case':'piece',qty:Math.max(0,parseInt(e.qty,10)||0),variation:e.variation||''};
+          }).filter(function(e){return e.pid&&e.qty>0;});
+        }
+      }catch(_){}
+    }
+    return raw.split('~').map(function(s){
+      if(!s)return null;
+      var caseIdx=s.indexOf('*');var pieceIdx=s.indexOf(':');
+      var sepIdx=caseIdx>=0&&(pieceIdx<0||caseIdx<pieceIdx)?caseIdx:pieceIdx;
+      if(sepIdx<0)return null;
+      var unit=sepIdx===caseIdx?'case':'piece';
+      var pid=s.substring(0,sepIdx);
+      var rest=s.substring(sepIdx+1);
+      var varIdx=rest.indexOf('|');
+      var qty=parseInt(varIdx>=0?rest.substring(0,varIdx):rest,10)||0;
+      var variation=varIdx>=0?decodeURIComponent(rest.substring(varIdx+1)):'';
+      return{pid:pid,unit:unit,qty:Math.max(0,qty),variation:variation};
+    }).filter(function(e){return e&&e.pid&&e.qty>0;});
   }
 }
 function restoreCartEntries(items){
