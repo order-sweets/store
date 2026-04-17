@@ -1699,19 +1699,32 @@ function doSend(){
       // Save cart to Firebase — hardcoded URL avoids _FB_URL scope issue inside IIFE
       var _saveUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/editOrders/'+orderId+'.json';
       var _saveBody=JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''});
-      fetch(_saveUrl,{
-        method:'PUT',
-        headers:{'Content-Type':'application/json'},
-        body:_saveBody
-      }).catch(function(err){
-        console.error('Edit order save failed:', err);
-      });
-      // Short link — no items in URL
+      // Build the edit link
       var editParams='?edit='+orderId+'&exp='+expiry;
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var editLink=baseUrl+editParams;
-      _sendWA(msg.replace('{EDITLINK}',editLink),orderId,sub);
+      // CRITICAL: await the save BEFORE opening WhatsApp.
+      // Opening wa.me navigates the page (mobile) and aborts in-flight fetches,
+      // which is why previously-saved edit orders appeared empty when reopened.
+      // We also add keepalive:true as a belt-and-suspenders safeguard so the
+      // request survives if the user backgrounds the tab during PUT.
+      var _savePromise;
+      try{
+        _savePromise=fetch(_saveUrl,{
+          method:'PUT',
+          headers:{'Content-Type':'application/json'},
+          body:_saveBody,
+          keepalive:true
+        });
+      }catch(_e){_savePromise=Promise.reject(_e);}
+      // Failsafe: don't block sending the WA message for more than 4s
+      var _timeout=new Promise(function(res){setTimeout(res,4000);});
+      Promise.race([_savePromise,_timeout])
+        .catch(function(err){console.error('Edit order save failed:', err);})
+        .then(function(){
+          _sendWA(msg.replace('{EDITLINK}',editLink),orderId,sub);
+        });
       return;
     }catch(e){console.error('Edit link build failed:', e);}
     msg=msg.replace('{EDITLINK}','(link unavailable)');
