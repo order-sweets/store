@@ -140,9 +140,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .gc-btn:disabled{opacity:.35;cursor:default;}
 .gc-inp{width:32px;height:24px;border-radius:6px;border:1px solid var(--border-md);background:#fff;text-align:center;font-size:12px;color:var(--text);font-family:inherit;}
 .gc-divider{height:1px;background:var(--border);margin:2px 0;width:100%;}
-.gc.has-qty{border-color:var(--accent);}
+.gc.has-qty{border:2.5px solid var(--accent);}
 .gc.oos{opacity:.3;}
-.gc-price{font-size:10.5px;color:var(--text-muted);margin-top:1px;}
+.gc-price{font-size:10.5px;color:var(--text);font-weight:600;margin-top:1px;}
 
 /* ITEM CARD */
 .item-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:row;}
@@ -248,6 +248,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 /* BASKET */
 .basket-wrap{background:var(--surface);border-radius:var(--r-lg);margin-bottom:2rem;overflow:hidden;border:1.5px solid var(--border);}
 .basket-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:#fff;}
+.clear-cart-btn{font-size:12px;color:var(--accent-text);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600;padding:0;}
 .basket-header-title{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;}
 .basket-count{font-size:11px;background:var(--accent);color:#fff;border-radius:20px;padding:2px 9px;font-weight:700;}
 .basket-body{padding:4px 0;}
@@ -607,6 +608,7 @@ body{top:0!important;}
   <div class="basket-wrap" id="basket-section" style="border:2.5px solid var(--accent);box-shadow:0 4px 18px rgba(0,0,0,.10);">
     <div class="basket-header" style="background:var(--accent-bg);">
       <span class="basket-header-title" style="color:var(--accent-text);">Items selected <span class="basket-count" id="basket-count">0</span></span>
+      <button class="clear-cart-btn" id="clear-cart-btn" onclick="clearCart()" style="display:none">Clear cart</button>
     </div>
     <div class="basket-body" id="basket-body"><div class="basket-empty">Your basket is empty — add products above.</div></div>
     <div class="basket-footer" id="basket-footer" style="display:none">
@@ -1487,7 +1489,7 @@ function gridCardHTML(p){
   html+='<div class="gc-name">'+esc(p.name)+'</div>';
   if(p.desc)html+='<div class="gc-desc">'+esc(p.desc)+'</div>';
   if(hasVar){
-    html+='<select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select variation</option>'
+    html+='<select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select type</option>'
       +p.variations.map(function(v){return'<option value="'+esc(v)+'"'+(pendingVar===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')
     +'</select>';
   }
@@ -1537,7 +1539,7 @@ function cardHTML(p,isNew){
   var pendingVar=_pendingVar[p.id]||'';
   var varHTML='';
   if(hasVar){
-    varHTML='<div class="var-section"><select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select variation</option>'
+    varHTML='<div class="var-section"><select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select type</option>'
       +p.variations.map(function(v){return'<option value="'+esc(v)+'"'+(pendingVar===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')
     +'</select></div>';
   }
@@ -1608,6 +1610,12 @@ window.removeEntry=function(entryId){
   var pid=e?e.pid:null;
   cartEntries=cartEntries.filter(function(x){return x.entryId!==entryId;});
   if(pid)refreshFullCard(pid);renderBasket();
+};
+window.clearCart=function(){
+  var pids=cartEntries.map(function(e){return e.pid;}).filter(function(v,i,a){return a.indexOf(v)===i;});
+  cartEntries=[];simpleState={};_pendingVar={};
+  pids.forEach(function(pid){refreshFullCard(pid);});
+  renderBasket();
 };
 function refreshFullCard(pid){
   var p=findProduct(pid);if(!p)return;
@@ -1691,8 +1699,11 @@ function renderBasket(){
   if(fb){fb.classList.remove('basket-glow');void fb.offsetWidth;fb.classList.add('basket-glow');}
   if(!cartEntries.length){
     el('basket-body').innerHTML='<div class="basket-empty">Your basket is empty — add products above.</div>';
-    el('basket-footer').style.display='none';el('wa-btn').disabled=true;return;
+    el('basket-footer').style.display='none';el('wa-btn').disabled=true;
+    var ccb=el('clear-cart-btn');if(ccb)ccb.style.display='none';
+    return;
   }
+  var ccb=el('clear-cart-btn');if(ccb)ccb.style.display='';
   el('basket-body').innerHTML=cartEntries.map(function(e){
     var p=findProduct(e.pid);if(!p)return'';
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
