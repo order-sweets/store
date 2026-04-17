@@ -3,6 +3,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Time to Order</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -593,10 +594,10 @@ body{top:0!important;}
 
   <p class="slabel">Products Available</p>
   <div class="view-toggle-bar">
-    <button class="view-toggle-btn active" id="btn-view-list" onclick="setViewMode('list')">
+    <button class="view-toggle-btn" id="btn-view-list" onclick="setViewMode('list')">
       <svg viewBox="0 0 13 13"><rect x="0" y="0" width="13" height="3" rx="1"/><rect x="0" y="5" width="13" height="3" rx="1"/><rect x="0" y="10" width="13" height="3" rx="1"/></svg>List
     </button>
-    <button class="view-toggle-btn" id="btn-view-grid" onclick="setViewMode('grid')">
+    <button class="view-toggle-btn active" id="btn-view-grid" onclick="setViewMode('grid')">
       <svg viewBox="0 0 13 13"><rect x="0" y="0" width="5" height="5" rx="1"/><rect x="8" y="0" width="5" height="5" rx="1"/><rect x="0" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>Grid
     </button>
   </div>
@@ -1461,7 +1462,7 @@ function cartEntriesHTML(pid){
   }).join('')+'</div>';
 }
 
-var _viewMode='list';
+var _viewMode='grid';
 window.setViewMode=function(m){
   _viewMode=m;
   var bl=el('btn-view-list'),bg=el('btn-view-grid');
