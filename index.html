@@ -1699,19 +1699,28 @@ function doSend(){
       // Save cart to Firebase — hardcoded URL avoids _FB_URL scope issue inside IIFE
       var _saveUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/editOrders/'+orderId+'.json';
       var _saveBody=JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''});
-      fetch(_saveUrl,{
-        method:'PUT',
-        headers:{'Content-Type':'application/json'},
-        body:_saveBody
-      }).catch(function(err){
-        console.error('Edit order save failed:', err);
-      });
       // Short link — no items in URL
       var editParams='?edit='+orderId+'&exp='+expiry;
       if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var editLink=baseUrl+editParams;
-      _sendWA(msg.replace('{EDITLINK}',editLink),orderId,sub);
+      var _waMsg=msg.replace('{EDITLINK}',editLink);
+      // Await save before opening WhatsApp — mobile can navigate away and abort the fetch
+      // keepalive:true keeps the request alive even if the page unloads; 4s failsafe ensures WA still opens
+      var _saveTimeout=setTimeout(function(){_sendWA(_waMsg,orderId,sub);},4000);
+      fetch(_saveUrl,{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:_saveBody,
+        keepalive:true
+      }).then(function(){
+        clearTimeout(_saveTimeout);
+        _sendWA(_waMsg,orderId,sub);
+      }).catch(function(err){
+        clearTimeout(_saveTimeout);
+        console.error('Edit order save failed:', err);
+        _sendWA(_waMsg,orderId,sub);
+      });
       return;
     }catch(e){console.error('Edit link build failed:', e);}
     msg=msg.replace('{EDITLINK}','(link unavailable)');
