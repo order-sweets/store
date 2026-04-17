@@ -248,7 +248,6 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 /* BASKET */
 .basket-wrap{background:var(--surface);border-radius:var(--r-lg);margin-bottom:2rem;overflow:hidden;border:1.5px solid var(--border);}
 .basket-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:#fff;}
-.clear-cart-btn{font-size:12px;color:var(--accent-text);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600;padding:0;}
 .basket-header-title{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;}
 .basket-count{font-size:11px;background:var(--accent);color:#fff;border-radius:20px;padding:2px 9px;font-weight:700;}
 .basket-body{padding:4px 0;}
@@ -608,7 +607,6 @@ body{top:0!important;}
   <div class="basket-wrap" id="basket-section" style="border:2.5px solid var(--accent);box-shadow:0 4px 18px rgba(0,0,0,.10);">
     <div class="basket-header" style="background:var(--accent-bg);">
       <span class="basket-header-title" style="color:var(--accent-text);">Items selected <span class="basket-count" id="basket-count">0</span></span>
-      <button class="clear-cart-btn" id="clear-cart-btn" onclick="clearCart()" style="display:none">Clear cart</button>
     </div>
     <div class="basket-body" id="basket-body"><div class="basket-empty">Your basket is empty — add products above.</div></div>
     <div class="basket-footer" id="basket-footer" style="display:none">
@@ -1521,7 +1519,7 @@ function gridCardHTML(p){
     html+='</div>';
   }
   if(hasVar){
-    html+='<button class="add-to-cart-btn" onclick="addVarToCart(\''+p.id+'\')"'+(oos?' disabled':'')+'>+ Add to cart</button>';
+    html+='<button class="add-to-cart-btn" onclick="addVarToCart(\''+p.id+'\')"'+(oos?' disabled':'')+'>+ Add</button>';
     html+=cartEntriesHTML(p.id);
   }
   html+='</div></div>';
@@ -1552,7 +1550,7 @@ function cardHTML(p,isNew){
       +'<div class="item-desc">'+esc(p.desc)+'</div>'
       +stockBadge+varHTML
       +unitRowsHTML(p,st.pieceQty,st.caseQty)
-      +(hasVar?'<button class="add-to-cart-btn" onclick="addVarToCart(\''+p.id+'\')"'+(oos?' disabled':'')+'>+ Add to cart</button>':'')
+      +(hasVar?'<button class="add-to-cart-btn" onclick="addVarToCart(\''+p.id+'\')"'+(oos?' disabled':'')+'>+ Add</button>':'')
       +(hasVar?cartEntriesHTML(p.id):'')
     +'</div>'
   +'</div>';
@@ -1610,12 +1608,6 @@ window.removeEntry=function(entryId){
   var pid=e?e.pid:null;
   cartEntries=cartEntries.filter(function(x){return x.entryId!==entryId;});
   if(pid)refreshFullCard(pid);renderBasket();
-};
-window.clearCart=function(){
-  var pids=cartEntries.map(function(e){return e.pid;}).filter(function(v,i,a){return a.indexOf(v)===i;});
-  cartEntries=[];simpleState={};_pendingVar={};
-  pids.forEach(function(pid){refreshFullCard(pid);});
-  renderBasket();
 };
 function refreshFullCard(pid){
   var p=findProduct(pid);if(!p)return;
@@ -1699,11 +1691,8 @@ function renderBasket(){
   if(fb){fb.classList.remove('basket-glow');void fb.offsetWidth;fb.classList.add('basket-glow');}
   if(!cartEntries.length){
     el('basket-body').innerHTML='<div class="basket-empty">Your basket is empty — add products above.</div>';
-    el('basket-footer').style.display='none';el('wa-btn').disabled=true;
-    var ccb=el('clear-cart-btn');if(ccb)ccb.style.display='none';
-    return;
+    el('basket-footer').style.display='none';el('wa-btn').disabled=true;return;
   }
-  var ccb=el('clear-cart-btn');if(ccb)ccb.style.display='';
   el('basket-body').innerHTML=cartEntries.map(function(e){
     var p=findProduct(e.pid);if(!p)return'';
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
