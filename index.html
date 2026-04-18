@@ -1613,7 +1613,7 @@ function gridCardHTML(p){
   html+='<div class="gc-body">';
   html+='<div class="gc-name">'+esc(p.name)+'</div>';
   if(hasVar){
-    html+='<select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select type</option>'
+    html+='<select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select type...</option>'
       +p.variations.map(function(v){return'<option value="'+esc(v)+'"'+(pendingVar===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')
     +'</select>';
   }
@@ -1663,7 +1663,7 @@ function cardHTML(p,isNew){
   var pendingVar=_pendingVar[p.id]||'';
   var varHTML='';
   if(hasVar){
-    varHTML='<div class="var-section"><select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select type</option>'
+    varHTML='<div class="var-section"><select class="var-select" data-pid="'+p.id+'" onchange="window._svp(this)"><option value="">Select type...</option>'
       +p.variations.map(function(v){return'<option value="'+esc(v)+'"'+(pendingVar===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')
     +'</select></div>';
   }
