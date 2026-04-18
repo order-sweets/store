@@ -1741,7 +1741,8 @@ function refreshFullCard(pid){
   var p=findProduct(pid);if(!p)return;
   var card=el('card-'+pid);if(!card)return;
   var isNew=NEW_ARRIVALS.some(function(x){return x.id===p.id;});
-  var tmp=document.createElement('div');tmp.innerHTML=cardHTML(p,isNew);
+  var tmp=document.createElement('div');
+  tmp.innerHTML=_viewMode==='grid'?gridCardHTML(p):cardHTML(p,isNew);
   card.parentNode.replaceChild(tmp.firstChild,card);
 }
 window.chgUnit=function(pid,unit,delta){
