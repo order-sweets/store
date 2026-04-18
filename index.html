@@ -26,7 +26,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 #lock-btn.scrolled-away{opacity:0;transform:translateY(-8px);pointer-events:none;}
 
 /* FLOATING BASKET BUTTON */
-#float-basket{position:fixed;bottom:100px;right:16px;z-index:499;width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;box-shadow:0 2px 12px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;}
+#float-basket{position:fixed;bottom:100px;right:16px;z-index:499;width:48px;height:48px;border-radius:50%;background:var(--accent);border:none;box-shadow:0 2px 12px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;}
 #float-basket:active{transform:scale(.92);}
 #float-basket svg{width:24px;height:24px;fill:#fff;}
 #float-basket-count{position:absolute;top:-4px;right:-4px;background:#fff;color:var(--accent);border-radius:20px;padding:2px 7px;font-size:12px;font-weight:800;font-family:inherit;min-width:20px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.2);display:none;}
@@ -36,7 +36,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   100%{box-shadow:0 0 0 24px rgba(216,90,48,0),0 2px 12px rgba(0,0,0,.2);}
 }
 .basket-glow{animation:basket-glow 1s ease-out;}
-.order-wrap{max-width:680px;margin:0 auto;padding:0.25rem 1.1rem 8rem;}
+.order-wrap{max-width:680px;margin:0 auto;padding:1.75rem 1.1rem 8rem;}
 
 /* TIER BANNER */
 .tier-banner{display:none!important;}
@@ -73,7 +73,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .outlet-modal-btn-name{font-size:15px;font-weight:700;color:var(--text);}
 .outlet-modal-btn-addr{font-size:12px;color:var(--text-muted);font-weight:400;}
 
-.brush-divider{width:100%;max-width:320px;margin:0.25rem auto -2rem;display:block;opacity:0.35;pointer-events:none;}
+.brush-divider{width:100%;max-width:320px;margin:0.25rem auto -0.5rem;display:block;opacity:0.35;pointer-events:none;}
 /* HERO */
 .hero{text-align:center;margin-bottom:1.25rem;margin-top:0;}
 .hero h1{font-family:'DM Serif Display',serif;font-size:clamp(28px,7vw,40px);font-weight:400;letter-spacing:-.3px;margin-bottom:6px;}
@@ -120,7 +120,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
 
 /* FLOATING MENU */
-#float-menu{position:fixed;bottom:166px;right:16px;z-index:499;width:54px;height:54px;border-radius:10px;background:#0a1628;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;animation:menu-glow 2s ease-in-out infinite;}
+#float-menu{position:fixed;bottom:161px;right:16px;z-index:499;width:54px;height:54px;border-radius:10px;background:#1a3a6b;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;animation:menu-glow 2s ease-in-out infinite;}
 #float-menu:active{transform:scale(.92);}
 #float-menu svg{display:none;}
 @keyframes menu-glow{0%,100%{box-shadow:0 0 8px 2px rgba(255,229,0,.5),0 0 16px 4px rgba(255,229,0,.2);}50%{box-shadow:0 0 14px 5px rgba(255,229,0,.8),0 0 28px 10px rgba(255,229,0,.35);}}
@@ -167,7 +167,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 @media(max-width:420px){
   .card-img{width:115px;height:115px;align-self:center;margin:8px 0 8px 8px;}
   .card-body{padding:10px 11px;}
-  .order-wrap{padding:0.25rem 0.85rem 8rem;}
+  .order-wrap{padding:1.75rem 0.85rem 8rem;}
   .unit-qty-ctrl{gap:6px;}
 }
 .card-img img{width:100%;height:100%;object-fit:contain;object-position:center;background:transparent;}
@@ -310,15 +310,15 @@ body{top:0!important;}
 #goog-gt-tt{display:none!important;}
 .goog-te-balloon-frame{display:none!important;}
 .page-admin-active .translate-btn,.page-login-active .translate-btn{display:none!important;}
-.translate-btn{position:fixed;top:16px;right:16px;z-index:490;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .3s,transform .3s;}
-.translate-btn.scrolled-away{opacity:0;transform:translateY(-8px);pointer-events:none;}
+.translate-btn{position:fixed;bottom:228px;right:16px;z-index:490;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .3s,transform .3s;}
+.translate-btn.scrolled-away{opacity:1;transform:none;pointer-events:all;}
 .translate-btn img{width:28px;height:28px;object-fit:contain;}
 .translate-btn:hover{box-shadow:0 3px 14px rgba(0,0,0,.22);}
 /* STICKY */
 .wa-sticky{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:10px 12px env(safe-area-inset-bottom,12px);background:transparent;pointer-events:none;}
 .wa-btn{pointer-events:all;width:100%;padding:17px;background:#128C4A;border:none;border-radius:var(--r-lg);font-size:17px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
 .wa-btn:disabled{opacity:.65;cursor:not-allowed;}
-.wa-icon{width:22px;height:22px;flex-shrink:0;}
+.wa-icon{width:20px;height:20px;flex-shrink:0;}
 
 /* MODALS */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;align-items:center;justify-content:center;padding:1.5rem;}
@@ -586,12 +586,7 @@ body{top:0!important;}
     <div class="how-arrow">→</div>
     <div class="how-step"><span class="how-num">3</span><span class="how-text">Check &amp;<br>Send Order</span></div>
   </div>
-  <div class="search-wrap">
-    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-    <input class="search-input" type="text" id="search-inp" placeholder="Search products…" oninput="onSearch()" autocomplete="off">
-    <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
-    <div class="search-dropdown" id="search-dropdown"></div>
-  </div>
+
 
 
   <div id="new-arrivals-section" class="new-arrivals-wrap">
@@ -646,8 +641,9 @@ body{top:0!important;}
 
 <div class="wa-sticky">
   <button class="wa-btn" id="wa-btn" disabled="">
-    <svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     Send Order via WhatsApp
+    <svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
   </button>
 </div>
 <!-- ANNOUNCEMENT POPUP -->
@@ -674,14 +670,30 @@ body{top:0!important;}
 
 <!-- FLOATING MENU BUTTON -->
 <button id="float-menu" onclick="toggleFilterDrawer()" aria-label="Filter products" style="display:none">
-  <span style="font-size:12px;font-weight:800;color:#FFE500;letter-spacing:.08em;font-family:inherit;">MENU</span>
+  <span style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+    <span style="font-size:11px;font-weight:800;color:#FFE500;letter-spacing:.08em;font-family:inherit;line-height:1;">MENU</span>
+    <span style="display:flex;flex-direction:column;gap:2.5px;align-items:center;">
+      <span style="width:22px;height:2px;background:#FFE500;border-radius:1px;display:block;"></span>
+      <span style="width:22px;height:2px;background:#FFE500;border-radius:1px;display:block;"></span>
+      <span style="width:22px;height:2px;background:#FFE500;border-radius:1px;display:block;"></span>
+    </span>
+  </span>
   <span id="float-menu-dot"></span>
 </button>
 
 <!-- FILTER DRAWER -->
 <div id="filter-drawer-backdrop" onclick="closeFilterDrawer()"></div>
 <div id="filter-drawer">
-  <div class="fd-handle"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <span style="font-size:14px;font-weight:700;color:var(--text);">Browse</span>
+    <button onclick="closeFilterDrawer()" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border-md);background:var(--surface);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-family:inherit;line-height:1;">&#x2715;</button>
+  </div>
+  <div style="position:relative;margin-bottom:14px;">
+    <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-hint);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="search-inp" class="search-input" type="text" placeholder="Search products…" oninput="onSearch()" autocomplete="off" style="padding-left:34px;padding-top:9px;padding-bottom:9px;font-size:13px;">
+    <button class="search-clear" id="search-clear" onclick="clearSearch()">&#x2715;</button>
+    <div class="search-dropdown" id="search-dropdown"></div>
+  </div>
   <div class="fd-section-label">Category</div>
   <div class="fd-pills" id="fd-cat-pills"></div>
   <div class="fd-section-label">Brand</div>
