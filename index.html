@@ -29,7 +29,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 #float-basket{position:fixed;bottom:100px;right:16px;z-index:499;width:48px;height:48px;border-radius:50%;background:var(--accent);border:none;box-shadow:0 2px 12px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;}
 #float-basket:active{transform:scale(.92);}
 #float-basket svg{width:24px;height:24px;fill:#fff;}
-#float-basket-count{position:absolute;top:-4px;right:-4px;background:#fff;color:var(--accent);border-radius:20px;padding:2px 7px;font-size:12px;font-weight:800;font-family:inherit;min-width:20px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.2);display:none;}
+#float-basket-count{position:absolute;bottom:-4px;right:-4px;background:#fff;color:var(--accent);border-radius:20px;padding:2px 7px;font-size:12px;font-weight:800;font-family:inherit;min-width:20px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.2);display:none;}
 @keyframes basket-glow{
   0%{box-shadow:0 0 0 0 rgba(216,90,48,.9),0 2px 12px rgba(0,0,0,.2);}
   40%{box-shadow:0 0 0 16px rgba(216,90,48,.4),0 2px 12px rgba(0,0,0,.2);}
@@ -47,13 +47,13 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .tier-dot.distributor{background:var(--purple);}
 
 /* GREETING */
-.greeting-banner{background:none;border-radius:0;padding:.75rem 0 .5rem;margin-bottom:0;text-align:center;}
+.greeting-banner{background:none;border-radius:0;padding:.75rem 0 0;margin-bottom:0;text-align:center;}
 .greeting-banner .hello{font-size:14px;color:var(--text-muted);margin-bottom:2px;font-weight:500;}
 .greeting-banner .cust-name{font-family:'DM Serif Display',serif;font-size:clamp(34px,8vw,48px);color:var(--text);margin-bottom:4px;line-height:1.1;}
 .greeting-selected-outlet{display:flex;flex-direction:column;align-items:center;gap:2px;}
 .greeting-outlet-name-text{font-family:'DM Serif Display',serif;font-size:clamp(22px,5vw,30px);color:var(--text);line-height:1.2;}
-.change-outlet-btn{font-size:14px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;text-underline-offset:3px;font-weight:500;margin-top:1px;}
-.change-outlet-btn:hover{color:var(--text);}
+.change-outlet-btn{font-size:16px;color:var(--accent-text);background:#fff;border:2px solid var(--accent);border-radius:8px;cursor:pointer;font-family:inherit;padding:6px 16px;font-weight:600;margin-top:6px;text-decoration:none;}
+.change-outlet-btn:hover{background:var(--accent-bg);}
 .outlet-label{font-size:13px;color:var(--text-muted);margin-bottom:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
 .outlet-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
 .outlet-btn{padding:13px 22px;background:var(--surface);border:2px solid var(--border-md);border-radius:50px;font-size:15px;font-weight:600;color:var(--text-muted);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .18s;}
@@ -75,7 +75,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
 .brush-divider{width:100%;max-width:320px;margin:0.25rem auto -0.5rem;display:block;opacity:0.35;pointer-events:none;}
 /* HERO */
-.hero{text-align:center;margin-bottom:1.25rem;margin-top:0;}
+.hero{text-align:center;margin-bottom:1.25rem;margin-top:-0.25rem;}
 .hero h1{font-family:'DM Serif Display',serif;font-size:clamp(28px,7vw,40px);font-weight:400;letter-spacing:-.3px;margin-bottom:6px;}
 .hero p{font-size:14px;color:var(--text-muted);max-width:280px;margin:0 auto;line-height:1.6;}
 
@@ -559,7 +559,7 @@ body{top:0!important;}
     <div class="cust-name" id="cust-name-display"></div>
     <div id="greeting-outlet-line" style="display:none" class="greeting-selected-outlet">
       <span class="greeting-outlet-name-text" id="greeting-outlet-name"></span>
-      <button class="change-outlet-btn" id="change-outlet-btn" onclick="reopenOutletModal()">Change outlet</button>
+      <button class="change-outlet-btn" id="change-outlet-btn" onclick="reopenOutletModal()">Change Outlet</button>
     </div>
     <div id="outlet-picker" style="display:none">
       <div class="outlet-label">Select your outlet</div>
