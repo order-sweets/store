@@ -831,6 +831,10 @@ body{top:0!important;}
         <span>➕ Add New Product</span><span id="add-prod-chevron" style="font-size:13px;color:var(--text-muted);">▼</span>
       </button>
       <div id="add-prod-body" style="display:none;border:1.5px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:16px;background:#fff;">
+      <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;padding:10px 12px;background:#f0f7ff;border-radius:8px;border:1.5px solid #bfdbfe;">
+        <input type="text" id="import-url" placeholder="Paste product URL to auto-fill…" style="flex:1;font-size:13px;padding:6px 9px;border:1.5px solid #bfdbfe;border-radius:7px;font-family:inherit;outline:none;background:#fff;">
+        <button onclick="importFromURL()" id="import-btn" style="padding:6px 14px;background:#3b82f6;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;">Import</button>
+      </div>
     <div class="form-grid">
         <div class="form-field"><label>Product Name</label><input type="text" id="add-name" placeholder=""></div>
         <div class="form-field"><label>Brand</label><input type="text" id="add-brand" list="brand-datalist" placeholder=""><datalist id="brand-datalist"><option value="Airheads">Airheads</option><option value="Nerds">Nerds</option><option value="Bee Events">Bee Events</option></datalist></div>
@@ -1440,7 +1444,7 @@ window.tryLogin=function(){
 (function(){
   if(localStorage.getItem('snack-admin-auth')==='1'){
     renderAdmin();renderCustomerList();window.showPage('page-admin');
-    if(!window._fbStarted){window._fbStarted=true;_fbHookSaves();}
+    if(!window._fbStarted){window._fbStarted=true;if(typeof _fbHookSaves==='function')_fbHookSaves();}
     if(window._fbEnsureListening)window._fbEnsureListening();
     else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
   }
@@ -2505,6 +2509,47 @@ window.importBackup=function(input){
   };
   reader.readAsText(file);
 };
+window.importFromURL=async function(){
+  var url=document.getElementById('import-url').value.trim();
+  if(!url){alert('Please paste a product URL first.');return;}
+  var btn=document.getElementById('import-btn');
+  btn.textContent='Fetching…';btn.disabled=true;
+  try{
+    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        tools:[{type:'web_search_20250305',name:'web_search'}],
+        messages:[{role:'user',content:'Fetch this product page and return ONLY a JSON object, no markdown, no explanation: '+url+'\n\nKeys: name (string), brand (string), weight (e.g. "56g"), ppc (pieces per box as integer or null), description (one sentence), imageUrl (direct image URL or null).'}]
+      })
+    });
+    var data=await resp.json();
+    var text='';
+    (data.content||[]).forEach(function(b){if(b.type==='text')text+=b.text;});
+    text=text.replace(/```json|```/g,'').trim();
+    var prod=JSON.parse(text);
+    if(prod.name)document.getElementById('add-name').value=prod.name;
+    if(prod.brand)document.getElementById('add-brand').value=prod.brand;
+    if(prod.weight)document.getElementById('add-weight').value=prod.weight;
+    if(prod.ppc)document.getElementById('add-ppc').value=prod.ppc;
+    if(prod.description)document.getElementById('add-cat').value=prod.description;
+    if(prod.imageUrl){
+      window._importedPhotoUrl=prod.imageUrl;
+      var wrap=document.getElementById('import-url').parentNode;
+      var prev=document.getElementById('import-preview');
+      if(!prev){prev=document.createElement('div');prev.id='import-preview';prev.style.cssText='margin-top:8px;display:flex;align-items:center;gap:8px;';wrap.appendChild(prev);}
+      prev.innerHTML='<img src="'+prod.imageUrl+'" style="width:44px;height:44px;object-fit:cover;border-radius:7px;border:1px solid #ddd;"><span style="font-size:11px;color:#3b82f6;font-weight:600;">Photo ready</span>';
+    }
+    btn.textContent='✓ Done';
+    setTimeout(function(){btn.textContent='Import';btn.disabled=false;},2000);
+  }catch(e){
+    console.error(e);
+    btn.textContent='Import';btn.disabled=false;
+    alert('Could not extract info. Fill in manually.');
+  }
+};
 window.addProduct=function(){
   var name=el('add-name').value.trim(),brand=el('add-brand').value.trim();
   var price=parseFloat(el('add-price').value)||0;
@@ -2523,13 +2568,7 @@ window.addProduct=function(){
   if(!name){alert('Please enter a product name.');return;}if(!price){alert('Please enter a retail price.');return;}
   if(section==='catalog'&&!brand){alert('Please enter a brand name.');return;}
   var id='p_'+Date.now();
-  if(window._importedPhotoUrl){
-    photos[id]=window._importedPhotoUrl;
-    saveJ(LS_PHOTOS,photos);
-    window._importedPhotoUrl=null;
-    var preview=document.getElementById('import-photo-preview');
-    if(preview)preview.remove();
-  }
+  if(window._importedPhotoUrl){photos[id]=window._importedPhotoUrl;saveJ(LS_PHOTOS,photos);window._importedPhotoUrl=null;var pv=document.getElementById('import-preview');if(pv)pv.remove();}
   var inv=getInv();
   inv[id]=stockPieces;inv['disc_'+id]=disc;
   inv['rp_'+id]=price;inv['dp_'+id]=priceDist;
