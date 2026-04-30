@@ -779,7 +779,7 @@ body{top:0!important;}
   <div class="admin-topbar">
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
       <h2 style="margin:0;">Admin Panel</h2>
-      <button class="out-btn" onclick="showPage('page-order')" style="font-size:12px;padding:5px 12px;">Sign Out</button>
+      <button class="out-btn" onclick="localStorage.removeItem('snack-admin-auth');showPage('page-order')" style="font-size:12px;padding:5px 12px;">Sign Out</button>
     </div>
     <div class="admin-actions">
       <span class="toast-msg" id="toast" style="display: inline-block;">✓ Data exported!</span>
@@ -1430,10 +1430,21 @@ window.tryLogin=function(){
   var pw=el('pw-input').value;
   if(pw===ADMIN_PW){
     el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';
+    localStorage.setItem('snack-admin-auth','1');
     renderAdmin();renderCustomerList();window.showPage('page-admin');if(!window._fbStarted){window._fbStarted=true;_fbHookSaves();}if(window._fbEnsureListening)window._fbEnsureListening();else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
   }
   else{el('pw-input').classList.add('err-i');el('login-err').style.display='block';}
 };
+
+// Auto-login if previously authenticated on this device
+(function(){
+  if(localStorage.getItem('snack-admin-auth')==='1'){
+    renderAdmin();renderCustomerList();window.showPage('page-admin');
+    if(!window._fbStarted){window._fbStarted=true;_fbHookSaves();}
+    if(window._fbEnsureListening)window._fbEnsureListening();
+    else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
+  }
+})();
 window.openLightbox=function(pid){
   var photo=getPhoto(pid);
   el('lightbox-content').innerHTML=photo?'<img src="'+photo+'" alt="">':'<span style="font-size:80px">\uD83D\uDCE6</span>';
@@ -1455,12 +1466,7 @@ window.onSearch=function(){
   el('search-clear').style.display=q?'flex':'none';
   var dd=el('search-dropdown');
   if(!q){dd.classList.remove('open');return;}
-  var results=getAllProducts().filter(function(p){
-    if(!isVisible(p))return false;
-    var brand=BRANDS.find(function(b){return b.products.some(function(x){return x.id===p.id;});});
-    var brandName=brand?brand.brand.toLowerCase():'';
-    return p.name.toLowerCase().indexOf(q)!==-1||(p.desc||'').toLowerCase().indexOf(q)!==-1||brandName.indexOf(q)!==-1;
-  });
+  var results=getAllProducts().filter(function(p){return isVisible(p)&&(p.name.toLowerCase().indexOf(q)!==-1||p.desc.toLowerCase().indexOf(q)!==-1);});
   if(!results.length){dd.innerHTML='<div class="search-no-results">No products found for "'+esc(q)+'"</div>';dd.classList.add('open');return;}
   dd.innerHTML=results.slice(0,8).map(function(p){
     var photo=getPhoto(p.id);
