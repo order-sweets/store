@@ -1455,7 +1455,12 @@ window.onSearch=function(){
   el('search-clear').style.display=q?'flex':'none';
   var dd=el('search-dropdown');
   if(!q){dd.classList.remove('open');return;}
-  var results=getAllProducts().filter(function(p){return isVisible(p)&&(p.name.toLowerCase().indexOf(q)!==-1||p.desc.toLowerCase().indexOf(q)!==-1);});
+  var results=getAllProducts().filter(function(p){
+    if(!isVisible(p))return false;
+    var brand=BRANDS.find(function(b){return b.products.some(function(x){return x.id===p.id;});});
+    var brandName=brand?brand.brand.toLowerCase():'';
+    return p.name.toLowerCase().indexOf(q)!==-1||(p.desc||'').toLowerCase().indexOf(q)!==-1||brandName.indexOf(q)!==-1;
+  });
   if(!results.length){dd.innerHTML='<div class="search-no-results">No products found for "'+esc(q)+'"</div>';dd.classList.add('open');return;}
   dd.innerHTML=results.slice(0,8).map(function(p){
     var photo=getPhoto(p.id);
