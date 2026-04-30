@@ -1498,11 +1498,20 @@ function unitRowsHTML(p,pq,cq){
   }
   // Show case row only if product has ppc set, OR customer has a custom case price
   if((p.ppc>0||hasCustomCase)&&(units==='case'||units==='both')){
-    var effectivePpc=p.ppc>0?p.ppc:1;
     var cpCaseObj=custCustomPriceObj(p.id,'case');
     var cMinQty=cpCaseObj&&cpCaseObj.minQty&&cpCaseObj.minQty>1?cpCaseObj.minQty:null;
-    var effectivePpc=(cpCaseObj&&cpCaseObj.ppc)?cpCaseObj.ppc:p.ppc;
-    var cSpec=effectivePpc>0?(effectivePpc+' pcs'+(p.weight?' × '+p.weight:'')):'(box)';
+    // Resolve ppc: prefer customer custom ppc, then product ppc, then 1 (so we still show weight)
+    var cpPpc=(cpCaseObj&&Number(cpCaseObj.ppc)>0)?Number(cpCaseObj.ppc):0;
+    var effectivePpc=cpPpc>0?cpPpc:(Number(p.ppc)>0?Number(p.ppc):0);
+    // Always render the spec when we have ANY information (ppc or weight); only fall back to '(box)' when both missing
+    var cSpec;
+    if(effectivePpc>0){
+      cSpec=effectivePpc+' pcs'+(p.weight?' × '+p.weight:'');
+    } else if(p.weight){
+      cSpec='Box × '+p.weight;
+    } else {
+      cSpec='(box)';
+    }
     if(cMinQty)cSpec+=' (min '+cMinQty+')';
     var maxCase=effectivePpc>0?Math.floor(stock/effectivePpc):(hasCustomCase?stock:0);
     html+='<div class="unit-row'+(cq>0?' has-qty-row':'')+'" id="urow-case-'+p.id+'">'
@@ -2726,7 +2735,15 @@ function _fbUserBusy(){
 }
 
 function _fbRenderSyncedViews(){
-  if(urlCustId||urlCustName)initGreeting();
+  // Always re-resolve currentCustomer against the freshly synced `customers` array.
+  // The previous reference may point at a stale object that lacks newly-saved fields (ppc, minQty).
+  if(urlCustId||urlCustName){
+    var fresh=null;
+    if(urlCustId)fresh=customers.find(function(c){return c.id===urlCustId;});
+    if(!fresh&&urlCustName)fresh=customers.find(function(c){return c.name===decodeURIComponent(urlCustName);});
+    if(fresh)currentCustomer=fresh;
+    initGreeting();
+  }
   renderOrder();renderAdmin();renderCustomerList();syncAdminSettings();
 }
 
