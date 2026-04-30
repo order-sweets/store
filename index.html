@@ -947,22 +947,29 @@ function filterTombstonedCustomers(arr){
   return arr.filter(function(c){return !_tombstones.customers[c.id];});
 }
 function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
-var NEW_ARRIVALS=savedP?savedP.newArrivals||[]:[];
-var HOT_SALE=savedP?savedP.hotSale||[]:[];
-var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
+var NEW_ARRIVALS=(savedP&&Array.isArray(savedP.newArrivals))?savedP.newArrivals:[];
+var HOT_SALE=(savedP&&Array.isArray(savedP.hotSale))?savedP.hotSale:[];
+var BRANDS=(savedP&&Array.isArray(savedP.brands))?savedP.brands:DEFAULT_BRANDS;
+if(!Array.isArray(BRANDS))BRANDS=DEFAULT_BRANDS||[];
 var _BAKED_CUSTOMERS=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":15.3,"minQty":1,"ppc":9}]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5,"ppc":15}]}];
 var customers=(function(){
-  var c=loadJ(LS_CUST)||_BAKED_CUSTOMERS;
+  var c;
+  try{c=loadJ(LS_CUST);}catch(e){c=null;}
+  if(!Array.isArray(c))c=_BAKED_CUSTOMERS;
   // Fix any null ppc on custom prices — hydrate from product catalog
   // (records saved before the ppc fix have ppc:null in localStorage/Firebase)
-  c.forEach(function(cust){
-    (cust.customPrices||[]).forEach(function(cp){
-      if(!cp.ppc){
-        var allP=NEW_ARRIVALS.concat(HOT_SALE).concat(BRANDS.reduce(function(a,b){return a.concat(b.products);},[]));        var prod=allP.find(function(pr){return pr.id===cp.pid;});
-        if(prod&&prod.ppc)cp.ppc=prod.ppc;
-      }
+  try{
+    c.forEach(function(cust){
+      (cust&&cust.customPrices||[]).forEach(function(cp){
+        if(!cp.ppc){
+          var brandsArr=Array.isArray(BRANDS)?BRANDS:[];
+          var allP=(NEW_ARRIVALS||[]).concat(HOT_SALE||[]).concat(brandsArr.reduce(function(a,b){return a.concat((b&&b.products)||[]);},[]));
+          var prod=allP.find(function(pr){return pr&&pr.id===cp.pid;});
+          if(prod&&prod.ppc)cp.ppc=prod.ppc;
+        }
+      });
     });
-  });
+  }catch(e){console.warn('ppc hydration skipped:',e);}
   return c;
 })();/* loaded */
 var photos=loadJ(LS_PHOTOS)||{};
