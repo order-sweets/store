@@ -961,7 +961,8 @@ function getAllProducts(){return NEW_ARRIVALS.concat(HOT_SALE).concat(BRANDS.red
 function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getInv(){return loadJ(LS_INV)||{};}
-function saveInv(inv){saveJ(LS_INV,inv);if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
+var _invLocalWriteTime=0;
+function saveInv(inv){saveJ(LS_INV,inv);_invLocalWriteTime=Date.now();if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
 function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
 function commitProductCatalogChange(inv,immediateSync){saveInv(inv);saveProds();if(immediateSync&&window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}}
 
@@ -1482,7 +1483,6 @@ function unitRowsHTML(p,pq,cq){
     var cMinQty=cpCaseObj&&cpCaseObj.minQty&&cpCaseObj.minQty>1?cpCaseObj.minQty:null;
     var effectivePpc=(cpCaseObj&&cpCaseObj.ppc)?cpCaseObj.ppc:p.ppc;
     var cSpec=effectivePpc>0?(effectivePpc+' pcs'+(p.weight?' × '+p.weight:'')):'(box)';
-    if(cpCaseObj&&cpCaseObj.ppc)cSpec+=' (custom)';
     if(cMinQty)cSpec+=' (min '+cMinQty+')';
     var maxCase=effectivePpc>0?Math.floor(stock/effectivePpc):(hasCustomCase?stock:0);
     html+='<div class="unit-row'+(cq>0?' has-qty-row':'')+'" id="urow-case-'+p.id+'">'
@@ -1936,9 +1936,11 @@ function doSend(){
       if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
       var editLink=baseUrl+editParams;
       var _waMsg=msg.replace('{EDITLINK}',editLink);
+      // iOS Safari blocks window.open inside async callbacks — open synchronously now, redirect after fetch
+      var _waWin=window.open('','_blank');
       // Await save before opening WhatsApp — mobile can navigate away and abort the fetch
       // keepalive:true keeps the request alive even if the page unloads; 4s failsafe ensures WA still opens
-      var _saveTimeout=setTimeout(function(){_sendWA(_waMsg,orderId,sub);},4000);
+      var _saveTimeout=setTimeout(function(){_sendWA(_waMsg,orderId,sub,_waWin);},4000);
       fetch(_saveUrl,{
         method:'PUT',
         headers:{'Content-Type':'application/json'},
@@ -1946,11 +1948,11 @@ function doSend(){
         keepalive:true
       }).then(function(){
         clearTimeout(_saveTimeout);
-        _sendWA(_waMsg,orderId,sub);
+        _sendWA(_waMsg,orderId,sub,_waWin);
       }).catch(function(err){
         clearTimeout(_saveTimeout);
         console.error('Edit order save failed:', err);
-        _sendWA(_waMsg,orderId,sub);
+        _sendWA(_waMsg,orderId,sub,_waWin);
       });
       return;
     }catch(e){console.error('Edit link build failed:', e);}
@@ -1958,18 +1960,20 @@ function doSend(){
   }
   _sendWA(msg.replace('{EDITLINK}','(see above)'),orderId,sub);
 }
-function _sendWA(fullMsg,orderId,sub){
+function _sendWA(fullMsg,orderId,sub,_preWin){
   var enc=encodeURIComponent(fullMsg);
   // wa.me is the most reliable method across all platforms and browsers
   var url='https://wa.me/'+WA_1+'?text='+enc;
-  window.open(url,'_blank');
+  if(_preWin&&!_preWin.closed){_preWin.location.href=url;}else{window.open(url,'_blank');}
   isRevision=false;
   // ── Push to invoice system's Pending Orders (beinv-pending) ──
   var beinvPending=JSON.parse(localStorage.getItem('beinv-pending')||'[]');
   var invItems=cartEntries.map(function(e){
     var p=findProduct(e.pid);
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
-    return {pid:e.pid,desc:(p?p.name:e.pid)+(e.variation?' ['+e.variation+']':''),qty:e.qty,price:price,unit:e.unit};
+    var cpObj=e.unit==='case'?custCustomPriceObj(e.pid,'case'):null;
+    var effectivePpcForInv=cpObj&&cpObj.ppc?cpObj.ppc:(p?p.ppc:null);
+    return {pid:e.pid,desc:(p?p.name:e.pid)+(e.variation?' ['+e.variation+']':''),qty:e.qty,price:price,unit:e.unit,ppc:effectivePpcForInv||undefined};
   });
   beinvPending.unshift({
     id:orderId,
@@ -2697,8 +2701,8 @@ function _fbUserBusy(){
 }
 
 function _fbRenderSyncedViews(){
-  renderOrder();renderAdmin();renderCustomerList();syncAdminSettings();
   if(urlCustId||urlCustName)initGreeting();
+  renderOrder();renderAdmin();renderCustomerList();syncAdminSettings();
 }
 
 function _fbFlushPending(){
@@ -2767,7 +2771,7 @@ window._fbApplyData = function(d) {
       }
       saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
     }
-    if (d.inv) saveJ(LS_INV, d.inv);
+    if (d.inv && (!_invLocalWriteTime || (d._v && d._v > _invLocalWriteTime))) saveJ(LS_INV, d.inv);
     if (d.customers) { customers = filterTombstonedCustomers(d.customers); saveJ(LS_CUST, customers); }
     if (d.settings) {
       Object.keys(d.settings).forEach(function(k){ SETTINGS[k] = d.settings[k]; });
