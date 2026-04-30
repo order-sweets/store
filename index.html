@@ -1538,7 +1538,9 @@ function cartEntriesHTML(pid){
   if(!entries.length)return'';
   return'<div class="cart-entries">'+entries.map(function(e){
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
-    var label=(e.variation?'['+esc(e.variation)+'] ':(e.unit==='case'?'Box':'Piece'))+(e.unit==='case'?' ('+p.ppc+' pcs)':'')+' × '+e.qty+' = $'+(price*e.qty).toFixed(2);
+    var ceCpObj=e.unit==='case'?custCustomPriceObj(p.id,'case'):null;
+    var ceEffPpc=ceCpObj&&Number(ceCpObj.ppc)>0?Number(ceCpObj.ppc):p.ppc;
+    var label=(e.variation?'['+esc(e.variation)+'] ':(e.unit==='case'?'Box':'Piece'))+(e.unit==='case'&&ceEffPpc?' ('+ceEffPpc+' pcs)':'')+' × '+e.qty+' = $'+(price*e.qty).toFixed(2);
     return'<div class="cart-entry"><span class="cart-entry-label">'+label+'</span><button class="cart-entry-remove" onclick="removeEntry(\''+e.entryId+'\')">✕</button></div>';
   }).join('')+'</div>';
 }
@@ -1667,9 +1669,17 @@ function gridCardHTML(p){
     html+='</div>';
     showDivider=true;
   }
-  if(p.ppc>0&&(units==='case'||units==='both')){
-    var maxCase=Math.floor(stock/p.ppc);
-    var cSpec=p.ppc+' pcs'+(p.weight?' \xD7 '+p.weight:'');
+  // Resolve ppc: prefer customer custom ppc, then product ppc
+  var gcCpCaseObj=custCustomPriceObj(p.id,'case');
+  var gcHasCustomCase=gcCpCaseObj!==null;
+  var gcCpPpc=(gcCpCaseObj&&Number(gcCpCaseObj.ppc)>0)?Number(gcCpCaseObj.ppc):0;
+  var gcEffectivePpc=gcCpPpc>0?gcCpPpc:(Number(p.ppc)>0?Number(p.ppc):0);
+  if((gcEffectivePpc>0||gcHasCustomCase)&&(units==='case'||units==='both')){
+    var maxCase=gcEffectivePpc>0?Math.floor(stock/gcEffectivePpc):(gcHasCustomCase?stock:0);
+    var cSpec;
+    if(gcEffectivePpc>0){ cSpec=gcEffectivePpc+' pcs'+(p.weight?' \xD7 '+p.weight:''); }
+    else if(p.weight){ cSpec='Box \xD7 '+p.weight; }
+    else { cSpec='(box)'; }
     if(showDivider)html+='<div class="gc-divider"></div>';
     html+='<div class="gc-unit"><div class="gc-unit-label">Box \u00B7 '+esc(cSpec)+'</div>';
     html+='<div class="gc-ctrl">';
@@ -1862,8 +1872,10 @@ function renderBasket(){
     var p=findProduct(e.pid);if(!p)return'';
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var varStr=e.variation?' ['+esc(e.variation)+']':'';
+    var bCpObj=e.unit==='case'?custCustomPriceObj(p.id,'case'):null;
+    var bEffPpc=bCpObj&&Number(bCpObj.ppc)>0?Number(bCpObj.ppc):p.ppc;
     return'<div class="basket-item">'
-      +'<div class="basket-item-info"><div class="basket-item-name">'+esc(p.name)+varStr+'</div><div class="basket-item-sub">'+(e.unit==='case'?'Box ('+p.ppc+' pcs)':'Piece')+' × '+e.qty+'</div></div>'
+      +'<div class="basket-item-info"><div class="basket-item-name">'+esc(p.name)+varStr+'</div><div class="basket-item-sub">'+(e.unit==='case'?'Box'+(bEffPpc?' ('+bEffPpc+' pcs)':''):'Piece')+' × '+e.qty+'</div></div>'
       +'<div class="basket-qty-ctrl"><button class="b-qty-btn" onclick="bChg(\''+e.entryId+'\',-1)">−</button>'
       +'<input class="b-qty-inp" type="number" min="1" value="'+e.qty+'" inputmode="numeric" onchange="bSet(\''+e.entryId+'\',this.value)">'
       +'<button class="b-qty-btn" onclick="bChg(\''+e.entryId+'\',1)">+</button></div>'
