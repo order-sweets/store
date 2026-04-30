@@ -950,8 +950,7 @@ function saveSettings(){saveJ(LS_SETTINGS,SETTINGS);if(window._fbStarted&&!_fbAp
 var NEW_ARRIVALS=savedP?savedP.newArrivals||[]:[];
 var HOT_SALE=savedP?savedP.hotSale||[]:[];
 var BRANDS=savedP?savedP.brands:DEFAULT_BRANDS;
-var DEFAULT_CUSTOMERS=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5}]}];
-var _BAKED_CUSTOMERS=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":15.3,"minQty":1,"ppc":9}]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5}]}];
+var _BAKED_CUSTOMERS=[{"id":"c_1774654498552","name":"Nelly Retro","phone":"","address":"ddddd","tier":"retail","outlets":[{"name":"Causeway piint","address":"dddddd"},{"name":"junction 9","address":"ssss"}]},{"id":"c_1774654526853","name":"Hong Yi Hao","phone":"","address":"rrrrrrr","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":15.3,"minQty":1,"ppc":9}]},{"id":"c_1774707041721","name":"Walson Food Distributor Pte Ltd","phone":"62447980","address":"T-Space, 1 Tampines North Dr 1 #06-27,  (S)528559","tier":"distributor","outlets":[],"customPrices":[{"pid":"p_1774654791150","unit":"case","price":34.5,"ppc":15}]}];
 var customers=loadJ(LS_CUST)||_BAKED_CUSTOMERS;/* loaded */
 var photos=loadJ(LS_PHOTOS)||{};
 
@@ -962,8 +961,14 @@ function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getInv(){return loadJ(LS_INV)||{};}
 var _invLocalWriteTime=0;
-var _INV_WRITE_GRACE=10000; // 10s grace — don't apply remote inv within this window after a local write
-function saveInv(inv){saveJ(LS_INV,inv);_invLocalWriteTime=Date.now();if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
+var _INV_WRITE_GRACE=15000; // 15s grace — don't apply remote inv within this window after a local write
+var _invLocalSnapshot=null; // snapshot of inv at time of last local write — used to guard against Firebase overwrite
+function saveInv(inv){
+  saveJ(LS_INV,inv);
+  _invLocalWriteTime=Date.now();
+  _invLocalSnapshot=JSON.parse(JSON.stringify(inv)); // capture snapshot
+  if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();
+}
 function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
 function commitProductCatalogChange(inv,immediateSync){saveInv(inv);saveProds();if(immediateSync&&window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}}
 
@@ -993,12 +998,11 @@ window.doRestock=function(pid){
   var inv=getInv();
   inv[pid]=(inv[pid]||0)+addPieces;
   saveInv(inv);
+  commitProductCatalogChange(inv,true); // immediate Firebase push — same as quickAdjBox
   // Log it
   restockHistory[pid]=restockHistory[pid]||[];
   restockHistory[pid].push({boxes:boxes,ts:new Date().toISOString()});
   saveRestockHistory();
-  // Immediately push to Firebase — bypass debounce so new stock lands before SSE can echo old data
-  if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
   inp.value='';
   // Refresh display
   var newTotal=inv[pid];var ppc2=p.ppc||1;
@@ -2530,12 +2534,13 @@ window.addCustomPrice=function(cid){
   var unit=unitSel.value;
   var price=parseFloat(priceInp.value);
   var minQty=minQtyInp?parseInt(minQtyInp.value)||1:1;
-  var customPpc=ppcInp&&ppcInp.value?parseInt(ppcInp.value)||null:null;
   if(!pname){alert('Please type a product name.');return;}
   if(isNaN(price)||price<=0){alert('Please enter a valid price.');return;}
   // Find product by name (case-insensitive)
   var pp=getAllProducts().find(function(x){return x.name.toLowerCase()===pname.toLowerCase();});
   if(!pp){alert('Product "'+pname+'" not found. Please select from the dropdown suggestions.');return;}
+  // Use entered ppc if provided, otherwise fall back to product default — never store null
+  var customPpc=ppcInp&&ppcInp.value?parseInt(ppcInp.value)||pp.ppc:pp.ppc;
   cust.customPrices=cust.customPrices||[];
   // Remove existing entry for same product+unit before adding
   cust.customPrices=cust.customPrices.filter(function(x){return!(x.pid===pp.id&&x.unit===unit);});
@@ -2774,23 +2779,29 @@ window._fbApplyData = function(d) {
       }
       saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
     }
-    if (d.inv && (!_invLocalWriteTime || (Date.now() - _invLocalWriteTime > _INV_WRITE_GRACE))) saveJ(LS_INV, d.inv);
+    if (d.inv) {
+      var withinGrace=_invLocalWriteTime&&(Date.now()-_invLocalWriteTime<_INV_WRITE_GRACE);
+      if(withinGrace&&_invLocalSnapshot){
+        // Within grace window: merge — take max of local snapshot vs remote for each key
+        // This prevents Firebase echoing old data from undoing a just-completed restock
+        var mergedInv=JSON.parse(JSON.stringify(d.inv));
+        Object.keys(_invLocalSnapshot).forEach(function(k){
+          var localVal=_invLocalSnapshot[k];
+          var remoteVal=mergedInv[k];
+          // For numeric stock keys (pid), keep the higher value
+          if(typeof localVal==='number'&&typeof remoteVal==='number'){
+            mergedInv[k]=Math.max(localVal,remoteVal);
+          } else {
+            mergedInv[k]=localVal; // for non-numeric (prices, flags), prefer local
+          }
+        });
+        saveJ(LS_INV,mergedInv);
+      } else {
+        saveJ(LS_INV,d.inv);
+      }
+    }
     if (d.customers) {
       customers = filterTombstonedCustomers(d.customers);
-      // Restore any custom price ppc values that Firebase may have lost (e.g. ppc:null or missing)
-      // _BAKED_CUSTOMERS is the source of truth for these overrides
-      if(typeof _BAKED_CUSTOMERS !== 'undefined') {
-        customers.forEach(function(c){
-          var baked=_BAKED_CUSTOMERS.find(function(b){return b.id===c.id;});
-          if(!baked||!baked.customPrices)return;
-          (c.customPrices||[]).forEach(function(cp){
-            if(!cp.ppc){
-              var bakedCp=baked.customPrices.find(function(b){return b.pid===cp.pid&&b.unit===cp.unit;});
-              if(bakedCp&&bakedCp.ppc)cp.ppc=bakedCp.ppc;
-            }
-          });
-        });
-      }
       saveJ(LS_CUST, customers);
     }
     if (d.settings) {
