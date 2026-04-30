@@ -2159,7 +2159,11 @@ window.saveProductEdits=function(id){
   if(newBrand)p.brand=newBrand;
 
   var inv=getInv();
-  inv[id]=newStock;
+  // Only update stock if the form value actually differs from current live stock
+  // This prevents Save Changes from overwriting a restock that happened since the form was opened
+  var currentStock=inv[id]!==undefined?parseInt(inv[id],10):(parseInt((p.stockPieces||0),10));
+  var currentBoxes=newPpc>0?Math.floor(currentStock/newPpc):currentStock;
+  if(newStockCases!==currentBoxes){inv[id]=newStock;}
   inv['disc_'+id]=newDisc;
   inv['rp_'+id]=newRp;
   inv['dp_'+id]=newDp;
@@ -2548,7 +2552,7 @@ window.addCustomPrice=function(cid){
   saveJ(LS_CUST,customers);
   nameInp.value='';priceInp.value='';if(minQtyInp)minQtyInp.value='';if(ppcInp)ppcInp.value='';
   renderCustomerList();
-  renderProducts(); // reflect on storefront immediately
+  renderOrder(); // reflect on storefront immediately
 };
 
 window.removeCustomPrice=function(cid,pid,unit){
@@ -2556,7 +2560,7 @@ window.removeCustomPrice=function(cid,pid,unit){
   cust.customPrices=(cust.customPrices||[]).filter(function(x){return!(x.pid===pid&&x.unit===unit);});
   saveJ(LS_CUST,customers);
   renderCustomerList();
-  renderProducts(); // reflect on storefront immediately
+  renderOrder(); // reflect on storefront immediately
 };
 
 
