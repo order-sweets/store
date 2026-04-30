@@ -2523,6 +2523,13 @@ window.addProduct=function(){
   if(!name){alert('Please enter a product name.');return;}if(!price){alert('Please enter a retail price.');return;}
   if(section==='catalog'&&!brand){alert('Please enter a brand name.');return;}
   var id='p_'+Date.now();
+  if(window._importedPhotoUrl){
+    photos[id]=window._importedPhotoUrl;
+    saveJ(LS_PHOTOS,photos);
+    window._importedPhotoUrl=null;
+    var preview=document.getElementById('import-photo-preview');
+    if(preview)preview.remove();
+  }
   var inv=getInv();
   inv[id]=stockPieces;inv['disc_'+id]=disc;
   inv['rp_'+id]=price;inv['dp_'+id]=priceDist;
