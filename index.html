@@ -962,6 +962,7 @@ function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getInv(){return loadJ(LS_INV)||{};}
 var _invLocalWriteTime=0;
+var _INV_WRITE_GRACE=10000; // 10s grace — don't apply remote inv within this window after a local write
 function saveInv(inv){saveJ(LS_INV,inv);_invLocalWriteTime=Date.now();if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
 function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
 function commitProductCatalogChange(inv,immediateSync){saveInv(inv);saveProds();if(immediateSync&&window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}}
@@ -996,6 +997,8 @@ window.doRestock=function(pid){
   restockHistory[pid]=restockHistory[pid]||[];
   restockHistory[pid].push({boxes:boxes,ts:new Date().toISOString()});
   saveRestockHistory();
+  // Immediately push to Firebase — bypass debounce so new stock lands before SSE can echo old data
+  if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
   inp.value='';
   // Refresh display
   var newTotal=inv[pid];var ppc2=p.ppc||1;
@@ -2771,8 +2774,25 @@ window._fbApplyData = function(d) {
       }
       saveJ(LS_PROD, {newArrivals:NEW_ARRIVALS, hotSale:HOT_SALE, brands:BRANDS});
     }
-    if (d.inv && (!_invLocalWriteTime || (d._v && d._v > _invLocalWriteTime))) saveJ(LS_INV, d.inv);
-    if (d.customers) { customers = filterTombstonedCustomers(d.customers); saveJ(LS_CUST, customers); }
+    if (d.inv && (!_invLocalWriteTime || (Date.now() - _invLocalWriteTime > _INV_WRITE_GRACE))) saveJ(LS_INV, d.inv);
+    if (d.customers) {
+      customers = filterTombstonedCustomers(d.customers);
+      // Restore any custom price ppc values that Firebase may have lost (e.g. ppc:null or missing)
+      // _BAKED_CUSTOMERS is the source of truth for these overrides
+      if(typeof _BAKED_CUSTOMERS !== 'undefined') {
+        customers.forEach(function(c){
+          var baked=_BAKED_CUSTOMERS.find(function(b){return b.id===c.id;});
+          if(!baked||!baked.customPrices)return;
+          (c.customPrices||[]).forEach(function(cp){
+            if(!cp.ppc){
+              var bakedCp=baked.customPrices.find(function(b){return b.pid===cp.pid&&b.unit===cp.unit;});
+              if(bakedCp&&bakedCp.ppc)cp.ppc=bakedCp.ppc;
+            }
+          });
+        });
+      }
+      saveJ(LS_CUST, customers);
+    }
     if (d.settings) {
       Object.keys(d.settings).forEach(function(k){ SETTINGS[k] = d.settings[k]; });
       saveJ(LS_SETTINGS, SETTINGS);
