@@ -1431,16 +1431,18 @@ window.tryLogin=function(){
   if(pw===ADMIN_PW){
     el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';
     localStorage.setItem('snack-admin-auth','1');
-    renderAdmin();renderCustomerList();window.showPage('page-admin');if(!window._fbStarted){window._fbStarted=true;_fbHookSaves();}if(window._fbEnsureListening)window._fbEnsureListening();else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
+    renderAdmin();renderCustomerList();window.showPage('page-admin');if(!window._fbStarted){window._fbStarted=true;if(typeof _fbHookSaves==='function')_fbHookSaves();}if(window._fbEnsureListening)window._fbEnsureListening();else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
   }
   else{el('pw-input').classList.add('err-i');el('login-err').style.display='block';}
 };
 
 // Auto-login if previously authenticated on this device
+// BUT skip if ?cid= is in the URL — that means we're opening a customer link
 (function(){
-  if(localStorage.getItem('snack-admin-auth')==='1'){
+  var _hasCid=new URLSearchParams(window.location.search).get('cid');
+  if(localStorage.getItem('snack-admin-auth')==='1'&&!_hasCid){
     renderAdmin();renderCustomerList();window.showPage('page-admin');
-    if(!window._fbStarted){window._fbStarted=true;_fbHookSaves();}
+    if(!window._fbStarted){window._fbStarted=true;if(typeof _fbHookSaves==='function')_fbHookSaves();}
     if(window._fbEnsureListening)window._fbEnsureListening();
     else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
   }
