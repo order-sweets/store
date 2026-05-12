@@ -1929,6 +1929,7 @@ function _sendWA(fullMsg,orderId,sub){
     id:orderId,
     custName:el('f-name')?el('f-name').value.trim()||'(not provided)':'(not provided)',
     custId:urlCustId||'',
+    phone:(el('f-phone')?el('f-phone').value.replace(/\s/g,'').trim():''),
     addr:(el('f-address')?el('f-address').value.trim():''),
     outlet:'',
     date:new Date().toISOString().split('T')[0],
