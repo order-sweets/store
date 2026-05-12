@@ -1258,10 +1258,7 @@ var params=new URLSearchParams(window.location.search);
 var urlCustId=params.get('cid')||'';
 var urlCustName=params.get('customer')||'';
 var urlOutletIdx=params.get('outlet');
-var urlEditOrder=params.get('edit')||'';   // original order ID being revised
-var urlEditExpiry=params.get('exp')||'';   // expiry timestamp (ms)
-var urlEditItems=params.get('items')||'';  // base64-encoded cart items
-var isRevision=false; // set to true if editing an existing order
+
 
 function initGreeting(){
   var cust=null;
@@ -1354,67 +1351,6 @@ function initGreeting(){
   }
 
   // ── EDIT ORDER handling ──
-  if(urlEditOrder&&urlEditExpiry){
-    var now=Date.now();
-    var expiry=parseInt(urlEditExpiry,10);
-
-    function _applyEditData(items,expiry){
-      if(now>expiry){
-        // Expired
-        var banner=document.createElement('div');
-        banner.style.cssText='background:#FCEBEB;color:#791F1F;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:14px;font-weight:600;text-align:center;';
-        banner.textContent='\u23F0 This edit link has expired. Please place a new order if needed.';
-        var wrap=el('order-wrap');
-        if(wrap)wrap.insertBefore(banner,wrap.firstChild);
-        el('wa-btn').disabled=true;
-      } else {
-        // Valid — restore basket
-        isRevision=true;
-        if(Array.isArray(items)&&items.length){
-          cartEntries=items.map(function(e){
-            return{entryId:'e'+(++entryCounter),pid:e.pid,unit:e.unit,qty:e.qty,variation:e.variation||''};
-          });
-          renderOrder();renderBasket();
-        }
-        // Show editing banner
-        var editBanner=document.createElement('div');
-        editBanner.style.cssText='background:var(--amber-bg);color:var(--amber-text);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:14px;font-weight:600;text-align:center;border:1.5px solid #E8C87A;';
-        editBanner.innerHTML='\u270F\uFE0F Editing order <strong>'+urlEditOrder+'</strong> &nbsp;\u00B7&nbsp; Edit window closes in <strong id="edit-countdown"></strong>';
-        var wrap2=el('order-wrap');
-        if(wrap2)wrap2.insertBefore(editBanner,wrap2.firstChild);
-        function updateCountdown(){
-          var rem=Math.max(0,Math.floor((expiry-Date.now())/1000));
-          var d=Math.floor(rem/86400),h=Math.floor((rem%86400)/3600),m=Math.floor((rem%3600)/60);
-          var cdStr=d>0?(d+'d '+h+'h '+m+'m'):(h>0?(h+'h '+m+'m'):(m+'m '+(rem%60)+'s'));
-          var cd=el('edit-countdown');
-          if(cd)cd.textContent=cdStr;
-          if(rem<=0){if(cd)cd.parentElement.style.background='#FCEBEB';el('wa-btn').disabled=true;}
-        }
-        updateCountdown();
-        setInterval(updateCountdown,1000);
-      }
-    }
-
-    if(urlEditItems){
-      // Legacy support: old links that still have items in URL
-      try{
-        var decoded=JSON.parse(decodeURIComponent(escape(atob(urlEditItems))));
-        _applyEditData(decoded,expiry);
-      }catch(err){_applyEditData([],expiry);}
-    } else {
-      // New: fetch cart from Firebase — stored OUTSIDE /store to survive admin PUT overwrites
-      var _fbEditUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/editOrders/'+urlEditOrder+'.json';
-      fetch(_fbEditUrl)
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-          _applyEditData(d&&d.items?d.items:[],d&&d.expiry?d.expiry:expiry);
-        })
-        .catch(function(err){
-          console.error('Edit order fetch failed:', err);
-          _applyEditData([],expiry);
-        });
-    }
-  }
 }
 
 window.showPage=function(id){
@@ -1936,7 +1872,7 @@ function doSend(){
   var notes=el('f-notes').value.trim();
   var sub=getSub();
   var metMin=delMode!=='delivery'||sub>=MIN_ORDER;
-  var orderId=isRevision?urlEditOrder:genOrderId();
+  var orderId=genOrderId();
   var lines=[];
   cartEntries.forEach(function(e){
     var p=findProduct(e.pid);if(!p)return;
@@ -1949,87 +1885,25 @@ function doSend(){
   var delLbl=delMode==='delivery'?'Delivery':'Self Collect';
 
   // Build WA message
-  var msg='';
-  if(isRevision){
-    msg='*\u2713REVISED ORDER! | '+orderId+'*'
-      +'\n\n*Name:* '+name+'\n'
-      +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
-      +'*Address:* '+(addr&&addr!=='(not provided)'?addr:'(not provided)')+'\n'
-      +(notes?'\n*Notes:* '+notes:'')
-      +'\n_Edit order (3 days):_ {EDITLINK}'
-      +'\n-------------------------------'
-      +'\n*\u2713ITEMS:*\n'+lines.join('\n')
-      +'\n\nTotal: $'+sub.toFixed(2)
-      +'\nCash on Delivery'
-      +'\n-------------------------------'
-      +minNote
-      +'\n\n_We\'ll be in touch to confirm. Thank you!_';
-  } else {
-    msg='*\u2713ORDER RECEIVED! | '+orderId+'*'
-      +'\n\n*Name:* '+name+'\n'
-      +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
-      +'*Address:* '+(addr&&addr!=='(not provided)'?addr:'(not provided)')+'\n'
-      +(notes?'\n*Notes:* '+notes:'')
-      +'\n_Edit order (3 days):_ {EDITLINK}'
-      +'\n-------------------------------'
-      +'\n*\u2713ITEMS:*\n'+lines.join('\n')
-      +'\n\nTotal: $'+sub.toFixed(2)
-      +'\nCash on Delivery'
-      +'\n-------------------------------'
-      +minNote
-      +'\n\n_We\'ll be in touch to confirm. Thank you!_';
-  }
+  var msg='*\u2713ORDER RECEIVED! | '+orderId+'*'
+    +'\n\n*Name:* '+name+'\n'
+    +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
+    +'*Address:* '+(addr&&addr!=='(not provided)'?addr:'(not provided)')+'\n'
+    +(notes?'\n*Notes:* '+notes:'')
+    +'\n-------------------------------'
+    +'\n*\u2713ITEMS:*\n'+lines.join('\n')
+    +'\n\nTotal: $'+sub.toFixed(2)
+    +'\nCash on Delivery'
+    +'\n-------------------------------'
+    +minNote
+    +'\n\n_We\'ll be in touch to confirm. Thank you!_';
 
-  // Build edit link (only for fresh orders, not revisions)
-  if(!isRevision){
-    try{
-      var editItems=cartEntries.map(function(e){
-        return{pid:e.pid,unit:e.unit,qty:e.qty,variation:e.variation||''};
-      });
-      var expiry=Date.now()+(3*24*60*60*1000);
-      var baseUrl=window.location.href.split('?')[0];
-      // Save cart to Firebase — hardcoded URL avoids _FB_URL scope issue inside IIFE
-      var _saveUrl='https://store-and-invoicing-default-rtdb.asia-southeast1.firebasedatabase.app/editOrders/'+orderId+'.json';
-      var _saveBody=JSON.stringify({items:editItems,expiry:expiry,cid:urlCustId||'',customer:urlCustName?decodeURIComponent(urlCustName):''});
-      // Short link — no items in URL, cart fetched from Firebase on restore
-      var editParams='?edit='+orderId+'&exp='+expiry;
-      if(urlCustId)editParams+='&cid='+encodeURIComponent(urlCustId);
-      if(urlCustName)editParams+='&customer='+encodeURIComponent(decodeURIComponent(urlCustName));
-      var editLink=baseUrl+editParams;
-      var _waMsg=msg.replace('{EDITLINK}',editLink);
-      // iOS Safari blocks window.open inside async callbacks — open synchronously now, redirect after fetch
-      var _waWin=window.open('','_blank');
-      // Await save before opening WhatsApp — mobile can navigate away and abort the fetch
-      // keepalive:true keeps the request alive even if the page unloads; 4s failsafe ensures WA still opens
-      var _saveTimeout=setTimeout(function(){_sendWA(_waMsg,orderId,sub,_waWin);},4000);
-      fetch(_saveUrl,{
-        method:'PUT',
-        headers:{'Content-Type':'application/json'},
-        body:_saveBody,
-        keepalive:true
-      }).then(function(){
-        clearTimeout(_saveTimeout);
-        _sendWA(_waMsg,orderId,sub,_waWin);
-      }).catch(function(err){
-        clearTimeout(_saveTimeout);
-        console.error('Edit order save failed:', err);
-        _sendWA(_waMsg,orderId,sub,_waWin);
-      });
-      return;
-    }catch(e){console.error('Edit link build failed:', e);}
-    msg=msg.replace('{EDITLINK}','(link unavailable)');
-  }
-  _sendWA(msg.replace('{EDITLINK}','(see above)'),orderId,sub);
+  _sendWA(msg,orderId,sub);
 }
-function _sendWA(fullMsg,orderId,sub,_preWin){
+function _sendWA(fullMsg,orderId,sub){
   var enc=encodeURIComponent(fullMsg);
-  // Use intent:// for Android Chrome (bypasses deep-link interception), wa.me fallback for iOS
-  var isAndroid=/Android/i.test(navigator.userAgent);
-  var url=isAndroid
-    ? 'intent://send/'+WA_1+'?text='+enc+'#Intent;scheme=whatsapp;package=com.whatsapp;end'
-    : 'https://wa.me/'+WA_1+'?text='+enc;
-  if(_preWin&&!_preWin.closed){_preWin.location.href=url;}else{window.open(url,'_blank');}
-  isRevision=false;
+  var url='https://wa.me/'+WA_1+'?text='+enc;
+  if(/Android/i.test(navigator.userAgent)){window.location.href=url;}else{window.open(url,'_blank');}
   // ── Push to invoice system's Pending Orders (beinv-pending) ──
   var beinvPending=JSON.parse(localStorage.getItem('beinv-pending')||'[]');
   var invItems=cartEntries.map(function(e){
