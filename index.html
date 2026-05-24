@@ -906,6 +906,7 @@ var WA_1='6581648864';
 var LS_PROD='snack-products-v5',LS_INV='snack-inv-v5',LS_CUST='snack-customers-v2',LS_PHOTOS='snack-photos-v1',LS_SETTINGS='snack-settings-v1',LS_ORD_CTR='snack-ord-counter';
 var delMode='delivery';
 var pendingMinOrder=false;
+var selectedOutletName='';
 var cartEntries=[];
 var simpleState={};
 var entryCounter=0;
@@ -1301,6 +1302,7 @@ function initGreeting(){
         btn.onclick=function(){
           document.querySelectorAll('.outlet-btn').forEach(function(b){b.classList.remove('active');});
           btn.classList.add('active');el('f-address').value=o.address||'';
+          selectedOutletName=o.name||'';
         };
         grid.appendChild(btn);
         if(urlOutletIdx==i)el('f-address').value=o.address||'';
@@ -1310,6 +1312,7 @@ function initGreeting(){
       if(cust.outlets.length===1){
         var so=cust.outlets[0];
         el('f-address').value=so.address||'';
+        selectedOutletName=so.name||'';
         var outLine=el('greeting-outlet-line'),outName=el('greeting-outlet-name');
         if(outLine&&outName){outName.textContent=so.name;outLine.style.display='flex';}
         var chBtn=el('change-outlet-btn');if(chBtn)chBtn.style.display='none';
@@ -1319,6 +1322,8 @@ function initGreeting(){
         var preIdx=parseInt(urlOutletIdx,10);
         var preO=cust.outlets[preIdx];
         if(preO){
+          selectedOutletName=preO.name||'';
+          el('f-address').value=preO.address||'';
           var outLine=el('greeting-outlet-line'),outName=el('greeting-outlet-name');
           if(outLine&&outName){outName.textContent=preO.name;outLine.style.display='flex';}
         }
@@ -1338,6 +1343,7 @@ function initGreeting(){
             mbtn.innerHTML='<span class="outlet-modal-btn-name">'+esc(o.name)+'</span>'+(o.address?'<span class="outlet-modal-btn-addr">'+esc(o.address)+'</span>':'');
             mbtn.onclick=function(){
               el('f-address').value=o.address||'';
+              selectedOutletName=o.name||'';
               document.querySelectorAll('.outlet-btn').forEach(function(b,bi){b.classList.toggle('active',bi===i);});
               var outLine=el('greeting-outlet-line'),outName=el('greeting-outlet-name');
               if(outLine&&outName){outName.textContent=o.name;outLine.style.display='flex';}
@@ -1931,7 +1937,7 @@ function _sendWA(fullMsg,orderId,sub){
     custId:urlCustId||'',
     phone:(el('f-phone')?el('f-phone').value.replace(/\s/g,'').trim():''),
     addr:(el('f-address')?el('f-address').value.trim():''),
-    outlet:'',
+    outlet:selectedOutletName||'',
     date:new Date().toISOString().split('T')[0],
     delivery:(typeof delMode!=='undefined'?delMode:''),
     items:invItems,
