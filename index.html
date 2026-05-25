@@ -1948,6 +1948,7 @@ function _sendWA(fullMsg,orderId,sub){
   localStorage.setItem('beinv-pending',JSON.stringify(beinvPending));
   if(!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
     el('placed-order-id').textContent=orderId;
+  el('wa-btn').disabled=false;
   el('placed-modal').classList.add('open');
 }
 window.closePlacedModal=function(another){
@@ -1955,7 +1956,7 @@ window.closePlacedModal=function(another){
   window._pendingConf=null;
   if(another){cartEntries=[];simpleState={};_pendingVar={};renderOrder();renderBasket();window.scrollTo({top:0,behavior:'smooth'});}
 };
-el('wa-btn').addEventListener('click',function(){doSend();});
+el('wa-btn').addEventListener('click',function(){this.disabled=true;doSend();});
 el('modal-confirm-btn').addEventListener('click',function(){el('min-order-modal').classList.remove('open');if(pendingMinOrder)doSend();pendingMinOrder=false;});
 el('f-phone').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,8);});
 // Show announcement popup on storefront load
