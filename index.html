@@ -1942,22 +1942,22 @@ function doSend(){
     var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
     var d=getDiscount(p);
     var varStr=e.variation?' ['+e.variation+']':'';
-    lines.push('*'+(lines.length+1)+'.*'+' '+p.name+varStr+'\n'+(e.unit==='case'?'Box':'Piece')+(d>0?' (-'+d+'%)':'')+' x '+e.qty+' — $'+(price*e.qty).toFixed(2));
+    lines.push((lines.length+1)+'. '+p.name+varStr+'\n'+(e.unit==='case'?'Box':'Piece')+(d>0?' (-'+d+'%)':'')+' x '+e.qty+' — $'+(price*e.qty).toFixed(2));
   });
   var delLbl=delMode==='delivery'?'Delivery':'Self Collect';
 
   // Build WA message
   var msg='*\u2713NEW ORDER! | '+orderId+'*'
-    +'\n*Name:* '+name+'\n'
+    +'\n\n*Name:* '+name+'\n'
     +'*Phone:* '+(phone?'+65 '+phone:'(not provided)')+'\n'
     +'*Address:* '+(addr&&addr!=='(not provided)'?addr:'(not provided)')+'\n'
     +(notes?'*Notes:* '+notes+'\n':'')
-    +'-------------------------------'
-    +'\nITEMS:\n'+lines.join('\n\n')
+    +'-------------------------------\n'
+    +'*ITEMS:*\n'+lines.join('\n\n')
     +'\n\n*Total: $'+sub.toFixed(2)+'*'
     +'\n*Cash on Delivery*'
     +'\n-------------------------------'
-    +'\nBee Events, I want to order the above.\nPlease advise delivery date.';
+    +'\nBee Events, I want to order the above. Please advise delivery date!';
 
   _sendWA(msg,orderId,sub);
 }
