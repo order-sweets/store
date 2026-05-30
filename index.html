@@ -26,16 +26,17 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 #lock-btn.scrolled-away{opacity:0;transform:translateY(-8px);pointer-events:none;}
 
 /* FLOATING BASKET BUTTON */
-#float-basket{position:fixed;bottom:100px;right:16px;z-index:499;width:48px;height:48px;border-radius:50%;background:var(--accent);border:none;box-shadow:0 2px 12px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;}
+#float-basket{position:fixed;bottom:100px;right:16px;z-index:499;width:auto;height:auto;border-radius:24px;background:var(--accent);border:none;box-shadow:0 2px 12px rgba(0,0,0,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;padding:10px 14px 8px;gap:3px;}
 #float-basket:active{transform:scale(.92);}
-#float-basket svg{width:24px;height:24px;fill:#fff;}
+#float-basket svg{width:22px;height:22px;fill:#fff;flex-shrink:0;}
+#float-basket-label{font-size:10px;font-weight:800;color:#fff;letter-spacing:.06em;font-family:inherit;line-height:1;}
 #float-basket-count{position:absolute;bottom:-4px;right:-4px;background:#fff;color:var(--accent);border-radius:20px;padding:2px 7px;font-size:12px;font-weight:800;font-family:inherit;min-width:20px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.2);display:none;}
 @keyframes basket-glow{
-  0%{box-shadow:0 0 0 0 rgba(216,90,48,.9),0 2px 12px rgba(0,0,0,.2);}
-  40%{box-shadow:0 0 0 16px rgba(216,90,48,.4),0 2px 12px rgba(0,0,0,.2);}
-  100%{box-shadow:0 0 0 24px rgba(216,90,48,0),0 2px 12px rgba(0,0,0,.2);}
+  0%,100%{box-shadow:0 0 0 0 rgba(216,90,48,.7),0 2px 12px rgba(0,0,0,.2);transform:scale(1);}
+  50%{box-shadow:0 0 0 12px rgba(216,90,48,.0),0 2px 12px rgba(0,0,0,.2);transform:scale(1.08);}
 }
-.basket-glow{animation:basket-glow 1s ease-out;}
+.basket-glow{animation:basket-glow 1.4s ease-in-out infinite;}
+#float-basket:active{transform:scale(.92);}
 .order-wrap{max-width:680px;margin:0 auto;padding:1.75rem 1.1rem 8rem;}
 
 /* TIER BANNER */
@@ -127,10 +128,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
 
 /* FLOATING MENU */
-#float-menu{position:fixed;bottom:161px;right:16px;z-index:499;width:54px;height:54px;border-radius:10px;background:#1a3a6b;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;animation:menu-glow 2s ease-in-out infinite;}
+#float-menu{position:fixed;top:16px;right:72px;z-index:499;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;}
 #float-menu:active{transform:scale(.92);}
 #float-menu svg{display:none;}
-@keyframes menu-glow{0%,100%{box-shadow:0 0 8px 2px rgba(255,229,0,.5),0 0 16px 4px rgba(255,229,0,.2);}50%{box-shadow:0 0 14px 5px rgba(255,229,0,.8),0 0 28px 10px rgba(255,229,0,.35);}}
 #float-menu-dot{position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--accent);display:none;}
 #filter-drawer-backdrop{position:fixed;inset:0;z-index:598;display:none;}
 #filter-drawer{position:fixed;bottom:0;left:0;right:0;z-index:599;background:#fff;border-radius:16px 16px 0 0;border-top:1.5px solid var(--border-md);padding:14px 16px 32px;transform:translateY(100%);transition:transform .28s ease;box-shadow:0 -4px 24px rgba(0,0,0,.10);}
@@ -317,8 +317,7 @@ body{top:0!important;}
 #goog-gt-tt{display:none!important;}
 .goog-te-balloon-frame{display:none!important;}
 .page-admin-active .translate-btn,.page-login-active .translate-btn{display:none!important;}
-.translate-btn{position:fixed;bottom:228px;right:16px;z-index:490;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .3s,transform .3s;}
-.translate-btn.scrolled-away{opacity:1;transform:none;pointer-events:all;}
+.translate-btn{position:fixed;top:16px;right:16px;z-index:490;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--border-md);box-shadow:0 2px 12px rgba(0,0,0,.13);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .translate-btn img{width:28px;height:28px;object-fit:contain;}
 .translate-btn:hover{box-shadow:0 3px 14px rgba(0,0,0,.22);}
 /* STICKY */
@@ -679,6 +678,7 @@ body{top:0!important;}
 <!-- FLOATING BASKET BUTTON -->
 <button id="float-basket" onclick="document.getElementById('basket-section').scrollIntoView({behavior:'smooth'})" aria-label="View basket" class="basket-glow">
   <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"></path></svg>
+  <span id="float-basket-label">CHECKOUT</span>
   <span id="float-basket-count" style="display: none;">0</span>
 </button>
 
@@ -687,11 +687,11 @@ body{top:0!important;}
 <!-- FLOATING MENU BUTTON -->
 <button id="float-menu" onclick="toggleFilterDrawer()" aria-label="Filter products" style="display:none">
   <span style="display:flex;flex-direction:column;align-items:center;gap:5px;">
-    <span style="font-size:11px;font-weight:800;color:#FFE500;letter-spacing:.08em;font-family:inherit;line-height:1;">MENU</span>
+    <span style="font-size:9px;font-weight:800;color:var(--text);letter-spacing:.08em;font-family:inherit;line-height:1;">MENU</span>
     <span style="display:flex;flex-direction:column;gap:2.5px;align-items:center;">
-      <span style="width:22px;height:2px;background:#FFE500;border-radius:1px;display:block;"></span>
-      <span style="width:22px;height:2px;background:#FFE500;border-radius:1px;display:block;"></span>
-      <span style="width:22px;height:2px;background:#FFE500;border-radius:1px;display:block;"></span>
+      <span style="width:18px;height:2px;background:var(--text);border-radius:1px;display:block;"></span>
+      <span style="width:18px;height:2px;background:var(--text);border-radius:1px;display:block;"></span>
+      <span style="width:18px;height:2px;background:var(--text);border-radius:1px;display:block;"></span>
     </span>
   </span>
   <span id="float-menu-dot"></span>
@@ -1870,7 +1870,6 @@ function renderBasket(){
     }
   }
   // Trigger glow animation
-  if(fb){fb.classList.remove('basket-glow');void fb.offsetWidth;fb.classList.add('basket-glow');}
   if(!cartEntries.length){
     el('basket-body').innerHTML='<div class="basket-empty">Your basket is empty — add products above.</div>';
     el('basket-footer').style.display='none';el('wa-btn').disabled=true;return;
@@ -3217,9 +3216,7 @@ window._fbEnsureListening();
     var scrolled = window.scrollY > THRESHOLD;
     var onStore = document.getElementById('page-order') && document.getElementById('page-order').classList.contains('active');
     var lockBtn = document.getElementById('lock-btn');
-    var transBtn = document.getElementById('translate-btn');
-    if(lockBtn){ lockBtn.classList.toggle('scrolled-away', scrolled && onStore); }
-    if(transBtn){ transBtn.classList.toggle('scrolled-away', scrolled && onStore); }
+      if(lockBtn){ lockBtn.classList.toggle('scrolled-away', scrolled && onStore); }
     ticking = false;
   }
   window.addEventListener('scroll', function(){
