@@ -909,7 +909,7 @@ body{top:0!important;}
 
 <script>
 (function(){
-var ADMIN_PW='admin123';
+var ADMIN_PW='69e399851c8419993d46757025fd51e415e0277e8def8cb283dfbe7867212e8a'; // SHA-256 hash
 var MIN_ORDER=80.00;
 var WA_1='6581648864';
 var LS_PROD='snack-products-v5',LS_INV='snack-inv-v5',LS_CUST='snack-customers-v2',LS_PHOTOS='snack-photos-v1',LS_SETTINGS='snack-settings-v1',LS_ORD_CTR='snack-ord-counter';
@@ -1418,9 +1418,14 @@ window.showPage=function(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   el(id).classList.add('active');window.scrollTo(0,0);
 };
-window.tryLogin=function(){
+async function _sha256Store(str){
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+window.tryLogin=async function(){
   var pw=el('pw-input').value;
-  if(pw===ADMIN_PW){
+  var hash=await _sha256Store(pw);
+  if(hash===ADMIN_PW){
     el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';
     localStorage.setItem('snack-admin-auth','1');
     renderAdmin();renderCustomerList();window.showPage('page-admin');if(!window._fbStarted){window._fbStarted=true;if(typeof _fbHookSaves==='function')_fbHookSaves();}if(window._fbEnsureListening)window._fbEnsureListening();else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
