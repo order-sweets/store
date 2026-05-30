@@ -418,14 +418,14 @@ body{top:0!important;}
 
 /* ADMIN PRODUCT CARD */
 .prod-admin-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);margin-bottom:10px;overflow:hidden;}
-.prod-admin-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;}
+.prod-admin-header{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;flex-wrap:wrap;}
 .prod-admin-thumb{width:44px;height:44px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;}
 .prod-admin-thumb img{width:100%;height:100%;object-fit:cover;}
-.prod-admin-info{flex:1;min-width:0;}
+.prod-admin-info{flex:1;min-width:0;max-width:calc(100% - 100px);}
 .prod-admin-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .prod-admin-price{font-size:12px;color:var(--text-muted);}
-.prod-admin-stock-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;}
-.pah-stock-chip{font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--surface);color:var(--text-muted);border:1px solid var(--border);white-space:nowrap;}
+.prod-admin-stock-bar{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;margin-top:2px;}
+.pah-stock-chip{font-size:11px;font-weight:600;padding:2px 6px;border-radius:20px;background:var(--surface);color:var(--text-muted);border:1px solid var(--border);white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis;}
 .pah-stock-chip.boxes{background:var(--green-bg);color:var(--green-text);border-color:var(--green);}
 .pah-adj-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border-md);background:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);line-height:1;flex-shrink:0;padding:0;}
 .pah-adj-btn:active{background:var(--surface);}
@@ -434,7 +434,11 @@ body{top:0!important;}
 .prod-admin-chevron.open{transform:rotate(180deg);}
 @media(max-width:480px){
   .prod-admin-thumb{width:34px;height:34px;font-size:18px;}
-  .prod-admin-header{padding:10px 10px;gap:8px;}
+  .prod-admin-header{padding:10px 10px;gap:6px;}
+  .pah-adj-btn{width:22px;height:22px;font-size:13px;}
+  .pah-stock-chip{font-size:10px;padding:2px 5px;max-width:65px;}
+  .prod-admin-chevron{font-size:10px;}
+  .sbadge{font-size:9px;padding:2px 5px;}
 }
 .prod-admin-body{display:none;padding:0 14px 14px;border-top:1px solid var(--border);}
 .prod-admin-body.open{display:block;}
@@ -601,14 +605,14 @@ body{top:0!important;}
 
   <div id="new-arrivals-section" class="new-arrivals-wrap">
     <div class="new-arrivals-header">
-      <span class="new-arrivals-title">✨ New Arrivals</span>
+      <span class="new-arrivals-title" id="new-arrivals-title-display">✨ New Arrivals</span>
     </div>
     <div class="prod-list" id="new-arrivals-list"></div>
   </div>
 
 
   <div id="hot-sale-section">
-  <p class="slabel">Hot Sale!</p>
+  <p class="slabel" id="hot-sale-title-display">Hot Sale!</p>
   <div class="prod-list" id="hot-sale-list"><div class="ps-empty">No hot sale items.</div></div>
   </div><!-- /hot-sale-section -->
 
@@ -923,7 +927,7 @@ var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads 
 
 var savedP=loadJ(LS_PROD);
 var _rawSettings=loadJ(LS_SETTINGS)||{};
-var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||''};
+var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||'',newArrivalsTitle:_rawSettings.newArrivalsTitle||'✨ New Arrivals',hotSaleTitle:_rawSettings.hotSaleTitle||'Hot Sale!'};
 var _fbApplyingRemote=false;
 window._fbApplyingRemote=false; // mirror for IIFE access
 var _fbLastAppliedVersion=0; // track last applied remote version
@@ -1095,6 +1099,16 @@ window.toggleHotSale=function(on){
   SETTINGS.showHotSale=on;
   saveSettings();
   renderOrder();
+};
+window.saveNewArrivalsTitle=function(){
+  var v=el('new-arrivals-title-inp');if(!v)return;
+  SETTINGS.newArrivalsTitle=v.value.trim()||'✨ New Arrivals';
+  saveSettings();renderOrder();
+};
+window.saveHotSaleTitle=function(){
+  var v=el('hot-sale-title-inp');if(!v)return;
+  SETTINGS.hotSaleTitle=v.value.trim()||'Hot Sale!';
+  saveSettings();renderOrder();
 };
 window.togglePopup=function(on){
   SETTINGS.popupEnabled=on;
@@ -1708,6 +1722,8 @@ function renderOrder(){
   var visNew=NEW_ARRIVALS.filter(isVisibleFiltered);
   if(nal)nal.innerHTML=visNew.length?visNew.map(function(p){return cardHTML(p,true);}).join(''):'<div class="ps-empty">No new arrivals yet.</div>';
   if(naSection)naSection.style.display=SETTINGS.showNewArrivals?'':'none';
+  var naTitle=el('new-arrivals-title-display');if(naTitle)naTitle.textContent=SETTINGS.newArrivalsTitle||'✨ New Arrivals';
+  var hsTitle=el('hot-sale-title-display');if(hsTitle)hsTitle.textContent=SETTINGS.hotSaleTitle||'Hot Sale!';
   var hsSection=el('hot-sale-section');
   var hsl=el('hot-sale-list');
   var visHot=HOT_SALE.filter(isVisibleFiltered);
@@ -2239,8 +2255,18 @@ function renderAdmin(){
   var openCards=Array.prototype.map.call(document.querySelectorAll('.prod-admin-body.open'),function(node){return node.id.replace('pab-','');});
   syncAdminSettings();
   var sorted=BRANDS.slice().sort(function(a,b){return a.brand.localeCompare(b.brand);});
-  el('admin-new').innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><p class="admin-brand-name" style="margin:0">✨ New Arrivals</p><label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-new-arrivals" '+(SETTINGS.showNewArrivals?'checked':'')+' onchange="toggleNewArrivals(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div>'+(NEW_ARRIVALS.length?NEW_ARRIVALS.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No new arrivals.</p>');
-  el('admin-hot').innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><p class="admin-brand-name" style="margin:0">Hot Sale!</p><label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-hot-sale" '+(SETTINGS.showHotSale?'checked':'')+' onchange="toggleHotSale(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div>'+(HOT_SALE.length?HOT_SALE.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No hot sale items.</p>');
+  el('admin-new').innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+    +'<input type="text" id="new-arrivals-title-inp" value="'+esc(SETTINGS.newArrivalsTitle||'✨ New Arrivals')+'" placeholder="Section title…" style="flex:1;font-size:13px;font-weight:600;padding:6px 9px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;font-family:inherit;color:var(--text);outline:none;">'
+    +'<button onclick="saveNewArrivalsTitle()" style="padding:6px 11px;font-size:12px;font-weight:600;border:1px solid var(--green);background:var(--green-bg);color:var(--green-text);border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;">Save</button>'
+    +'<label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-new-arrivals" '+(SETTINGS.showNewArrivals?'checked':'')+' onchange="toggleNewArrivals(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label>'
+    +'</div>'
+    +(NEW_ARRIVALS.length?NEW_ARRIVALS.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No new arrivals.</p>');
+  el('admin-hot').innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+    +'<input type="text" id="hot-sale-title-inp" value="'+esc(SETTINGS.hotSaleTitle||'Hot Sale!')+'" placeholder="Section title…" style="flex:1;font-size:13px;font-weight:600;padding:6px 9px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;font-family:inherit;color:var(--text);outline:none;">'
+    +'<button onclick="saveHotSaleTitle()" style="padding:6px 11px;font-size:12px;font-weight:600;border:1px solid var(--green);background:var(--green-bg);color:var(--green-text);border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;">Save</button>'
+    +'<label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-hot-sale" '+(SETTINGS.showHotSale?'checked':'')+' onchange="toggleHotSale(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label>'
+    +'</div>'
+    +(HOT_SALE.length?HOT_SALE.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No hot sale items.</p>');
   el('admin-brands').innerHTML=sorted.filter(function(b){return b.products.length;}).map(function(b){return'<div class="admin-brand-block"><p class="admin-brand-name">'+esc(b.brand)+'</p>'+b.products.map(function(p){return prodAdminCard(p);}).join('')+'</div>';}).join('');
   openCards.forEach(function(id){var body=el('pab-'+id),chev=el('chev-'+id);if(body)body.classList.add('open');if(chev)chev.classList.add('open');});
   updateStats();updateBrandDatalist();
