@@ -2112,22 +2112,24 @@ window.saveHideProduct=function(pid,val){
   p.hidden=!!val;
   var inv=getInv();inv['hidden_'+pid]=val?1:0;saveInv(inv);
   saveProds();
-  // Disable/enable tier visibility toggles
-  var visrEl=document.getElementById('evisr-'+pid);
-  var visdEl=document.getElementById('evisd-'+pid);
-  if(visrEl)visrEl.disabled=!!val;
-  if(visdEl)visdEl.disabled=!!val;
   // Drop hidden product from cart silently
   if(val){
     var before=cartEntries.length;
     cartEntries=cartEntries.filter(function(e){return e.pid!==pid;});
     if(cartEntries.length!==before){
-      // also clear simpleState
       if(simpleState[pid])delete simpleState[pid];
       renderBasket();
     }
   }
   renderOrder();
+  // Re-render admin card so badge + disabled toggles update immediately
+  renderAdmin();
+  // Re-open the card that was just toggled
+  var body=el('pab-'+pid);
+  if(body&&!body.classList.contains('open')){
+    body.classList.add('open');
+    var chev=el('chev-'+pid);if(chev)chev.classList.add('open');
+  }
 };
 window.saveProductEdits=function(id){
   var p=findProduct(id);if(!p)return;
