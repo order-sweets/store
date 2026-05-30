@@ -163,13 +163,13 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .gc-inp{width:32px;height:24px;border-radius:6px;border:1px solid var(--border-md);background:#fff;text-align:center;font-size:12px;color:var(--text);font-family:inherit;}
 .gc-divider{height:1px;background:var(--border);margin:2px 0;width:100%;}
 .gc.has-qty{border:2.5px solid var(--accent);}
-.gc.oos{opacity:.3;}
+.gc.oos{opacity:.45;}
 .gc-price{font-size:10.5px;color:var(--text);font-weight:600;margin-top:1px;}
 
 /* ITEM CARD */
 .item-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:row;}
 .item-card.has-qty{border:2.5px solid var(--accent);background:var(--accent-bg);}
-.item-card.oos{opacity:.42;background:var(--surface);}
+.item-card.oos{opacity:.57;background:var(--surface);}
 .card-img{width:150px;height:150px;flex-shrink:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:zoom-in;overflow:hidden;align-self:center;margin:10px 0 10px 10px;border-radius:8px;}
 @media(max-width:420px){
   .card-img{width:115px;height:115px;align-self:center;margin:8px 0 8px 8px;}
@@ -326,13 +326,7 @@ body{top:0!important;}
 .checkout-details{padding:14px 16px 18px;}
 .checkout-details-title{font-family:'Bebas Neue',sans-serif;font-size:20px;font-weight:400;letter-spacing:1.2px;text-transform:uppercase;color:var(--text);margin-bottom:12px;}
 .wa-sticky{display:none;}
-@keyframes details-glow-pulse{
-  0%{box-shadow:0 0 0 0 rgba(216,90,48,.0);background:transparent;}
-  25%{box-shadow:0 0 0 8px rgba(216,90,48,.25);background:rgba(216,90,48,.07);}
-  70%{box-shadow:0 0 0 14px rgba(216,90,48,.1);background:rgba(216,90,48,.04);}
-  100%{box-shadow:0 0 0 0 rgba(216,90,48,.0);background:transparent;}
-}
-.details-glow{border-radius:var(--r);animation:details-glow-pulse 1.8s ease-out forwards;}
+
 .wa-btn{width:100%;padding:16px;background:#128C4A;border:none;border-radius:var(--r-lg);font-size:16px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
 .wa-btn:disabled{opacity:.65;cursor:not-allowed;}
 .wa-icon{width:20px;height:20px;flex-shrink:0;}
@@ -406,6 +400,11 @@ body{top:0!important;}
 .primary-btn.full{width:100%;margin-top:12px;}
 .danger-btn{padding:8px 14px;background:#FCEBEB;border:none;border-radius:var(--r);font-size:13px;font-weight:600;color:#791F1F;cursor:pointer;font-family:inherit;}
 .save-prod-btn{padding:9px 20px;background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r);font-size:13px;font-weight:600;color:var(--green-text);cursor:pointer;font-family:inherit;}
+.sbadge.hidden-badge{background:#F3F4F6;color:#6B7280;border:1px solid #D1D5DB;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700;letter-spacing:.04em;}
+.vis-toggle-row.vis-disabled{opacity:.4;pointer-events:none;}
+.hide-prod-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;margin-left:auto;padding:6px 10px;border-radius:var(--r);border:1.5px solid #FECACA;background:#FEF2F2;}
+.hide-prod-toggle input{accent-color:#DC2626;width:15px;height:15px;cursor:pointer;flex-shrink:0;}
+.hide-prod-label{font-size:12px;font-weight:600;color:#DC2626;user-select:none;white-space:nowrap;}
 .admin-brand-block{margin-bottom:1.5rem;}
 .admin-brand-name{font-size:11px;font-weight:600;color:var(--text-muted);padding:5px 0;border-bottom:1px solid var(--border);margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase;}
 .new-admin-wrap .admin-brand-name,.hot-admin-wrap .admin-brand-name{border-bottom:none;}
@@ -639,11 +638,11 @@ body{top:0!important;}
       <div class="checkout-details">
         <div class="checkout-details-title">Delivery Details</div>
         <div class="field-grid" style="margin-bottom:0;">
-          <div class="field full"><label>Your Name / Company Name <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required)</span></label><input type="text" id="f-name" placeholder="" autocomplete="name"></div>
-          <div class="field full"><label>Phone Number <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required)</span></label>
+          <div class="field full"><label>Your Name / Company Name <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required!)</span></label><input type="text" id="f-name" placeholder="" autocomplete="name"></div>
+          <div class="field full"><label>Phone Number <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required!)</span></label>
             <div class="phone-row"><span class="phone-pfx">+65</span><input type="tel" id="f-phone" placeholder="" maxlength="9" inputmode="numeric" oninput="fmtPhone(this)"></div>
           </div>
-          <div class="field full" id="addr-field"><label>Delivery Address <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required)</span></label><input type="text" id="f-address" placeholder="" autocomplete="off"></div>
+          <div class="field full" id="addr-field"><label>Delivery Address <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required!)</span></label><input type="text" id="f-address" placeholder="" autocomplete="off"></div>
           <div class="field full"><label>Notes (optional)</label><textarea id="f-notes" placeholder=""></textarea></div>
         </div>
         <button class="wa-btn" id="wa-btn" disabled="" style="margin-top:14px;border-radius:var(--r-lg);">
@@ -1262,7 +1261,13 @@ function getVisDist(p){
   if(p.visDist!==undefined)return !!p.visDist;
   return true;
 }
+function getHidden(p){
+  var inv=getInv();
+  if(inv['hidden_'+p.id]!==undefined)return !!inv['hidden_'+p.id];
+  return !!(p.hidden);
+}
 function isVisible(p){
+  if(getHidden(p))return false;
   if(activeTier==='distributor')return !!getVisDist(p);
   return !!getVisRetail(p);
 }
@@ -1970,15 +1975,7 @@ el('f-phone').addEventListener('input',function(){this.value=this.value.replace(
 ;['f-name','f-phone','f-address'].forEach(function(fid){
   var inp=el(fid);if(inp)inp.addEventListener('input',updateWaBtn);
 });
-// Scroll to details section with a glow pulse
-function scrollToDetails(){
-  var wrap=el('checkout-details-section');
-  if(!wrap)wrap=el('f-name');
-  if(!wrap)return;
-  wrap.scrollIntoView({behavior:'smooth',block:'center'});
-  var grid=wrap.closest('.checkout-details')||wrap.closest('.field-grid');
-  if(grid){grid.classList.add('details-glow');setTimeout(function(){grid.classList.remove('details-glow');},1800);}
-}
+
 // Show announcement popup on storefront load
 setTimeout(maybeShowPopup, 800);
 
@@ -2017,6 +2014,7 @@ function prodAdminCard(p){
   var autoDcp=p.ppc>0?(dp*p.ppc).toFixed(2):'—';
   var visR=!!getVisRetail(p);
   var visD=!!getVisDist(p);
+  var hidden=getHidden(p);
   var vars=p.variations||[];
 
   return'<div class="prod-admin-card" id="pac-'+p.id+'">'
@@ -2025,6 +2023,7 @@ function prodAdminCard(p){
       +'<div class="prod-admin-info"><div class="prod-admin-name">'+esc(p.name)+'</div>'
         +(function(){var sp=getStockPieces(p);var ppc=p.ppc||1;var boxes=Math.floor(sp/ppc);return '<div class="prod-admin-stock-bar" onclick="event.stopPropagation()"><button class="pah-adj-btn" onclick="quickAdjBox(\''+p.id+'\',-1)">−</button><span class="pah-stock-chip boxes" id="pah-boxes-'+p.id+'">'+boxes+' boxes</span><button class="pah-adj-btn" onclick="quickAdjBox(\''+p.id+'\',1)">+</button></div>';})()+'</div>'
       +'<span id="abadge-'+p.id+'">'+aBadgeP(p,getThresh())+'</span>'
+      +(hidden?'<span class="sbadge hidden-badge">Hidden</span>':'')
       +'<span class="prod-admin-chevron" id="chev-'+p.id+'">▼</span>'
     +'</div>'
     +'<div class="prod-admin-body" id="pab-'+p.id+'">'
@@ -2064,16 +2063,20 @@ function prodAdminCard(p){
         +'<div class="admin-field"><label>Distributor Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="edp-'+p.id+'" value="'+dp.toFixed(2)+'"></div>'
         +'<div class="admin-field"><label>Distributor Box Price ($) <small style="color:var(--text-hint)">(auto $'+autoDcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="edcp-'+p.id+'" value="'+(dcp>0?dcp:'')+'" placeholder="'+autoDcp+'"></div>'
         // Row 7 — Visible to Retail | Visible to Distributors
-        +'<div class="admin-field"><div class="vis-toggle-row retail"><span class="vis-toggle-label">🏪 Visible to Retailers</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisr-'+p.id+'" '+(visR?'checked':'')+' onchange="saveVisRetail(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
-        +'<div class="admin-field"><div class="vis-toggle-row dist"><span class="vis-toggle-label">\uD83D\uDCE6 Visible to Distributors</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisd-'+p.id+'" '+(visD?'checked':'')+' onchange="saveVisDist(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
+        +'<div class="admin-field"><div class="vis-toggle-row retail'+(hidden?' vis-disabled':'')+'" title="'+(hidden?'Unhide product to change visibility':'')+'"><span class="vis-toggle-label">🏪 Visible to Retailers</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisr-'+p.id+'" '+(visR&&!hidden?'checked':'')+' '+(hidden?'disabled':'')+' onchange="saveVisRetail(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
+        +'<div class="admin-field"><div class="vis-toggle-row dist'+(hidden?' vis-disabled':'')+'" title="'+(hidden?'Unhide product to change visibility':'')+'"><span class="vis-toggle-label">\uD83D\uDCE6 Visible to Distributors</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisd-'+p.id+'" '+(visD&&!hidden?'checked':'')+' '+(hidden?'disabled':'')+' onchange="saveVisDist(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
         // Row 8 — Units available to Retail | Units available to Distributors
         +'<div class="admin-field"><label style="color:var(--blue-text);font-weight:600">🏪 Retailers can order by</label><select id="eunitr-'+p.id+'"><option value="both"'+((!p.unitsRetail||p.unitsRetail==='both')?' selected':'')+'>Piece &amp; Box</option><option value="piece"'+(p.unitsRetail==='piece'?' selected':'')+'>Piece only</option><option value="case"'+(p.unitsRetail==='case'?' selected':'')+'>Box only</option></select></div>'
         +'<div class="admin-field"><label style="color:var(--purple-text);font-weight:600">\uD83D\uDCE6 Distributors can order by</label><select id="eunitd-'+p.id+'"><option value="both"'+((!p.unitsDist||p.unitsDist==='both')?' selected':'')+'>Piece &amp; Box</option><option value="piece"'+(p.unitsDist==='piece'?' selected':'')+'>Piece only</option><option value="case"'+(p.unitsDist==='case'?' selected':'')+'>Box only</option></select></div>'
       +'</div>'
 
-      +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
+      +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center">'
         +'<button class="save-prod-btn" onclick="saveProductEdits(\''+p.id+'\')">✓ Save changes</button>'
         +'<button class="danger-btn" onclick="deleteProduct(\''+p.id+'\')">Delete product</button>'
+        +'<label class="hide-prod-toggle" title="Hide from storefront for all customers">'
+          +'<input type="checkbox" id="ehide-'+p.id+'" '+(hidden?'checked':'')+' onchange="saveHideProduct(\''+p.id+'\',this.checked)">'
+          +'<span class="hide-prod-label">Hide from Store</span>'
+        +'</label>'
       +'</div>'
     +'</div>'
 
@@ -2104,6 +2107,28 @@ window.saveVisDist=function(pid,val){
   saveProds();renderOrder();
 };
 
+window.saveHideProduct=function(pid,val){
+  var p=findProduct(pid);if(!p)return;
+  p.hidden=!!val;
+  var inv=getInv();inv['hidden_'+pid]=val?1:0;saveInv(inv);
+  saveProds();
+  // Disable/enable tier visibility toggles
+  var visrEl=document.getElementById('evisr-'+pid);
+  var visdEl=document.getElementById('evisd-'+pid);
+  if(visrEl)visrEl.disabled=!!val;
+  if(visdEl)visdEl.disabled=!!val;
+  // Drop hidden product from cart silently
+  if(val){
+    var before=cartEntries.length;
+    cartEntries=cartEntries.filter(function(e){return e.pid!==pid;});
+    if(cartEntries.length!==before){
+      // also clear simpleState
+      if(simpleState[pid])delete simpleState[pid];
+      renderBasket();
+    }
+  }
+  renderOrder();
+};
 window.saveProductEdits=function(id){
   var p=findProduct(id);if(!p)return;
   var newName=(el('ename-'+id)||{}).value||'';
@@ -3169,7 +3194,7 @@ window._fbEnsureListening();
     <div style="font-size:72px;line-height:1;color:#D32F2F;margin-bottom:1rem;">&#10007;</div>
     <div style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:700;color:#D32F2F;margin-bottom:.75rem;">Error: Order Not Sent!</div>
     <div style="font-size:15px;color:#555;line-height:1.6;margin-bottom:1.5rem;">Please fill in your Name, Phone Number &amp; Delivery Address and try again.</div>
-    <button onclick="document.getElementById('err-modal').style.display='none';scrollToDetails();" style="width:100%;padding:14px;background:#D32F2F;border:none;border-radius:10px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">OK</button>
+    <button onclick="document.getElementById('err-modal').style.display='none';" style="width:100%;padding:14px;background:#D32F2F;border:none;border-radius:10px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">OK</button>
   </div>
 </div>
 </body></html>
