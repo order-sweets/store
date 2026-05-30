@@ -1700,7 +1700,7 @@ function cardHTML(p,isNew){
       +p.variations.map(function(v){return'<option value="'+esc(v)+'"'+(pendingVar===v?' selected':'')+'>'+esc(v)+'</option>';}).join('')
     +'</select></div>';
   }
-  var stockBadge=oos?'<span class="badge-out">Out of Stock</span>':(getStockCases(p)<=1&&p.ppc>0?'<span class="badge-low">Low Stock</span>':'');
+  var stockBadge=oos?'<span class="badge-out">OOS</span>':(getStockCases(p)<=1&&p.ppc>0?'<span class="badge-low">Low Stock</span>':'');
   return'<div class="item-card'+(hasQty?' has-qty':'')+(oos?' oos':'')+'" id="card-'+p.id+'">'
     +'<div class="card-img" onclick="openLightbox(\''+p.id+'\')" title="Tap to enlarge">'+imgHTML+'</div>'
     +'<div class="card-body">'
@@ -1999,13 +1999,13 @@ setTimeout(maybeShowPopup, 800);
 function getThresh(){return 0;}
 function getStockCases(p){var s=getStockPieces(p);return p.ppc>0?Math.floor(s/p.ppc):s;}
 function aBadge(stock,thresh){
-  if(stock<=0)return'<span class="sbadge out">Out of stock</span>';
+  if(stock<=0)return'<span class="sbadge out">OOS</span>';
   return'<span class="sbadge ok">In stock</span>';
 }
 function aBadgeP(p,thresh){
   var s=getStockPieces(p);
   var cases=p.ppc>0?Math.floor(s/p.ppc):s;
-  if(s<=0)return'<span class="sbadge out">Out of stock</span>';
+  if(s<=0)return'<span class="sbadge out">OOS</span>';
   if(cases<=thresh)return'<span class="sbadge low">Low stock</span>';
   return'<span class="sbadge ok">In stock</span>';
 }
