@@ -296,9 +296,9 @@ body{top:0!important;}
 .skiptranslate{display:none!important;}
 .notranslate{font-style:normal!important;}
 /* Restock */
-.restock-row{display:flex;align-items:center;gap:6px;margin:0 0 4px;flex-direction:column;width:100%;}
-.restock-inp{width:100%;padding:6px 10px;border:1.5px solid var(--border-md);border-radius:8px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;}
-.restock-btn{width:100%;padding:6px 10px;background:var(--green);border:none;border-radius:8px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;}
+.restock-row{display:flex;align-items:center;gap:5px;margin:6px 0 2px;}
+.restock-inp{width:60px;flex-shrink:0;padding:5px 7px;border:1.5px solid var(--border-md);border-radius:7px;font-size:13px;font-family:inherit;outline:none;text-align:center;-webkit-appearance:none;}
+.restock-btn{flex:1;padding:5px 8px;background:var(--green);border:none;border-radius:7px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;}.reset-stock-btn{flex-shrink:0;width:26px;height:26px;padding:0;background:transparent;border:1px solid var(--border-md);border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-hint);}.reset-stock-btn:active{background:var(--surface);color:var(--accent);}.reset-stock-btn svg{pointer-events:none;}
 .restock-log{font-size:11px;color:var(--text-muted);font-style:italic;}
 /* Order history admin */
 .order-log-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
@@ -1055,6 +1055,24 @@ window.doRestock=function(pid){
   var t=el('toast');t.style.display='inline-block';t.textContent='✓ Restocked +'+boxes+' boxes!';
   setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},2500);
 };
+
+window.resetStock=function(pid){
+  if(!confirm('Reset Stock?'))return;
+  var p=findProduct(pid);if(!p)return;
+  var inv=getInv();
+  inv[pid]=0;
+  saveInv(inv);
+  commitProductCatalogChange(inv,true);
+  var boxChip=el('pah-boxes-'+pid);if(boxChip)boxChip.textContent='0 boxes';
+  var dsp=el('invdsp-'+pid);
+  if(dsp){var cells=dsp.querySelectorAll('.inv-box .inv-box-val');if(cells[0])cells[0].textContent='0';if(cells[1])cells[1].textContent='0';}
+  var stockInp=el('estock-'+pid);if(stockInp)stockInp.value='0';
+  var badge=el('abadge-'+pid);if(badge)badge.innerHTML=aBadgeP(p,getThresh());
+  updateStats();renderOrder();
+  var t=el('toast');t.style.display='inline-block';t.textContent='✓ Stock reset to 0';
+  setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},1800);
+};
+
 
 window.quickAdjBox=function(pid,delta){
   var p=findProduct(pid);
@@ -2044,7 +2062,7 @@ function prodAdminCard(p){
     +'</div>'
     +'<div class="prod-admin-body" id="pab-'+p.id+'">'
 
-    +(function(){var sp=getStockPieces(p);var ppc=p.ppc||1;var loose=ppc>0?sp%ppc:sp;return '<div class="inv-display" id="invdsp-'+p.id+'"><div class="inv-box"><div class="inv-box-val">'+loose+'</div><div class="inv-box-lbl">Loose Pieces</div></div><div class="inv-box"><div class="inv-box-val">'+sp+'</div><div class="inv-box-lbl">Total Pieces</div></div><div class="restock-row" id="restockrow-'+p.id+'"><input class="restock-inp" type="number" min="1" step="1" inputmode="numeric" id="restock-inp-'+p.id+'" placeholder="+boxes"><button class="restock-btn" onclick="doRestock(\''+p.id+'\')">+ Restock</button></div></div><div class="restock-log" id="restock-log-'+p.id+'">'+restockLogHTML(p.id)+'</div>';})()
+    +(function(){var sp=getStockPieces(p);var ppc=p.ppc||1;var loose=ppc>0?sp%ppc:sp;return '<div class="inv-display" id="invdsp-'+p.id+'"><div class="inv-box"><div class="inv-box-val">'+loose+'</div><div class="inv-box-lbl">Loose Pieces</div></div><div class="inv-box"><div class="inv-box-val">'+sp+'</div><div class="inv-box-lbl">Total Pieces</div></div><div class="restock-row" id="restockrow-'+p.id+'"><input class="restock-inp" type="number" min="1" step="1" inputmode="numeric" id="restock-inp-'+p.id+'" placeholder="+boxes"><button class="restock-btn" onclick="doRestock(\''+p.id+'\')">+ Restock</button><button class="reset-stock-btn" onclick="resetStock(\''+p.id+'\')" title="Reset Stock"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div></div><div class="restock-log" id="restock-log-'+p.id+'">'+restockLogHTML(p.id)+'</div>';})()
 
 
     // Photo row
