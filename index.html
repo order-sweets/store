@@ -268,19 +268,19 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .phone-row input{border:none;flex:1;min-width:0;background:transparent;font-size:16px;padding:13px 12px;font-family:inherit;color:var(--text);outline:none;-webkit-appearance:none;}
 
 /* BASKET */
-.basket-wrap{background:var(--surface);border-radius:var(--r-lg);margin-bottom:2rem;overflow:hidden;border:1.5px solid var(--border);}
-.basket-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:#fff;}
-.basket-header-title{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.basket-wrap{background:#fff;border-radius:var(--r-lg);margin-bottom:2rem;overflow:hidden;border:1.5px solid var(--border);}
+.basket-header{display:flex;align-items:center;justify-content:center;padding:16px 16px 14px;border-bottom:1px solid var(--border);background:#fff;}
+.basket-header-title{font-family:'Bebas Neue',sans-serif;font-size:26px;font-weight:400;letter-spacing:2px;display:flex;align-items:center;gap:10px;color:var(--text);}
 .basket-count{font-size:11px;background:var(--accent);color:#fff;border-radius:20px;padding:2px 9px;font-weight:700;}
-.basket-body{padding:4px 0;}
-.basket-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.basket-body{padding:2px 0;}
+.basket-item{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid var(--border);}
 .basket-item:last-child{border-bottom:none;}
 .basket-item-info{flex:1;min-width:0;}
-.basket-item-name{font-size:14px;font-weight:500;}
-.basket-item-sub{font-size:11px;color:var(--text-muted);margin-top:1px;}
-.basket-qty-ctrl{display:flex;align-items:center;gap:6px;}
-.b-qty-btn{width:28px;height:28px;border:1.5px solid var(--border-md);background:#fff;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0;}
-.b-qty-inp{width:40px;height:28px;border:1.5px solid var(--border-md);border-radius:7px;text-align:center;font-size:13px;font-weight:700;font-family:inherit;color:var(--text);background:#fff;outline:none;-webkit-appearance:none;}
+.basket-item-name{font-size:13px;font-weight:500;}
+.basket-item-sub{font-size:11px;color:var(--text-muted);margin-top:0;}
+.basket-qty-ctrl{display:flex;align-items:center;gap:5px;}
+.b-qty-btn{width:24px;height:24px;border:1.5px solid var(--border-md);background:#fff;border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0;}
+.b-qty-inp{width:36px;height:24px;border:1.5px solid var(--border-md);border-radius:7px;text-align:center;font-size:12px;font-weight:700;font-family:inherit;color:var(--text);background:#fff;outline:none;-webkit-appearance:none;}
 .basket-item-price{font-size:14px;font-weight:600;color:var(--accent-text);min-width:52px;text-align:right;}
 .basket-empty{padding:22px 16px;font-size:14px;color:var(--text-hint);text-align:center;}
 .basket-footer{padding:12px 16px;border-top:1px solid var(--border);background:#fff;}
@@ -322,8 +322,18 @@ body{top:0!important;}
 .translate-btn img{width:28px;height:28px;object-fit:contain;}
 .translate-btn:hover{box-shadow:0 3px 14px rgba(0,0,0,.22);}
 /* STICKY */
-.wa-sticky{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:10px 12px env(safe-area-inset-bottom,12px);background:transparent;pointer-events:none;}
-.wa-btn{pointer-events:all;width:100%;padding:17px;background:#128C4A;border:none;border-radius:var(--r-lg);font-size:17px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
+.checkout-divider{height:1px;background:var(--border-md);margin:14px 0 0;}
+.checkout-details{padding:14px 16px 18px;}
+.checkout-details-title{font-family:'Bebas Neue',sans-serif;font-size:20px;font-weight:400;letter-spacing:1.2px;text-transform:uppercase;color:var(--text);margin-bottom:12px;}
+.wa-sticky{display:none;}
+@keyframes details-glow-pulse{
+  0%{box-shadow:0 0 0 0 rgba(216,90,48,.0);background:transparent;}
+  25%{box-shadow:0 0 0 8px rgba(216,90,48,.25);background:rgba(216,90,48,.07);}
+  70%{box-shadow:0 0 0 14px rgba(216,90,48,.1);background:rgba(216,90,48,.04);}
+  100%{box-shadow:0 0 0 0 rgba(216,90,48,.0);background:transparent;}
+}
+.details-glow{border-radius:var(--r);animation:details-glow-pulse 1.8s ease-out forwards;}
+.wa-btn{width:100%;padding:16px;background:#128C4A;border:none;border-radius:var(--r-lg);font-size:16px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;}
 .wa-btn:disabled{opacity:.65;cursor:not-allowed;}
 .wa-icon{width:20px;height:20px;flex-shrink:0;}
 
@@ -586,13 +596,7 @@ body{top:0!important;}
     <p>Trending and classic snacks, handpicked for modern taste buds!</p>
   </div>
 
-  <div class="how-to-order">
-    <div class="how-step"><span class="how-num">1</span><span class="how-text">Add<br>Items</span></div>
-    <div class="how-arrow">→</div>
-    <div class="how-step"><span class="how-num">2</span><span class="how-text">Enter<br>Details</span></div>
-    <div class="how-arrow">→</div>
-    <div class="how-step"><span class="how-num">3</span><span class="how-text">Check &amp;<br>Send Order</span></div>
-  </div>
+
 
 
 
@@ -620,39 +624,41 @@ body{top:0!important;}
   </div>
   <div id="brand-catalog"><div class="brand-group"><div class="brand-group-title">Bee Events</div><div class="prod-list"><div class="item-card" id="card-p_1774654791150"><div class="card-img" onclick="openLightbox('p_1774654791150')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Cotton Candy</div><div class="item-desc"></div><div class="unit-rows"><div class="unit-row" id="urow-piece-p_1774654791150"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 38g</span></span><span class="unit-row-price notranslate">$1.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('p_1774654791150','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="1000" value="0" inputmode="numeric" id="uqinp-piece-p_1774654791150" onchange="setUnitQty('p_1774654791150','piece',this.value)"><button class="uq-btn" onclick="chgUnit('p_1774654791150','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-p_1774654791150"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">15 pcs × 38g</span></span><span class="unit-row-price notranslate">$27.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('p_1774654791150','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="66" value="0" inputmode="numeric" id="uqinp-case-p_1774654791150" onchange="setUnitQty('p_1774654791150','case',this.value)"><button class="uq-btn" onclick="chgUnit('p_1774654791150','case',1)">+</button></div></div></div></div></div></div></div><div class="brand-group"><div class="brand-group-title">Airheads</div><div class="prod-list"><div class="item-card" id="card-a1"><div class="card-img" onclick="openLightbox('a1')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Airheads Bars</div><div class="item-desc">Chewy taffy candy bar</div><div class="unit-rows"><div class="unit-row" id="urow-piece-a1"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 37g</span></span><span class="unit-row-price notranslate">$2.50</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a1','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="720" value="0" inputmode="numeric" id="uqinp-piece-a1" onchange="setUnitQty('a1','piece',this.value)"><button class="uq-btn" onclick="chgUnit('a1','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-a1"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">36 pcs × 37g</span></span><span class="unit-row-price notranslate">$90.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a1','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-a1" onchange="setUnitQty('a1','case',this.value)"><button class="uq-btn" onclick="chgUnit('a1','case',1)">+</button></div></div></div></div></div><div class="item-card" id="card-a2"><div class="card-img" onclick="openLightbox('a2')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Airheads Bites</div><div class="item-desc">Bite-sized chewy candy</div><div class="unit-rows"><div class="unit-row" id="urow-piece-a2"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 57g</span></span><span class="unit-row-price notranslate">$3.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a2','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="480" value="0" inputmode="numeric" id="uqinp-piece-a2" onchange="setUnitQty('a2','piece',this.value)"><button class="uq-btn" onclick="chgUnit('a2','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-a2"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">24 pcs × 57g</span></span><span class="unit-row-price notranslate">$72.00</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('a2','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-a2" onchange="setUnitQty('a2','case',this.value)"><button class="uq-btn" onclick="chgUnit('a2','case',1)">+</button></div></div></div></div></div></div></div><div class="brand-group"><div class="brand-group-title">Nerds</div><div class="prod-list"><div class="item-card" id="card-nb1"><div class="card-img" onclick="openLightbox('nb1')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Nerds Grape &amp; Strawberry</div><div class="item-desc">Tiny crunchy candy</div><div class="unit-rows"><div class="unit-row" id="urow-piece-nb1"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 46.7g</span></span><span class="unit-row-price notranslate">$2.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb1','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="720" value="0" inputmode="numeric" id="uqinp-piece-nb1" onchange="setUnitQty('nb1','piece',this.value)"><button class="uq-btn" onclick="chgUnit('nb1','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-nb1"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">36 pcs × 46.7g</span></span><span class="unit-row-price notranslate">$100.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb1','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-nb1" onchange="setUnitQty('nb1','case',this.value)"><button class="uq-btn" onclick="chgUnit('nb1','case',1)">+</button></div></div></div></div></div><div class="item-card" id="card-nb2"><div class="card-img" onclick="openLightbox('nb2')" title="Tap to enlarge"><span class="card-img-placeholder">📦</span></div><div class="card-body"><div class="item-name">Nerds Rope Rainbow</div><div class="item-desc">Chewy rope covered in Nerds</div><div class="unit-rows"><div class="unit-row" id="urow-piece-nb2"><div class="unit-row-top"><span class="unit-row-label">Piece <span class="unit-row-spec">1pc × 26g</span></span><span class="unit-row-price notranslate">$3.20</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb2','piece',-1)">−</button><input class="uq-inp" type="number" min="0" max="480" value="0" inputmode="numeric" id="uqinp-piece-nb2" onchange="setUnitQty('nb2','piece',this.value)"><button class="uq-btn" onclick="chgUnit('nb2','piece',1)">+</button></div></div><div class="unit-row" id="urow-case-nb2"><div class="unit-row-top"><span class="unit-row-label">Box <span class="unit-row-spec">24 pcs × 26g</span></span><span class="unit-row-price notranslate">$76.80</span></div><div class="unit-qty-ctrl"><button class="uq-btn" onclick="chgUnit('nb2','case',-1)">−</button><input class="uq-inp" type="number" min="0" max="20" value="0" inputmode="numeric" id="uqinp-case-nb2" onchange="setUnitQty('nb2','case',this.value)"><button class="uq-btn" onclick="chgUnit('nb2','case',1)">+</button></div></div></div></div></div></div></div></div>
 
-  <p class="slabel">🧺 Your Basket</p>
   <div class="basket-wrap" id="basket-section" style="border:2.5px solid var(--accent);box-shadow:0 4px 18px rgba(0,0,0,.10);">
-    <div class="basket-header" style="background:var(--accent-bg);">
-      <span class="basket-header-title" style="color:var(--accent-text);">Items selected <span class="basket-count" id="basket-count">0</span></span>
+    <div class="basket-header">
+      <span class="basket-header-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        CHECKOUT
+        <span class="basket-count" id="basket-count">0</span>
+      </span>
     </div>
     <div class="basket-body" id="basket-body"><div class="basket-empty">Your basket is empty — add products above.</div></div>
     <div class="basket-footer" id="basket-footer" style="display:none">
-      <div id="basket-lines"></div>
-      <div class="basket-row tot"><span>Total</span><span id="basket-total" class="notranslate" translate="no">$0.00</span></div>
-      <div class="cash-banner" style="margin:12px 0 0;justify-content:center;"><div class="cash-icon">💵</div><div class="cash-text-title" style="font-size:16px;">Cash on Delivery</div></div>
+      <div style="margin:10px 0 0;display:flex;justify-content:center;"><div class="cash-banner" style="display:inline-flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;stroke:var(--green-text);"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M17 12h.01M7 12h.01"/></svg><div class="cash-text-title" style="font-size:16px;">Cash on Delivery</div></div></div>
+      <div class="checkout-divider"></div>
+      <div class="checkout-details">
+        <div class="checkout-details-title">Delivery Details</div>
+        <div class="field-grid" style="margin-bottom:0;">
+          <div class="field full"><label>Your Name / Company Name <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required)</span></label><input type="text" id="f-name" placeholder="" autocomplete="name"></div>
+          <div class="field full"><label>Phone Number <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required)</span></label>
+            <div class="phone-row"><span class="phone-pfx">+65</span><input type="tel" id="f-phone" placeholder="" maxlength="9" inputmode="numeric" oninput="fmtPhone(this)"></div>
+          </div>
+          <div class="field full" id="addr-field"><label>Delivery Address <span style="font-size:11px;color:var(--accent-text);font-weight:600;">(required)</span></label><input type="text" id="f-address" placeholder="" autocomplete="off"></div>
+          <div class="field full"><label>Notes (optional)</label><textarea id="f-notes" placeholder=""></textarea></div>
+        </div>
+        <button class="wa-btn" id="wa-btn" disabled="" style="margin-top:14px;border-radius:var(--r-lg);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Order via WhatsApp
+          <svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- Delivery method removed -->
 
-  <p class="slabel">Your Details</p>
-  <div class="field-grid">
-    <div class="field full"><label>Full Name / Company Name</label><input type="text" id="f-name" placeholder="" autocomplete="name"></div>
-    <div class="field full"><label>Phone Number</label>
-      <div class="phone-row"><span class="phone-pfx">+65</span><input type="tel" id="f-phone" placeholder="" maxlength="9" inputmode="numeric" oninput="fmtPhone(this)"></div>
-    </div>
-    <div class="field full" id="addr-field"><label>Delivery Address</label><input type="text" id="f-address" placeholder="" autocomplete="off"></div>
-    <div class="field full"><label>Notes (optional)</label><textarea id="f-notes" placeholder=""></textarea></div>
-  </div>
-</div><!-- /order-wrap -->
+  </div><!-- /order-wrap -->
 
-<div class="wa-sticky">
-  <button class="wa-btn" id="wa-btn" disabled="">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    Send Order via WhatsApp
-    <svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
-  </button>
-</div>
 <!-- ANNOUNCEMENT POPUP -->
 <div id="announcement-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:18px;max-width:380px;width:100%;padding:28px 24px 24px;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.18);">
@@ -1845,14 +1851,14 @@ function renderBasket(){
     +'</div>';
   }).join('');
   var sub=getSub();
-  el('basket-lines').innerHTML=cartEntries.map(function(e){
-    var p=findProduct(e.pid);if(!p)return'';
-    var price=e.unit==='case'?effectiveCasePrice(p):effectivePiecePrice(p);
-    var varStr=e.variation?' ['+esc(e.variation)+']':'';
-    return'<div class="basket-row dim"><span>'+esc(p.name)+varStr+' ('+(e.unit==='case'?'Box':'Piece')+') × '+e.qty+'</span><span class="notranslate">$'+(price*e.qty).toFixed(2)+'</span></div>';
-  }).join('');
-  el('basket-total').textContent='$'+sub.toFixed(2);
-  el('basket-footer').style.display='';el('wa-btn').disabled=false;
+  el('basket-footer').style.display='';updateWaBtn();
+}
+function updateWaBtn(){
+  var hasItems=cartEntries.length>0;
+  var name=(el('f-name')&&el('f-name').value.trim())||'';
+  var phone=(el('f-phone')&&el('f-phone').value.replace(/\s/g,'').trim())||'';
+  var addr=(el('f-address')&&el('f-address').value.trim())||'';
+  el('wa-btn').disabled=!(hasItems&&name&&phone&&addr);
 }
 window.bChg=function(entryId,delta){
   var e=cartEntries.find(function(x){return x.entryId===entryId;});if(!e)return;
@@ -1881,12 +1887,13 @@ window.fmtPhone=fmtPhone;
 function doSend(){
   var name=el('f-name').value.trim()||'(not provided)';
   var phone=el('f-phone').value.replace(/\s/g,'').trim();
-  // Validate name and phone before sending
-  if(!el('f-name').value.trim()||!phone){
+  var addr=el('f-address').value.trim();
+  // Validate name, phone and address before sending
+  if(!el('f-name').value.trim()||!phone||!addr){
     document.getElementById('err-modal').style.display='flex';
     return;
   }
-  var addr=el('f-address').value.trim()||'(not provided)';
+  addr=addr||'(not provided)';
   var notes=el('f-notes').value.trim();
   var sub=getSub();
   var metMin=delMode!=='delivery'||sub>=MIN_ORDER;
@@ -1959,6 +1966,19 @@ window.closePlacedModal=function(another){
 el('wa-btn').addEventListener('click',function(){this.disabled=true;doSend();});
 el('modal-confirm-btn').addEventListener('click',function(){el('min-order-modal').classList.remove('open');if(pendingMinOrder)doSend();pendingMinOrder=false;});
 el('f-phone').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,8);});
+// Re-check WA button state whenever any required field changes
+;['f-name','f-phone','f-address'].forEach(function(fid){
+  var inp=el(fid);if(inp)inp.addEventListener('input',updateWaBtn);
+});
+// Scroll to details section with a glow pulse
+function scrollToDetails(){
+  var wrap=el('checkout-details-section');
+  if(!wrap)wrap=el('f-name');
+  if(!wrap)return;
+  wrap.scrollIntoView({behavior:'smooth',block:'center'});
+  var grid=wrap.closest('.checkout-details')||wrap.closest('.field-grid');
+  if(grid){grid.classList.add('details-glow');setTimeout(function(){grid.classList.remove('details-glow');},1800);}
+}
 // Show announcement popup on storefront load
 setTimeout(maybeShowPopup, 800);
 
@@ -3148,8 +3168,8 @@ window._fbEnsureListening();
   <div style="background:#fff;border-radius:18px;padding:2rem 1.75rem 1.75rem;max-width:320px;width:100%;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.25);">
     <div style="font-size:72px;line-height:1;color:#D32F2F;margin-bottom:1rem;">&#10007;</div>
     <div style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:700;color:#D32F2F;margin-bottom:.75rem;">Error: Order Not Sent!</div>
-    <div style="font-size:15px;color:#555;line-height:1.6;margin-bottom:1.5rem;">Fill in Name &amp; Phone Number<br>and Try Again</div>
-    <button onclick="document.getElementById('err-modal').style.display='none';" style="width:100%;padding:14px;background:#D32F2F;border:none;border-radius:10px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">OK</button>
+    <div style="font-size:15px;color:#555;line-height:1.6;margin-bottom:1.5rem;">Please fill in your Name, Phone Number &amp; Delivery Address and try again.</div>
+    <button onclick="document.getElementById('err-modal').style.display='none';scrollToDetails();" style="width:100%;padding:14px;background:#D32F2F;border:none;border-radius:10px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">OK</button>
   </div>
 </div>
 </body></html>
