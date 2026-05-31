@@ -224,16 +224,18 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .hot-sale-wrap .ps-empty{color:rgba(255,255,255,.65);}
 
 /* ── NEW ARRIVALS CAROUSEL ── */
-.na-carousel{position:relative;}
+.na-carousel{position:relative;padding:0 18px;}
 .na-carousel-track{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px;margin-bottom:10px;flex-direction:unset!important;}
-.na-carousel-nav{display:flex;align-items:center;justify-content:space-between;margin-top:2px;padding:0 2px;}
-.na-arrow{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.18);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
-.na-arrow:hover{background:rgba(0,0,0,.32);}
-.na-arrow:disabled{opacity:.25;cursor:default;}
-.na-dots{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;flex:1;}
-.na-dot-btn{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4);border:none;cursor:pointer;padding:0;transition:background .15s,transform .15s;}
-.na-dot-btn.active{background:#fff;transform:scale(1.25);}
-.na-page-label{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;white-space:nowrap;}
+.na-carousel-nav{display:flex;align-items:center;justify-content:center;margin-top:6px;gap:10px;}
+.na-arrow{position:absolute;top:50%;transform:translateY(-60%);width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.6);border:2px solid rgba(255,255,255,.55);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,.3);}
+.na-arrow:hover{background:rgba(0,0,0,.85);}
+.na-arrow:disabled{opacity:.2;cursor:default;}
+#na-prev{left:-6px;}
+#na-next{right:-6px;}
+.na-dots{display:flex;gap:6px;align-items:center;justify-content:center;}
+.na-dot-btn{width:7px;height:7px;border-radius:50%;background:rgba(0,0,0,.35);border:none;cursor:pointer;padding:0;transition:background .15s,transform .15s;}
+.na-dot-btn.active{background:rgba(0,0,0,.75);transform:scale(1.3);}
+.na-page-label{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;}
 
 
 .badge-low{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:var(--amber-bg);color:var(--amber-text);margin-bottom:4px;}
@@ -662,13 +664,13 @@ body{top:0!important;}
       </div>
     </div>
     <div class="na-carousel" id="na-carousel">
+      <button class="na-arrow" id="na-prev" onclick="naPage(-1)" style="display:none;">&#8592;</button>
+      <button class="na-arrow" id="na-next" onclick="naPage(1)" style="display:none;">&#8594;</button>
       <div class="na-carousel-track" id="new-arrivals-list" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
       <div class="na-carousel-nav" id="na-carousel-nav" style="display:none;">
-        <button class="na-arrow" id="na-prev" onclick="naPage(-1)">&#8592;</button>
         <div class="na-dots" id="na-dots"></div>
-        <span class="na-page-label" id="na-page-label"></span>
-        <button class="na-arrow" id="na-next" onclick="naPage(1)">&#8594;</button>
       </div>
+      <div style="text-align:center;margin-top:4px;"><span class="na-page-label" id="na-page-label"></span></div>
     </div>
   </div>
 
@@ -1847,18 +1849,18 @@ function renderNaPage(){
   var prev=el('na-prev');
   var next=el('na-next');
   if(!nal)return;
-  if(!_naItems.length){nal.innerHTML='<div class="ps-empty" style="color:rgba(255,255,255,.7)">No new arrivals yet.</div>';if(nav)nav.style.display='none';return;}
+  if(!_naItems.length){nal.innerHTML='<div class="ps-empty" style="color:rgba(255,255,255,.7)">No new arrivals yet.</div>';if(nav)nav.style.display='none';if(prev)prev.style.display='none';if(next)next.style.display='none';return;}
   var totalPages=Math.ceil(_naItems.length/_naPerPage);
   _naPage=Math.max(0,Math.min(_naPage,totalPages-1));
   var pageItems=_naItems.slice(_naPage*_naPerPage,(_naPage+1)*_naPerPage);
   nal.innerHTML=pageItems.map(function(p){return gridCardHTML(p);}).join('');
   if(totalPages>1){
     if(nav)nav.style.display='flex';
-    if(prev)prev.disabled=_naPage===0;
-    if(next)next.disabled=_naPage===totalPages-1;
+    if(prev){prev.style.display='flex';prev.disabled=_naPage===0;}
+    if(next){next.style.display='flex';next.disabled=_naPage===totalPages-1;}
     if(lbl)lbl.textContent=(_naPage+1)+' / '+totalPages;
     if(dots){dots.innerHTML='';for(var i=0;i<totalPages;i++){var d=document.createElement('button');d.className='na-dot-btn'+(i===_naPage?' active':'');d.setAttribute('data-pg',i);d.onclick=(function(pg){return function(){_naPage=pg;renderNaPage();};})(i);dots.appendChild(d);}}
-  } else {if(nav)nav.style.display='none';}
+  } else {if(nav)nav.style.display='none';if(prev)prev.style.display='none';if(next)next.style.display='none';}
 }
 window.naPage=function(dir){_naPage+=dir;renderNaPage();};
 // Touch swipe support
