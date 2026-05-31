@@ -912,7 +912,7 @@ body{top:0!important;}
 
 <script>
 (function(){
-var ADMIN_PW='admin123';
+var ADMIN_PW='69e399851c8419993d46757025fd51e415e0277e8def8cb283dfbe7867212e8a'; // SHA-256 hash
 var MIN_ORDER=80.00;
 var WA_1='6581648864';
 var LS_PROD='snack-products-v5',LS_INV='snack-inv-v5',LS_CUST='snack-customers-v2',LS_PHOTOS='snack-photos-v1',LS_SETTINGS='snack-settings-v1',LS_ORD_CTR='snack-ord-counter';
@@ -1421,9 +1421,14 @@ window.showPage=function(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   el(id).classList.add('active');window.scrollTo(0,0);
 };
-window.tryLogin=function(){
+async function _sha256Store(str){
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+window.tryLogin=async function(){
   var pw=el('pw-input').value;
-  if(pw===ADMIN_PW){
+  var hash=await _sha256Store(pw);
+  if(hash===ADMIN_PW){
     el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';
     localStorage.setItem('snack-admin-auth','1');
     renderAdmin();renderCustomerList();window.showPage('page-admin');if(!window._fbStarted){window._fbStarted=true;if(typeof _fbHookSaves==='function')_fbHookSaves();}if(window._fbEnsureListening)window._fbEnsureListening();else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
@@ -3326,6 +3331,19 @@ window._fbEnsureListening();
     <div style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:700;color:#D32F2F;margin-bottom:.75rem;">Error: Order Not Sent!</div>
     <div style="font-size:15px;color:#555;line-height:1.6;margin-bottom:1.5rem;">Please fill in your Name, Phone Number &amp; Delivery Address and try again.</div>
     <button onclick="document.getElementById('err-modal').style.display='none';" style="width:100%;padding:14px;background:#D32F2F;border:none;border-radius:10px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">OK</button>
+  </div>
+</div>
+
+<!-- Import picker modal -->
+<div id="import-picker-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:14px;padding:24px;max-width:320px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2);">
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;">Import</div>
+    <div style="font-size:12px;color:#888;margin-bottom:18px;">Choose what you want to import.</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="closeImportPicker();document.getElementById('import-xlsx-input').click()" style="padding:12px;background:#EEF2FF;color:#4F46E5;border:1.5px solid rgba(79,70,229,.3);border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;">📊 Import Products from Excel</button>
+      <button onclick="closeImportPicker();document.getElementById('import-json-input').click()" style="padding:12px;background:#F5F5F5;color:#333;border:1.5px solid #ddd;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;">📦 Import Full JSON Backup</button>
+      <button onclick="closeImportPicker()" style="padding:10px;background:#f3f4f6;color:#555;border:none;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;">Cancel</button>
+    </div>
   </div>
 </div>
 </body></html>
