@@ -223,7 +223,17 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .hot-sale-wrap .gc.has-qty{border-color:#fff;}
 .hot-sale-wrap .ps-empty{color:rgba(255,255,255,.65);}
 
-/* NEW ARRIVALS SECTION */
+/* ── NEW ARRIVALS CAROUSEL ── */
+.na-carousel{position:relative;}
+.na-carousel-track{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px;margin-bottom:10px;flex-direction:unset!important;}
+.na-carousel-nav{display:flex;align-items:center;justify-content:space-between;margin-top:2px;padding:0 2px;}
+.na-arrow{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.18);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
+.na-arrow:hover{background:rgba(0,0,0,.32);}
+.na-arrow:disabled{opacity:.25;cursor:default;}
+.na-dots{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;flex:1;}
+.na-dot-btn{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4);border:none;cursor:pointer;padding:0;transition:background .15s,transform .15s;}
+.na-dot-btn.active{background:#fff;transform:scale(1.25);}
+.na-page-label{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;white-space:nowrap;}
 
 
 .badge-low{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:var(--amber-bg);color:var(--amber-text);margin-bottom:4px;}
@@ -651,7 +661,15 @@ body{top:0!important;}
         <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
       </div>
     </div>
-    <div class="prod-list grid-view" id="new-arrivals-list"></div>
+    <div class="na-carousel" id="na-carousel">
+      <div class="na-carousel-track" id="new-arrivals-list" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+      <div class="na-carousel-nav" id="na-carousel-nav" style="display:none;">
+        <button class="na-arrow" id="na-prev" onclick="naPage(-1)">&#8592;</button>
+        <div class="na-dots" id="na-dots"></div>
+        <span class="na-page-label" id="na-page-label"></span>
+        <button class="na-arrow" id="na-next" onclick="naPage(1)">&#8594;</button>
+      </div>
+    </div>
   </div>
 
   <div id="hot-sale-section" class="hot-sale-wrap">
@@ -1820,12 +1838,50 @@ function cardHTML(p,isNew){
   +'</div>';
 }
 
-function renderOrder(){
-  // ── New Arrivals ──
-  var naSection=el('new-arrivals-section');
+var _naItems=[];var _naPage=0;var _naPerPage=4;
+function renderNaPage(){
   var nal=el('new-arrivals-list');
+  var nav=el('na-carousel-nav');
+  var dots=el('na-dots');
+  var lbl=el('na-page-label');
+  var prev=el('na-prev');
+  var next=el('na-next');
+  if(!nal)return;
+  if(!_naItems.length){nal.innerHTML='<div class="ps-empty" style="color:rgba(255,255,255,.7)">No new arrivals yet.</div>';if(nav)nav.style.display='none';return;}
+  var totalPages=Math.ceil(_naItems.length/_naPerPage);
+  _naPage=Math.max(0,Math.min(_naPage,totalPages-1));
+  var pageItems=_naItems.slice(_naPage*_naPerPage,(_naPage+1)*_naPerPage);
+  nal.innerHTML=pageItems.map(function(p){return gridCardHTML(p);}).join('');
+  if(totalPages>1){
+    if(nav)nav.style.display='flex';
+    if(prev)prev.disabled=_naPage===0;
+    if(next)next.disabled=_naPage===totalPages-1;
+    if(lbl)lbl.textContent=(_naPage+1)+' / '+totalPages;
+    if(dots){dots.innerHTML='';for(var i=0;i<totalPages;i++){var d=document.createElement('button');d.className='na-dot-btn'+(i===_naPage?' active':'');d.setAttribute('data-pg',i);d.onclick=(function(pg){return function(){_naPage=pg;renderNaPage();};})(i);dots.appendChild(d);}}
+  } else {if(nav)nav.style.display='none';}
+}
+window.naPage=function(dir){_naPage+=dir;renderNaPage();};
+// Touch swipe support
+(function(){
+  var startX=0;
+  document.addEventListener('touchstart',function(e){
+    var c=document.getElementById('na-carousel');
+    if(c&&c.contains(e.target))startX=e.touches[0].clientX;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    var c=document.getElementById('na-carousel');
+    if(!c||!c.contains(e.target))return;
+    var diff=startX-e.changedTouches[0].clientX;
+    if(Math.abs(diff)>40){_naPage+=diff>0?1:-1;renderNaPage();}
+  },{passive:true});
+})();
+function renderOrder(){
+  // ── New Arrivals Carousel ──
+  var naSection=el('new-arrivals-section');
   var visNew=NEW_ARRIVALS.filter(isVisibleFiltered);
-  if(nal){nal.className='prod-list grid-view';nal.innerHTML=visNew.length?visNew.map(function(p){return gridCardHTML(p);}).join(''):'<div class="ps-empty">No new arrivals yet.</div>';}
+  _naItems=visNew;
+  _naPage=0;
+  renderNaPage();
   if(naSection)naSection.style.display=SETTINGS.showNewArrivals?'':'none';
   applyTicker();
   var naTitle=el('new-arrivals-title-display');if(naTitle)naTitle.textContent=SETTINGS.newArrivalsTitle||'✨ New Arrivals';
