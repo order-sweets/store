@@ -985,7 +985,7 @@ var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads 
 
 var savedP=loadJ(LS_PROD);
 var _rawSettings=loadJ(LS_SETTINGS)||{};
-var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||'',newArrivalsTitle:_rawSettings.newArrivalsTitle||'✨ New Arrivals',hotSaleTitle:_rawSettings.hotSaleTitle||'Hot Sale!',tickerText:_rawSettings.tickerText||'JUST LANDED: New Arrivals! 🔥',tickerSpeed:_rawSettings.tickerSpeed||14};
+var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||'',newArrivalsTitle:_rawSettings.newArrivalsTitle||'✨ New Arrivals',hotSaleTitle:_rawSettings.hotSaleTitle||'Hot Sale!',tickerText:_rawSettings.tickerText||'JUST LANDED: New Arrivals! 🔥',tickerSpeed:_rawSettings.tickerSpeed||14,hsTickerText:_rawSettings.hsTickerText||'HOT DEALS: Don\'t Miss Out! 🔥'};
 var _fbApplyingRemote=false;
 window._fbApplyingRemote=false; // mirror for IIFE access
 var _fbLastAppliedVersion=0; // track last applied remote version
@@ -1192,6 +1192,17 @@ window.saveTicker=function(){
   if(s)SETTINGS.tickerSpeed=parseInt(s.value)||14;
   saveSettings();applyTicker();
 };
+window.saveHsTicker=function(){
+  var t=el('hs-ticker-text-inp');
+  if(t)SETTINGS.hsTickerText=t.value.trim()||'HOT DEALS: Don\'t Miss Out! 🔥';
+  saveSettings();applyHsTicker();
+};
+function applyHsTicker(){
+  var track=el('hs-ticker-track');if(!track)return;
+  var txt=esc(SETTINGS.hsTickerText||'HOT DEALS: Don\'t Miss Out! 🔥');
+  var item='<span class="hs-ticker-item">'+txt+' <span class="hs-ticker-star">✦</span></span>';
+  track.innerHTML=item+item+item+item+item+item+item+item;
+}
 function applyTicker(){
   var track=el('na-ticker-track');if(!track)return;
   var txt=esc(SETTINGS.tickerText||'JUST LANDED: New Arrivals! 🔥');
@@ -1824,6 +1835,7 @@ function renderOrder(){
   var visHot=HOT_SALE.filter(isVisibleFiltered);
   if(hsl)hsl.innerHTML=visHot.length?visHot.map(function(p){return cardHTML(p);}).join(''):'<div class="ps-empty">No hot sale items.</div>';
   if(hsSection)hsSection.style.display=SETTINGS.showHotSale?'':'none';
+  applyHsTicker();
   var bc=el('brand-catalog');
   // Sort brands A-Z but pin 'Bee Events' to the top always
   var sorted=BRANDS.slice().sort(function(a,b){
@@ -2359,9 +2371,14 @@ function renderAdmin(){
     +'</div>'
     +(NEW_ARRIVALS.length?NEW_ARRIVALS.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No new arrivals.</p>');
   el('admin-hot').innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
-    +'<input type="text" id="hot-sale-title-inp" value="'+esc(SETTINGS.hotSaleTitle||'Hot Sale!')+'" placeholder="Section title…" style="flex:1;font-size:13px;font-weight:600;padding:6px 9px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;font-family:inherit;color:var(--text);outline:none;">'
-    +'<button onclick="saveHotSaleTitle()" style="padding:6px 11px;font-size:12px;font-weight:600;border:1px solid var(--green);background:var(--green-bg);color:var(--green-text);border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;">Save</button>'
-    +'<label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-hot-sale" '+(SETTINGS.showHotSale?'checked':'')+' onchange="toggleHotSale(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label>'
+    +'<label class="vis-toggle-label-wrap" title="Show/hide on storefront" style="margin-left:auto"><input type="checkbox" class="vis-checkbox" id="toggle-hot-sale" '+(SETTINGS.showHotSale?'checked':'')+' onchange="toggleHotSale(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label>'
+    +'</div>'
+    +'<div style="background:#fff;border:1.5px solid var(--border-md);border-radius:8px;padding:10px 12px;margin-bottom:10px;">'
+    +'<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:6px;">Ticker Banner</p>'
+    +'<div style="display:flex;gap:6px;">'
+    +'<input type="text" id="hs-ticker-text-inp" value="'+esc(SETTINGS.hsTickerText||'HOT DEALS: Don\'t Miss Out! 🔥')+'" placeholder="Ticker text…" style="flex:1;font-size:13px;padding:6px 9px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;font-family:inherit;color:var(--text);outline:none;">'
+    +'<button onclick="saveHsTicker()" style="padding:6px 11px;font-size:12px;font-weight:600;border:1px solid var(--green);background:var(--green-bg);color:var(--green-text);border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;">Save</button>'
+    +'</div>'
     +'</div>'
     +(HOT_SALE.length?HOT_SALE.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No hot sale items.</p>');
   el('admin-brands').innerHTML=sorted.filter(function(b){return b.products.length;}).map(function(b){return'<div class="admin-brand-block"><p class="admin-brand-name">'+esc(b.brand)+'</p>'+b.products.map(function(p){return prodAdminCard(p);}).join('')+'</div>';}).join('');
