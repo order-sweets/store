@@ -186,10 +186,44 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 
 .badge-new{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:var(--amber-bg);color:var(--amber-text);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;}
 
+/* ── NEW ARRIVALS PANEL ── */
+.new-arrivals-wrap{background:linear-gradient(160deg,#f0a855 0%,#f8c060 55%,#ffe888 100%);border-radius:var(--r-lg);padding:16px 14px 10px;margin-bottom:1.75rem;position:relative;overflow:hidden;}
+.new-arrivals-wrap::before{content:'NEW';position:absolute;right:-18px;bottom:-10px;font-family:'Bebas Neue',sans-serif;font-size:110px;letter-spacing:6px;color:rgba(255,255,255,.07);pointer-events:none;line-height:1;}
+.na-eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:3px;}
+.na-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;opacity:.5;margin-right:6px;vertical-align:middle;}
+.na-title{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;color:#fff;line-height:1.15;margin-bottom:12px;}
+.new-arrivals-wrap .prod-list{margin-bottom:0;}
+.hot-sale-wrap .prod-list{margin-bottom:0;}
+.hs-ticker{overflow:hidden;margin-bottom:12px;background:#000;}
+.hs-ticker-track{display:flex;align-items:center;white-space:nowrap;animation:hsTick 14s linear infinite;}
+.hs-ticker-track:hover{animation-play-state:paused;}
+@keyframes hsTick{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.hs-ticker-item{display:inline-flex;align-items:center;padding:7px 36px;font-family:'Bebas Neue',sans-serif;font-size:19.5px;letter-spacing:.14em;color:#fff;}
+.hs-ticker-star{color:rgba(255,255,255,.4);font-size:13px;margin-left:10px;}
+.new-arrivals-wrap .item-card.has-qty{border-color:#fff;border-width:2.5px;}
+.new-arrivals-wrap .gc{border-color:rgba(255,255,255,.25);background:#fff;}
+.new-arrivals-wrap .gc.has-qty{border-color:#fff;}
+/* ── NEW ARRIVALS TICKER ── */
+.na-ticker{overflow:hidden;margin-bottom:12px;border-top:none;border-bottom:none;background:#000;}
+.na-ticker-track{display:flex;align-items:center;white-space:nowrap;animation:naTick 14s linear infinite;}
+.na-ticker-track:hover{animation-play-state:paused;}
+@keyframes naTick{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.na-ticker-item{display:inline-flex;align-items:center;padding:7px 36px;font-family:'Bebas Neue',sans-serif;font-size:19.5px;letter-spacing:.14em;color:#fff;}
+.na-ticker-star{color:rgba(255,255,255,.4);font-size:13px;margin-left:10px;}
+
+/* ── HOT SALE PANEL ── */
+.hot-sale-wrap{background:linear-gradient(160deg,#60d8d0 0%,#88e8e4 55%,#c0f8f8 100%);border-radius:var(--r-lg);padding:16px 14px 18px;margin-bottom:1.75rem;position:relative;overflow:hidden;}
+.hot-sale-wrap::before{content:'SALE';position:absolute;right:-14px;bottom:-10px;font-family:'Bebas Neue',sans-serif;font-size:110px;letter-spacing:6px;color:rgba(255,255,255,.06);pointer-events:none;line-height:1;}
+.hs-eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:3px;}
+.hs-title{font-family:'DM Serif Display',serif;font-size:32px;font-weight:400;color:#fff;line-height:1.15;margin-bottom:12px;}
+.hs-flame{font-size:20px;vertical-align:middle;margin-right:4px;line-height:1;}
+.hot-sale-wrap .item-card{border-color:rgba(255,255,255,.25);background:#fff;}
+.hot-sale-wrap .item-card.has-qty{border-color:#fff;border-width:2.5px;}
+.hot-sale-wrap .gc{border-color:rgba(255,255,255,.25);background:#fff;}
+.hot-sale-wrap .gc.has-qty{border-color:#fff;}
+.hot-sale-wrap .ps-empty{color:rgba(255,255,255,.65);}
+
 /* NEW ARRIVALS SECTION */
-.new-arrivals-wrap{margin-bottom:1.5rem;}
-.new-arrivals-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.new-arrivals-title{font-family:'Bebas Neue',sans-serif;font-size:24px;font-weight:400;color:var(--text);margin:0 0 14px;letter-spacing:1.5px;text-transform:uppercase;}
 
 
 .badge-low{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:var(--amber-bg);color:var(--amber-text);margin-bottom:4px;}
@@ -604,16 +638,37 @@ body{top:0!important;}
 
 
   <div id="new-arrivals-section" class="new-arrivals-wrap">
-    <div class="new-arrivals-header">
-      <span class="new-arrivals-title" id="new-arrivals-title-display">✨ New Arrivals</span>
+    <div class="na-ticker">
+      <span id="new-arrivals-title-display" style="display:none"></span>
+      <div class="na-ticker-track" id="na-ticker-track">
+        <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
+        <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
+        <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
+        <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
+        <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
+        <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
+        <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
+        <span class="na-ticker-item">JUST LANDED: New Arrivals! 🔥 <span class="na-ticker-star">✦</span></span>
+      </div>
     </div>
-    <div class="prod-list" id="new-arrivals-list"></div>
+    <div class="prod-list grid-view" id="new-arrivals-list"></div>
   </div>
 
-
-  <div id="hot-sale-section">
-  <p class="slabel" id="hot-sale-title-display">Hot Sale!</p>
-  <div class="prod-list" id="hot-sale-list"><div class="ps-empty">No hot sale items.</div></div>
+  <div id="hot-sale-section" class="hot-sale-wrap">
+    <span id="hot-sale-title-display" style="display:none"></span>
+    <div class="hs-ticker">
+      <div class="hs-ticker-track" id="hs-ticker-track">
+        <span class="hs-ticker-item">HOT DEALS: Don't Miss Out! 🔥 <span class="hs-ticker-star">✦</span></span>
+        <span class="hs-ticker-item">HOT DEALS: Don't Miss Out! 🔥 <span class="hs-ticker-star">✦</span></span>
+        <span class="hs-ticker-item">HOT DEALS: Don't Miss Out! 🔥 <span class="hs-ticker-star">✦</span></span>
+        <span class="hs-ticker-item">HOT DEALS: Don't Miss Out! 🔥 <span class="hs-ticker-star">✦</span></span>
+        <span class="hs-ticker-item">HOT DEALS: Don't Miss Out! 🔥 <span class="hs-ticker-star">✦</span></span>
+        <span class="hs-ticker-item">HOT DEALS: Don't Miss Out! 🔥 <span class="hs-ticker-star">✦</span></span>
+        <span class="hs-ticker-item">HOT DEALS: Don't Miss Out! 🔥 <span class="hs-ticker-star">✦</span></span>
+        <span class="hs-ticker-item">HOT DEALS: Don't Miss Out! 🔥 <span class="hs-ticker-star">✦</span></span>
+      </div>
+    </div>
+    <div class="prod-list" id="hot-sale-list"><div class="ps-empty">No hot sale items.</div></div>
   </div><!-- /hot-sale-section -->
 
   <p class="slabel">Products Available</p>
@@ -930,7 +985,7 @@ var DEFAULT_BRANDS=[{"brand":"Airheads","products":[{"id":"a1","name":"Airheads 
 
 var savedP=loadJ(LS_PROD);
 var _rawSettings=loadJ(LS_SETTINGS)||{};
-var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||'',newArrivalsTitle:_rawSettings.newArrivalsTitle||'✨ New Arrivals',hotSaleTitle:_rawSettings.hotSaleTitle||'Hot Sale!'};
+var SETTINGS={showNewArrivals:_rawSettings.showNewArrivals!==undefined?_rawSettings.showNewArrivals:true,showHotSale:_rawSettings.showHotSale!==undefined?_rawSettings.showHotSale:true,popupEnabled:!!_rawSettings.popupEnabled,popupTitle:_rawSettings.popupTitle||'',popupBody:_rawSettings.popupBody||'',newArrivalsTitle:_rawSettings.newArrivalsTitle||'✨ New Arrivals',hotSaleTitle:_rawSettings.hotSaleTitle||'Hot Sale!',tickerText:_rawSettings.tickerText||'JUST LANDED: New Arrivals! 🔥',tickerSpeed:_rawSettings.tickerSpeed||14};
 var _fbApplyingRemote=false;
 window._fbApplyingRemote=false; // mirror for IIFE access
 var _fbLastAppliedVersion=0; // track last applied remote version
@@ -1131,6 +1186,19 @@ window.saveHotSaleTitle=function(){
   SETTINGS.hotSaleTitle=v.value.trim()||'Hot Sale!';
   saveSettings();renderOrder();
 };
+window.saveTicker=function(){
+  var t=el('ticker-text-inp'),s=el('ticker-speed-inp');
+  if(t)SETTINGS.tickerText=t.value.trim()||'JUST LANDED: New Arrivals! 🔥';
+  if(s)SETTINGS.tickerSpeed=parseInt(s.value)||14;
+  saveSettings();applyTicker();
+};
+function applyTicker(){
+  var track=el('na-ticker-track');if(!track)return;
+  var txt=esc(SETTINGS.tickerText||'JUST LANDED: New Arrivals! 🔥');
+  var item='<span class="na-ticker-item">'+txt+' <span class="na-ticker-star">✦</span></span>';
+  track.innerHTML=item+item+item+item+item+item+item+item;
+  track.style.animationDuration=(SETTINGS.tickerSpeed||14)+'s';
+}
 window.togglePopup=function(on){
   SETTINGS.popupEnabled=on;
   saveSettings();
@@ -1746,8 +1814,9 @@ function renderOrder(){
   var naSection=el('new-arrivals-section');
   var nal=el('new-arrivals-list');
   var visNew=NEW_ARRIVALS.filter(isVisibleFiltered);
-  if(nal)nal.innerHTML=visNew.length?visNew.map(function(p){return cardHTML(p,true);}).join(''):'<div class="ps-empty">No new arrivals yet.</div>';
+  if(nal){nal.className='prod-list grid-view';nal.innerHTML=visNew.length?visNew.map(function(p){return gridCardHTML(p);}).join(''):'<div class="ps-empty">No new arrivals yet.</div>';}
   if(naSection)naSection.style.display=SETTINGS.showNewArrivals?'':'none';
+  applyTicker();
   var naTitle=el('new-arrivals-title-display');if(naTitle)naTitle.textContent=SETTINGS.newArrivalsTitle||'✨ New Arrivals';
   var hsTitle=el('hot-sale-title-display');if(hsTitle)hsTitle.textContent=SETTINGS.hotSaleTitle||'Hot Sale!';
   var hsSection=el('hot-sale-section');
@@ -2279,8 +2348,14 @@ function renderAdmin(){
   var sorted=BRANDS.slice().sort(function(a,b){return a.brand.localeCompare(b.brand);});
   el('admin-new').innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
     +'<input type="text" id="new-arrivals-title-inp" value="'+esc(SETTINGS.newArrivalsTitle||'✨ New Arrivals')+'" placeholder="Section title…" style="flex:1;font-size:13px;font-weight:600;padding:6px 9px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;font-family:inherit;color:var(--text);outline:none;">'
-    +'<button onclick="saveNewArrivalsTitle()" style="padding:6px 11px;font-size:12px;font-weight:600;border:1px solid var(--green);background:var(--green-bg);color:var(--green-text);border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;">Save</button>'
     +'<label class="vis-toggle-label-wrap" title="Show/hide on storefront"><input type="checkbox" class="vis-checkbox" id="toggle-new-arrivals" '+(SETTINGS.showNewArrivals?'checked':'')+' onchange="toggleNewArrivals(this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label>'
+    +'</div>'
+    +'<div style="background:#fff;border:1.5px solid var(--border-md);border-radius:8px;padding:10px 12px;margin-bottom:10px;">'
+    +'<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:6px;">Ticker Banner</p>'
+    +'<div style="display:flex;gap:6px;">'
+    +'<input type="text" id="ticker-text-inp" value="'+esc(SETTINGS.tickerText||'JUST LANDED: New Arrivals! 🔥')+'" placeholder="Ticker text…" style="flex:1;font-size:13px;padding:6px 9px;border:1.5px solid var(--border-md);border-radius:8px;background:#fff;font-family:inherit;color:var(--text);outline:none;">'
+    +'<button onclick="saveNewArrivalsTitle();saveTicker();" style="padding:6px 11px;font-size:12px;font-weight:600;border:1px solid var(--green);background:var(--green-bg);color:var(--green-text);border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;">Save</button>'
+    +'</div>'
     +'</div>'
     +(NEW_ARRIVALS.length?NEW_ARRIVALS.map(function(p){return prodAdminCard(p);}).join(''):'<p style="font-size:13px;color:var(--text-hint);padding:8px 0">No new arrivals.</p>');
   el('admin-hot').innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
