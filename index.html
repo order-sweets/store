@@ -2497,24 +2497,26 @@ window.importProductsExcel=function(input){
         var distPiece=parseFloat(r[10])||0;
         var distBox=parseFloat(r[11])||0;
         var prod={
+          id:'p_'+Date.now()+'_'+i,
           name:name,
           brand:(r[1]||'').toString().trim(),
-          section:(r[2]||'Products Available').toString().trim(),
+          section:(r[2]||'catalog').toString().trim(),
           category:(r[3]||'').toString().trim(),
           weight:(r[4]||'').toString().trim(),
           discount:parseFloat(r[5])||0,
-          stock:parseInt(r[6])||0,
+          stockPieces:(parseInt(r[6])||0)*ppcVal,
           ppc:ppcVal,
-          retailPiece:retPiece,
-          retailBox:retBox||retPiece*ppcVal,
-          distPiece:distPiece,
-          distBox:distBox||distPiece*ppcVal,
+          price:retPiece,
+          cpRetail:retBox||retPiece*ppcVal,
+          priceDist:distPiece,
+          cpDist:distBox||distPiece*ppcVal,
           visRetail:(r[12]||'Yes').toString().trim().toLowerCase()!=='no',
           visDist:(r[13]||'Yes').toString().trim().toLowerCase()!=='no',
-          orderByRetail:(r[14]||'Piece & Box').toString().trim(),
-          orderByDist:(r[15]||'Piece & Box').toString().trim(),
+          unitsRetail:(r[14]||'Piece & Box').toString().trim(),
+          unitsDist:(r[15]||'Piece & Box').toString().trim(),
           img:(r[16]||'').toString().trim(),
-          id:'p_'+Date.now()+'_'+i
+          desc:'',
+          variations:[]
         };
         // Find which brand section this product belongs to
         var found=false;
@@ -2534,8 +2536,12 @@ window.importProductsExcel=function(input){
         }
         if(!found){
           // Add to first brand section that matches, or create/use default
-          var targetBrand=BRANDS.find(function(b){return b.title===prod.section;})||BRANDS[0];
-          if(!targetBrand){skipped++;continue;}
+          // Match by brand name, create new brand group if not found
+          var targetBrand=BRANDS.find(function(b){return b.brand.toLowerCase()===prod.brand.toLowerCase();});
+          if(!targetBrand){
+            targetBrand={brand:prod.brand||'Other',products:[]};
+            BRANDS.push(targetBrand);
+          }
           if(!Array.isArray(targetBrand.products))targetBrand.products=[];
           targetBrand.products.push(prod);
           added++;
