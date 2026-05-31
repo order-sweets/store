@@ -169,6 +169,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .gc.has-qty{border:2.5px solid var(--accent);}
 .gc.oos{opacity:.2;filter:grayscale(100%);}
 .gc-price{font-size:11.5px;color:var(--text);font-weight:600;margin-top:1px;}
+.gc-price-orig{font-size:10.5px;color:var(--text-muted);text-decoration:line-through;margin-top:1px;}
+.gc-price-sale{font-size:11.5px;color:#c0392b;font-weight:700;}
+.gc-save-badge{font-size:9px;font-weight:700;background:#fdecea;color:#c0392b;padding:2px 5px;border-radius:4px;margin-left:3px;vertical-align:middle;}
 
 /* ITEM CARD */
 .item-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:row;}
@@ -1379,6 +1382,8 @@ function distCasePrice(p){
 // Active-tier price selectors
 function piecePrice(p){return activeTier==='distributor'?distPiecePrice(p):retailPiecePrice(p);}
 function casePrice(p){return activeTier==='distributor'?distCasePrice(p):retailCasePrice(p);}
+function basePiecePrice(p){var inv=getInv();return activeTier==='distributor'?(inv['dp_'+p.id]!==undefined?Number(inv['dp_'+p.id]):Number(p.priceDist||p.price||0)):(inv['rp_'+p.id]!==undefined?Number(inv['rp_'+p.id]):Number(p.price||0));}
+function baseCasePrice(p){var inv=getInv();if(activeTier==='distributor'){var dp=inv['dp_'+p.id]!==undefined?Number(inv['dp_'+p.id]):Number(p.priceDist||p.price||0);return inv['dcp_'+p.id]>0?Number(inv['dcp_'+p.id]):(p.ppc>0?Math.round(dp*p.ppc*100)/100:0);}else{var rp=inv['rp_'+p.id]!==undefined?Number(inv['rp_'+p.id]):Number(p.price||0);return inv['rcp_'+p.id]>0?Number(inv['rcp_'+p.id]):(p.ppc>0?Math.round(rp*p.ppc*100)/100:0);}}
 
 // ── CURRENT CUSTOMER helpers ──
 var currentCustomer=null;
@@ -1805,7 +1810,9 @@ function gridCardHTML(p){
     html+='<input class="gc-inp" type="number" min="0" max="'+stock+'" value="'+(st.pieceQty||0)+'" inputmode="numeric" id="uqinp-piece-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'piece\',this.value)">';
     html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'piece\',1)"'+(oos?' disabled':'')+'>+</button>';
     html+='</div>';
-    html+='<div class="gc-price">$'+effectivePiecePrice(p).toFixed(2)+'</div>';
+    var _epDisc=getDiscount(p),_epBase=basePiecePrice(p),_epSale=effectivePiecePrice(p);
+    if(_epDisc>0&&_epBase>_epSale){html+='<div><span class="gc-price-orig">$'+_epBase.toFixed(2)+'</span> <span class="gc-price-sale">$'+_epSale.toFixed(2)+'</span><span class="gc-save-badge">Save '+_epDisc+'%</span></div>';}
+    else{html+='<div class="gc-price">$'+_epSale.toFixed(2)+'</div>';}
     html+='</div>';
     showDivider=true;
   }
@@ -1827,7 +1834,9 @@ function gridCardHTML(p){
     html+='<input class="gc-inp" type="number" min="0" max="'+maxCase+'" value="'+(st.caseQty||0)+'" inputmode="numeric" id="uqinp-case-'+p.id+'" onchange="setUnitQty(\''+p.id+'\',\'case\',this.value)">';
     html+='<button class="gc-btn" onclick="chgUnit(\''+p.id+'\',\'case\',1)"'+(maxCase<=0?' disabled':'')+'>+</button>';
     html+='</div>';
-    html+='<div class="gc-price">$'+effectiveCasePrice(p).toFixed(2)+'</div>';
+    var _ecDisc=getDiscount(p),_ecBase=baseCasePrice(p),_ecSale=effectiveCasePrice(p);
+    if(_ecDisc>0&&_ecBase>_ecSale){html+='<div><span class="gc-price-orig">$'+_ecBase.toFixed(2)+'</span> <span class="gc-price-sale">$'+_ecSale.toFixed(2)+'</span><span class="gc-save-badge">Save '+_ecDisc+'%</span></div>';}
+    else{html+='<div class="gc-price">$'+_ecSale.toFixed(2)+'</div>';}
     html+='</div>';
   }
   if(hasVar){
