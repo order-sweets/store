@@ -2579,27 +2579,34 @@ window.exportCSV=function(){
       s='"'+s.replace(/"/g,'""')+'"';
     return s;
   };
-  var inv2=getInv();
 
-  // ── PRODUCTS ──
+  // ── PRODUCTS ── (same columns as Excel import)
   rows.push(['PRODUCTS']);
-  rows.push(['Brand','Product','Description','Weight','Pieces/Box','Retail Piece ($)','Retail Box ($)','Dist Piece ($)','Dist Box ($)','Stock (Boxes)','Stock (Pieces)','Visible Retail','Visible Dist']);
-  BRANDS.forEach(function(b){
-    b.products.forEach(function(p){
-      var rcp=Number(inv2['rcp_'+p.id])||0;
-      var dcp=Number(inv2['dcp_'+p.id])||0;
-      var autoRcp=p.ppc>0?Math.round(p.price*p.ppc*100)/100:0;
-      var autoDcp=p.ppc>0?Math.round(p.priceDist*p.ppc*100)/100:0;
-      var stockPcs=Number(p.stockPieces)||0;
-      var boxes=p.ppc>0?Math.floor(stockPcs/p.ppc):0;
-      rows.push([
-        b.brand, p.name, p.desc||'', p.weight||'', p.ppc||'',
-        p.price.toFixed(2), (rcp>0?rcp:autoRcp).toFixed(2),
-        p.priceDist.toFixed(2), (dcp>0?dcp:autoDcp).toFixed(2),
-        boxes, stockPcs,
-        p.visRetail?'Yes':'No', p.visDist?'Yes':'No'
-      ]);
-    });
+  rows.push(['Name','Brand','Section','Category','Weight','Discount (%)','Stock (Boxes)','Pieces/Box','Retail Piece ($)','Retail Box ($)','Dist Piece ($)','Dist Box ($)','Visible Retail','Visible Dist','Units Retail','Units Dist','Image URL']);
+  rows.push(['Product name','Brand name','catalog / new / hot','Category tag','e.g. 26g','0-100','Number of boxes','Pieces per box','Retail piece price','Retail box price','Dist piece price','Dist box price','Yes / No','Yes / No','Piece & Box / Piece only / Box only','Piece & Box / Piece only / Box only','URL or blank']);
+
+  var allProds=NEW_ARRIVALS.concat(HOT_SALE).concat(BRANDS.reduce(function(a,b){return a.concat(b.products);},[]));;
+  var seen={};
+  allProds.forEach(function(p){
+    if(seen[p.id])return;seen[p.id]=1;
+    var isNew=NEW_ARRIVALS.some(function(x){return x.id===p.id;});
+    var isHot=HOT_SALE.some(function(x){return x.id===p.id;});
+    var section=isNew?'new':isHot?'hot':'catalog';
+    var brand='';
+    BRANDS.forEach(function(b){b.products.forEach(function(bp){if(bp.id===p.id)brand=b.brand;});});
+    var stockPcs=Number(p.stockPieces)||0;
+    var boxes=p.ppc>0?Math.floor(stockPcs/p.ppc):0;
+    var retBox=p.cpRetail>0?p.cpRetail:(p.ppc>0?Math.round(p.price*p.ppc*100)/100:0);
+    var distBox=p.cpDist>0?p.cpDist:(p.ppc>0?Math.round(p.priceDist*p.ppc*100)/100:0);
+    rows.push([
+      p.name, brand, section, p.category||'', p.weight||'',
+      p.discount||0, boxes, p.ppc||'',
+      (p.price||0).toFixed(2), retBox.toFixed(2),
+      (p.priceDist||0).toFixed(2), distBox.toFixed(2),
+      p.visRetail?'Yes':'No', p.visDist?'Yes':'No',
+      p.unitsRetail||'Piece & Box', p.unitsDist||'Piece & Box',
+      p.img||''
+    ]);
   });
 
   rows.push([]);
@@ -2717,7 +2724,7 @@ window.importProductsExcel=function(input){
           id:'p_'+Date.now()+'_'+i,
           name:name,
           brand:(r[1]||'').toString().trim(),
-          section:(r[2]||'catalog').toString().trim(),
+          section:(r[2]||'catalog').toString().trim().toLowerCase(),
           category:(r[3]||'').toString().trim(),
           weight:(r[4]||'').toString().trim(),
           discount:parseFloat(r[5])||0,
@@ -2762,6 +2769,15 @@ window.importProductsExcel=function(input){
           if(!Array.isArray(targetBrand.products))targetBrand.products=[];
           targetBrand.products.push(prod);
           added++;
+        }
+        // Move to correct section array if needed
+        if(prod.section==='new'&&!NEW_ARRIVALS.some(function(x){return x.id===prod.id;})){
+          NEW_ARRIVALS.push(prod);
+          // Remove from BRANDS if accidentally added
+          BRANDS.forEach(function(b){b.products=b.products.filter(function(x){return x.id!==prod.id;});});
+        } else if(prod.section==='hot'&&!HOT_SALE.some(function(x){return x.id===prod.id;})){
+          HOT_SALE.push(prod);
+          BRANDS.forEach(function(b){b.products=b.products.filter(function(x){return x.id!==prod.id;});});
         }
       }
       // Also write stock, prices and photos to localStorage so admin panel displays correctly
