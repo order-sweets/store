@@ -2541,8 +2541,7 @@ window.importProductsExcel=function(input){
           added++;
         }
       }
-      saveJ(LS_KEY,BRANDS);
-      fbSave();
+      saveProds();
       renderAdmin();
       alert('Import complete!\n\nAdded: '+added+'\nUpdated: '+updated+(skipped?' Skipped: '+skipped:''));
     }catch(err){
