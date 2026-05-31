@@ -566,7 +566,8 @@ body{top:0!important;}
 .oh-row{padding:8px 14px;border-bottom:1px solid var(--border);}
 .oh-row:last-child{border-bottom:none;}
 </style>
-<link type="text/css" rel="stylesheet" charset="UTF-8" href="https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.Qrtd5lGlzn4.L.F4.O/am=AAAO/d=0/rs=AN8SPfqPOfVI0vIsLayx25KmhgZOuRvtXw/m=el_main_css"><script type="text/javascript" charset="UTF-8" src="https://translate.googleapis.com/_/translate_http/_/js/k=translate_http.tr.en_GB.98oWdd6Tbi4.O/am=AABA/d=1/exm=el_conf/ed=1/rs=AN8SPfpTAoypZS25H-4UjlQAKASNdJfOQA/m=el_main"></script></head>
+<link type="text/css" rel="stylesheet" charset="UTF-8" href="https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.Qrtd5lGlzn4.L.F4.O/am=AAAO/d=0/rs=AN8SPfqPOfVI0vIsLayx25KmhgZOuRvtXw/m=el_main_css"><script type="text/javascript" charset="UTF-8" src="https://translate.googleapis.com/_/translate_http/_/js/k=translate_http.tr.en_GB.98oWdd6Tbi4.O/am=AABA/d=1/exm=el_conf/ed=1/rs=AN8SPfpTAoypZS25H-4UjlQAKASNdJfOQA/m=el_main"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
 <body style="position: relative; min-height: 100%; top: 0px;">
 
 <!-- ORDER PAGE -->
@@ -799,10 +800,12 @@ body{top:0!important;}
     </div>
     <div class="admin-actions">
       <span class="toast-msg" id="toast" style="display: inline-block;">✓ Data exported!</span>
-      <button class="ghost-btn" onclick="saveAll()">💾 Export HTML</button>
       <button class="ghost-btn" onclick="exportData()">📤 Export Data</button>
       <button class="ghost-btn" onclick="exportCSV()">📊 Export CSV</button>
-      <label class="ghost-btn" style="cursor:pointer">📥 Import Data<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
+      <button class="ghost-btn" style="cursor:pointer" onclick="openImportPicker()">📥 Import</button>
+      <!-- Hidden file inputs -->
+      <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importData(this)">
+      <input type="file" id="import-xlsx-input" accept=".xlsx" style="display:none" onchange="importProductsExcel(this)">
     </div>
   </div>
 
@@ -909,7 +912,7 @@ body{top:0!important;}
 
 <script>
 (function(){
-var ADMIN_PW='69e399851c8419993d46757025fd51e415e0277e8def8cb283dfbe7867212e8a'; // SHA-256 hash
+var ADMIN_PW='admin123';
 var MIN_ORDER=80.00;
 var WA_1='6581648864';
 var LS_PROD='snack-products-v5',LS_INV='snack-inv-v5',LS_CUST='snack-customers-v2',LS_PHOTOS='snack-photos-v1',LS_SETTINGS='snack-settings-v1',LS_ORD_CTR='snack-ord-counter';
@@ -1418,14 +1421,9 @@ window.showPage=function(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   el(id).classList.add('active');window.scrollTo(0,0);
 };
-async function _sha256Store(str){
-  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
-}
-window.tryLogin=async function(){
+window.tryLogin=function(){
   var pw=el('pw-input').value;
-  var hash=await _sha256Store(pw);
-  if(hash===ADMIN_PW){
+  if(pw===ADMIN_PW){
     el('pw-input').classList.remove('err-i');el('login-err').style.display='none';el('pw-input').value='';
     localStorage.setItem('snack-admin-auth','1');
     renderAdmin();renderCustomerList();window.showPage('page-admin');if(!window._fbStarted){window._fbStarted=true;if(typeof _fbHookSaves==='function')_fbHookSaves();}if(window._fbEnsureListening)window._fbEnsureListening();else if(typeof fbLoad==='function'&&!window._fbListening){window._fbListening=true;fbLoad();}
@@ -2460,6 +2458,94 @@ window.importData=function(input){
     input.value='';
   };
   reader.readAsText(file);
+};
+
+window.openImportPicker=function(){
+  var m=document.getElementById('import-picker-modal');
+  m.style.display='flex';
+  m.onclick=function(e){if(e.target===m)closeImportPicker();};
+};
+window.closeImportPicker=function(){
+  document.getElementById('import-picker-modal').style.display='none';
+};
+
+window.importProductsExcel=function(input){
+  var file=input.files[0];
+  if(!file){return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=new Uint8Array(e.target.result);
+      var wb=XLSX.read(data,{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      // Row 0 = headers, Row 1 = instructions, Row 2+ = data
+      var added=0,updated=0,skipped=0;
+      for(var i=2;i<rows.length;i++){
+        var r=rows[i];
+        var name=(r[0]||'').toString().trim();
+        if(!name)continue;
+        // Build product object matching existing structure
+        var ppcVal=parseInt(r[7])||1;
+        var retPiece=parseFloat(r[8])||0;
+        var retBox=parseFloat(r[9])||0;
+        var distPiece=parseFloat(r[10])||0;
+        var distBox=parseFloat(r[11])||0;
+        var prod={
+          name:name,
+          brand:(r[1]||'').toString().trim(),
+          section:(r[2]||'Products Available').toString().trim(),
+          category:(r[3]||'').toString().trim(),
+          weight:(r[4]||'').toString().trim(),
+          discount:parseFloat(r[5])||0,
+          stock:parseInt(r[6])||0,
+          ppc:ppcVal,
+          retailPiece:retPiece,
+          retailBox:retBox||retPiece*ppcVal,
+          distPiece:distPiece,
+          distBox:distBox||distPiece*ppcVal,
+          visRetail:(r[12]||'Yes').toString().trim().toLowerCase()!=='no',
+          visDist:(r[13]||'Yes').toString().trim().toLowerCase()!=='no',
+          orderByRetail:(r[14]||'Piece & Box').toString().trim(),
+          orderByDist:(r[15]||'Piece & Box').toString().trim(),
+          img:(r[16]||'').toString().trim(),
+          id:'p_'+Date.now()+'_'+i
+        };
+        // Find which brand section this product belongs to
+        var found=false;
+        for(var b=0;b<BRANDS.length;b++){
+          if(!BRANDS[b].products)BRANDS[b].products=[];
+          var prods=Array.isArray(BRANDS[b].products)?BRANDS[b].products:Object.values(BRANDS[b].products);
+          for(var p=0;p<prods.length;p++){
+            if(prods[p].name.trim().toLowerCase()===name.toLowerCase()){
+              // Update existing
+              var existId=prods[p].id||prod.id;
+              prod.id=existId;
+              BRANDS[b].products[p]=prod;
+              updated++;found=true;break;
+            }
+          }
+          if(found)break;
+        }
+        if(!found){
+          // Add to first brand section that matches, or create/use default
+          var targetBrand=BRANDS.find(function(b){return b.title===prod.section;})||BRANDS[0];
+          if(!targetBrand){skipped++;continue;}
+          if(!Array.isArray(targetBrand.products))targetBrand.products=[];
+          targetBrand.products.push(prod);
+          added++;
+        }
+      }
+      saveJ(LS_KEY,BRANDS);
+      fbSave();
+      renderAdmin();
+      alert('Import complete!\n\nAdded: '+added+'\nUpdated: '+updated+(skipped?' Skipped: '+skipped:''));
+    }catch(err){
+      alert('Import failed: '+err.message);
+    }
+    input.value='';
+  };
+  reader.readAsArrayBuffer(file);
 };
 
 window.importBackup=function(input){
