@@ -2486,6 +2486,7 @@ window.importProductsExcel=function(input){
       var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
       // Row 0 = headers, Row 1 = instructions, Row 2+ = data
       var added=0,updated=0,skipped=0;
+      var importedProds=[];
       for(var i=2;i<rows.length;i++){
         var r=rows[i];
         var name=(r[0]||'').toString().trim();
@@ -2534,8 +2535,8 @@ window.importProductsExcel=function(input){
           }
           if(found)break;
         }
+        importedProds.push(prod);
         if(!found){
-          // Add to first brand section that matches, or create/use default
           // Match by brand name, create new brand group if not found
           var targetBrand=BRANDS.find(function(b){return b.brand.toLowerCase()===prod.brand.toLowerCase();});
           if(!targetBrand){
@@ -2547,6 +2548,19 @@ window.importProductsExcel=function(input){
           added++;
         }
       }
+      // Also write stock, prices and photos to localStorage so admin panel displays correctly
+      try{
+        var inv=JSON.parse(localStorage.getItem('snack-inv-v5')||'{}');
+        var photos=JSON.parse(localStorage.getItem('snack-photos-v1')||'{}');
+        importedProds.forEach(function(p){
+          inv[p.id]=p.stockPieces;
+          if(p.price) inv['rp_'+p.id]=p.price;
+          if(p.priceDist) inv['dp_'+p.id]=p.priceDist;
+          if(p.img) photos[p.id]=p.img;
+        });
+        localStorage.setItem('snack-inv-v5',JSON.stringify(inv));
+        localStorage.setItem('snack-photos-v1',JSON.stringify(photos));
+      }catch(e){}
       saveProds();
       renderAdmin();
       alert('Import complete!\n\nAdded: '+added+'\nUpdated: '+updated+(skipped?' Skipped: '+skipped:''));
