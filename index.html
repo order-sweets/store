@@ -424,16 +424,21 @@ body{top:0!important;}
 .lightbox-close{position:absolute;top:-16px;right:-16px;width:40px;height:40px;background:#fff;border-radius:50%;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.25);z-index:10;}
 
 /* LOGIN */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
-.login-card{background:#fff;border:1px solid var(--border-md);border-radius:var(--r-lg);padding:2rem 1.5rem;width:100%;max-width:340px;}
-.login-card h2{font-family:'DM Serif Display',serif;font-size:24px;font-weight:400;margin-bottom:6px;}
-.login-sub{font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:#7DD8F0;}
+.login-card{background:#fff;border:none;border-radius:22px;padding:36px 28px 28px;width:100%;max-width:360px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.12);}
+.login-card h2{font-family:'DM Sans',sans-serif;font-size:26px;font-weight:700;margin-bottom:16px;color:#1C1B18;}
+.login-sub{display:none;}
+.login-brand{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E040FB;margin-bottom:8px;}
 .lfield{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
-.lfield label{font-size:14px;color:var(--text-muted);font-weight:500;}
-.lfield input{font-size:16px;padding:13px;border:1.5px solid var(--border-md);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:inherit;outline:none;-webkit-appearance:none;}
+.lfield label{display:none;}
+.lfield input{font-size:16px;padding:13px 16px;border:1.5px solid #ddd;border-radius:12px;background:#fff;color:#1C1B18;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;text-align:center;box-sizing:border-box;width:100%;}
+.lfield input:focus{border-color:#E040FB;}
 .lfield input.err-i{border-color:#E24B4A;}
 .login-err{font-size:13px;color:#A32D2D;margin-bottom:10px;display:none;}
-.login-btn{width:100%;padding:14px;background:var(--text);border:none;border-radius:var(--r);font-size:15px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;}
+.login-btn{width:100%;padding:14px;background:#E040FB;border:none;border-radius:12px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.login-btn:hover{background:#C000E0;}
+.back-btn{display:block;width:100%;text-align:center;font-size:13px;color:#888;margin-top:16px;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:4px;}
+.back-btn:hover{color:#555;}
 .back-btn{display:block;width:100%;text-align:center;font-size:14px;color:var(--text-muted);margin-top:16px;cursor:pointer;background:none;border:none;font-family:inherit;padding:6px;}
 
 /* ADMIN */
@@ -882,12 +887,12 @@ body{top:0!important;}
 <div class="page" id="page-login">
   <div class="login-wrap">
     <div class="login-card">
-      <h2>Admin Access</h2>
-      <p class="login-sub">Enter your password to manage products and customers.</p>
-      <div class="lfield"><label>Password</label><input type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')tryLogin()"></div>
+      <div class="login-brand">Bee Events &amp; SWITS</div>
+      <h2>Admin Panel</h2>
+      <div class="lfield"><input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')tryLogin()"></div>
       <p class="login-err" id="login-err" style="display: none;">Incorrect password. Please try again.</p>
-      <button class="login-btn" onclick="tryLogin()">Sign In</button>
-      <button class="back-btn" onclick="showPage('page-order')">← Back to Order Form</button>
+      <button class="login-btn" onclick="tryLogin()">Unlock</button>
+      <button class="back-btn" onclick="showPage('page-order')">← Back to Main Page</button>
     </div>
   </div>
 </div>
