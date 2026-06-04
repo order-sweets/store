@@ -1109,6 +1109,10 @@ function saveInv(inv){
   saveJ(LS_INV,inv);
   _invLocalWriteTime=Date.now();
   _invLocalSnapshot=JSON.parse(JSON.stringify(inv)); // capture snapshot
+  // Write directly to /store/inv.json so inv is never overwritten by the full blob push
+  if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote){
+    fetch(_FB_URL+'/store/inv.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(inv)}).catch(function(){});
+  }
   if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();
 }
 function saveProds(){saveJ(LS_PROD,{newArrivals:NEW_ARRIVALS,hotSale:HOT_SALE,brands:BRANDS});if(window._fbStarted&&!_fbApplyingRemote&&!window._fbApplyingRemote)_fbDebouncedPush();}
@@ -2682,7 +2686,7 @@ window.importData=function(input){
         if(inv['vr_'+p.id]===undefined)inv['vr_'+p.id]=p.visRetail!==undefined?p.visRetail:1;
         if(inv['vd_'+p.id]===undefined)inv['vd_'+p.id]=p.visDist!==undefined?p.visDist:1;
       });
-      saveJ(LS_INV,inv);
+      saveInv(inv); // use saveInv so Firebase /store/inv.json is updated directly
       renderAdmin();renderCustomerList();renderOrder();renderBasket();      var restored=[];
       restored.push('Products, customers, inventory');
       if(data.restockHistory)restored.push('restock history');
@@ -2798,7 +2802,7 @@ window.importProductsExcel=function(input){
           if(p.priceDist) inv['dp_'+p.id]=p.priceDist;
           if(p.img){photos[p.id]=p.img;}
         });
-        localStorage.setItem('snack-inv-v5',JSON.stringify(inv));
+        saveInv(inv); // use saveInv so Firebase /store/inv.json is updated directly
         saveJ(LS_PHOTOS,photos);
       }catch(e){}
       saveProds();
@@ -3225,7 +3229,7 @@ window._fbApplyData = function(d) {
     }
     if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
     if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
-    if (Object.prototype.hasOwnProperty.call(d,'pendingOrders')) localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders || []));
+    localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders || []));
     if (d.ordCounter != null) {
       var localOrd = parseInt(localStorage.getItem(LS_ORD_CTR)||'0',10);
       if (d.ordCounter > localOrd) localStorage.setItem(LS_ORD_CTR, String(d.ordCounter));
@@ -3356,7 +3360,7 @@ function _fbGetAllData() {
 
   return {
     products:  prods,
-    inv:       lj('snack-inv-v5') || {},
+    // inv excluded — written directly to /store/inv.json via saveInv, never via blob push
     customers: custs,
     settings:  lj('snack-settings-v1') || {},
     photos:    lj('snack-photos-v1') || {},
