@@ -3442,6 +3442,7 @@ function fbPushAll() {
     data._v = now;
     data._pushId = pushId;
     data._deviceId = _fbDeviceId;
+    var inv = (function(){try{return JSON.parse(localStorage.getItem('snack-inv-v5'))||{};}catch(e){return{};}}());
     return fetch(_FB_URL + '/store.json', {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
@@ -3450,6 +3451,13 @@ function fbPushAll() {
       _fbStatus('✓ Saved', '#38a169');
       // Discard any SSE data queued before our push landed — it's stale
       _fbPendingData = null;
+      // Also PUT /store/inv.json directly so accounts and invoice always
+      // have a fresh dedicated path — never left empty by blob push timing
+      fetch(_FB_URL + '/store/inv.json', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(inv)
+      }).catch(function(){});
       return 'saved';
     });
   }).catch(function() {
