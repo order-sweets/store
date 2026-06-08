@@ -2231,17 +2231,14 @@ function _sendWA(fullMsg,orderId,sub){
     _fromStore:true
   });
   localStorage.setItem('beinv-pending',JSON.stringify(beinvPending));
-  // Write pending orders directly to /store/pendingOrders.json so invoice system receives them.
-  // We removed pendingOrders from the blob push to prevent ghost order resurrection,
-  // so this direct write is the only path to get new orders to the invoice system.
-  if(!window._fbApplyingRemote){
-    fetch(_FB_URL+'/store/pendingOrders.json',{
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(beinvPending)
-    }).catch(function(){});
-    clearTimeout(_fbPushTimer);fbPushAll();
-  }
+  // Always write pending orders directly to /store/pendingOrders.json.
+  // This must fire unconditionally — it is the only path to get orders to the invoice system.
+  fetch(_FB_URL+'/store/pendingOrders.json',{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(beinvPending)
+  }).catch(function(){});
+  if(!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
     el('placed-order-id').textContent=orderId;
   el('wa-btn').disabled=false;
   el('placed-modal').classList.add('open');
