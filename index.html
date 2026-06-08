@@ -2231,8 +2231,9 @@ function _sendWA(fullMsg,orderId,sub){
     _fromStore:true
   });
   localStorage.setItem('beinv-pending',JSON.stringify(beinvPending));
-  // Always write pending orders directly to /store/pendingOrders.json.
-  // This must fire unconditionally — it is the only path to get orders to the invoice system.
+  // Write pending orders directly to /store/pendingOrders.json for immediate delivery to invoice.
+  // fbPushAll below also includes pendingOrders in the blob (PUT /store.json) so the node is
+  // never wiped — the two writes carry the same data and do not conflict.
   fetch(_FB_URL+'/store/pendingOrders.json',{
     method:'PUT',
     headers:{'Content-Type':'application/json'},
@@ -3390,8 +3391,7 @@ function _fbGetAllData() {
     settings:  lj('snack-settings-v1') || {},
     photos:    lj('snack-photos-v1') || {},
     restockHistory: lj('snack-restock-v1') || {},
-    // pendingOrders excluded — invoice system is the sole authority on pending orders.
-    // Store must never push pendingOrders or it risks resurrecting cleared orders.
+    pendingOrders: lj('beinv-pending') || [],
     tombstones: tombstones,
     ordCounter: parseInt(localStorage.getItem('snack-ord-counter')||'0')
   };
