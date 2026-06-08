@@ -2231,7 +2231,17 @@ function _sendWA(fullMsg,orderId,sub){
     _fromStore:true
   });
   localStorage.setItem('beinv-pending',JSON.stringify(beinvPending));
-  if(!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
+  // Write pending orders directly to /store/pendingOrders.json so invoice system receives them.
+  // We removed pendingOrders from the blob push to prevent ghost order resurrection,
+  // so this direct write is the only path to get new orders to the invoice system.
+  if(!window._fbApplyingRemote){
+    fetch(_FB_URL+'/store/pendingOrders.json',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(beinvPending)
+    }).catch(function(){});
+    clearTimeout(_fbPushTimer);fbPushAll();
+  }
     el('placed-order-id').textContent=orderId;
   el('wa-btn').disabled=false;
   el('placed-modal').classList.add('open');
@@ -3241,7 +3251,13 @@ window._fbApplyData = function(d) {
     }
     if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
     if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
-    localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders || []));
+    // Only update beinv-pending if d.pendingOrders is explicitly present in the SSE data.
+    // Since pendingOrders was removed from the blob push, d.pendingOrders will be absent
+    // on normal SSE updates — in that case, leave beinv-pending unchanged.
+    // It will be updated when invoice system writes to /store/pendingOrders.json directly.
+    if (d.pendingOrders !== undefined && d.pendingOrders !== null) {
+      localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
+    }
     if (d.ordCounter != null) {
       var localOrd = parseInt(localStorage.getItem(LS_ORD_CTR)||'0',10);
       if (d.ordCounter > localOrd) localStorage.setItem(LS_ORD_CTR, String(d.ordCounter));
