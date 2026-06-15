@@ -2231,6 +2231,27 @@ function _sendWA(fullMsg,orderId,sub){
     _fromStore:true
   });
   localStorage.setItem('beinv-pending',JSON.stringify(beinvPending));
+  // Write the new order to Firebase by MERGING it onto the CURRENT Firebase pending list,
+  // not by overwriting with our local copy (which may contain stale orders the invoice
+  // system already cleared). Fetch fresh, prepend only this new order, write back.
+  // This prevents resurrecting cleared/invoiced orders. See fbPushAll for the same pattern.
+  var _newOrder=beinvPending[0];
+  fetch(_FB_URL+'/store/pendingOrders.json')
+    .then(function(r){return r.json();})
+    .then(function(fresh){
+      fresh=Array.isArray(fresh)?fresh:[];
+      // Only add if not already present (avoid dup if echo already landed)
+      if(!fresh.some(function(o){return o&&o.id===_newOrder.id;}))fresh.unshift(_newOrder);
+      return fetch(_FB_URL+'/store/pendingOrders.json',{
+        method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(fresh)
+      });
+    })
+    .catch(function(){
+      // Fallback: if fetch fails, write local copy so the order isn't lost entirely
+      fetch(_FB_URL+'/store/pendingOrders.json',{
+        method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(beinvPending)
+      }).catch(function(){});
+    });
   if(!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
     el('placed-order-id').textContent=orderId;
   el('wa-btn').disabled=false;
@@ -3241,7 +3262,13 @@ window._fbApplyData = function(d) {
     }
     if (d.photos) { photos = d.photos; saveJ(LS_PHOTOS, photos); }
     if (d.restockHistory) { restockHistory = d.restockHistory; saveJ(LS_RESTOCK, restockHistory); }
-    localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders || []));
+    // Only update beinv-pending if d.pendingOrders is explicitly present in the SSE data.
+    // Since pendingOrders was removed from the blob push, d.pendingOrders will be absent
+    // on normal SSE updates — in that case, leave beinv-pending unchanged.
+    // It will be updated when invoice system writes to /store/pendingOrders.json directly.
+    if (d.pendingOrders !== undefined && d.pendingOrders !== null) {
+      localStorage.setItem('beinv-pending', JSON.stringify(d.pendingOrders));
+    }
     if (d.ordCounter != null) {
       var localOrd = parseInt(localStorage.getItem(LS_ORD_CTR)||'0',10);
       if (d.ordCounter > localOrd) localStorage.setItem(LS_ORD_CTR, String(d.ordCounter));
@@ -3377,8 +3404,7 @@ function _fbGetAllData() {
     settings:  lj('snack-settings-v1') || {},
     photos:    lj('snack-photos-v1') || {},
     restockHistory: lj('snack-restock-v1') || {},
-    // pendingOrders excluded — invoice system is the sole authority on pending orders.
-    // Store must never push pendingOrders or it risks resurrecting cleared orders.
+    pendingOrders: lj('beinv-pending') || [],
     tombstones: tombstones,
     ordCounter: parseInt(localStorage.getItem('snack-ord-counter')||'0')
   };
@@ -3418,10 +3444,21 @@ function _fbApplyLatestSnapshot(successMsg) {
 }
 
 function _fbPrepareOutbound() {
-  // Read directly from localStorage — no pre-GET needed.
-  // The pre-GET was a race condition source: it could return stale Firebase data
-  // and re-populate deleted products back into localStorage before the push fired.
-  return Promise.resolve(_fbGetAllData());
+  // Read most data directly from localStorage (no pre-GET — avoids the product
+  // resurrection race). EXCEPTION: pendingOrders must come from FRESH Firebase, not
+  // localStorage, because the store's local copy may still contain orders the invoice
+  // system already cleared. Using stale localStorage here resurrects cleared orders.
+  var data = _fbGetAllData();
+  return fetch(_FB_URL + '/store/pendingOrders.json')
+    .then(function(r){ return r.json(); })
+    .then(function(fresh){
+      data.pendingOrders = Array.isArray(fresh) ? fresh : [];
+      return data;
+    })
+    .catch(function(){
+      // If the fetch fails, fall back to localStorage copy so the node isn't wiped
+      return data;
+    });
 }
 
 function fbPushAll() {
