@@ -2231,28 +2231,32 @@ function _sendWA(fullMsg,orderId,sub){
     _fromStore:true
   });
   localStorage.setItem('beinv-pending',JSON.stringify(beinvPending));
-  // Write the new order to Firebase by MERGING it onto the CURRENT Firebase pending list,
-  // not by overwriting with our local copy (which may contain stale orders the invoice
-  // system already cleared). Fetch fresh, prepend only this new order, write back.
-  // This prevents resurrecting cleared/invoiced orders. See fbPushAll for the same pattern.
+  // Write the new order to Firebase by MERGING it onto the CURRENT Firebase pending list
+  // (not our local copy, which may contain orders the invoice system already cleared).
+  // CRITICAL: fbPushAll must run AFTER this write completes, not in parallel — otherwise
+  // the blob PUT races the direct write and can wipe the new order. So we chain them.
   var _newOrder=beinvPending[0];
   fetch(_FB_URL+'/store/pendingOrders.json')
     .then(function(r){return r.json();})
     .then(function(fresh){
       fresh=Array.isArray(fresh)?fresh:[];
-      // Only add if not already present (avoid dup if echo already landed)
       if(!fresh.some(function(o){return o&&o.id===_newOrder.id;}))fresh.unshift(_newOrder);
       return fetch(_FB_URL+'/store/pendingOrders.json',{
         method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(fresh)
       });
     })
+    .then(function(){
+      // Direct write landed — NOW trigger the full blob push (reads fresh pendingOrders)
+      if(!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
+    })
     .catch(function(){
-      // Fallback: if fetch fails, write local copy so the order isn't lost entirely
+      // Fallback: write local copy so the order isn't lost, then push
       fetch(_FB_URL+'/store/pendingOrders.json',{
         method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(beinvPending)
-      }).catch(function(){});
+      }).catch(function(){}).then(function(){
+        if(!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
+      });
     });
-  if(!window._fbApplyingRemote){clearTimeout(_fbPushTimer);fbPushAll();}
     el('placed-order-id').textContent=orderId;
   el('wa-btn').disabled=false;
   el('placed-modal').classList.add('open');
