@@ -1287,7 +1287,7 @@ window.savePopupContent=function(){
   SETTINGS.popupTitle=el('popup-title-inp').value.trim();
   SETTINGS.popupBody=el('popup-body-inp').value.trim();
   SETTINGS.popupImage=SETTINGS.popupImage||''; // preserved from upload
-  var urlInp=el('popup-img-url');if(urlInp&&urlInp.value.trim())SETTINGS.popupImage=urlInp.value.trim();
+  var urlInp=el('popup-img-url');if(urlInp&&urlInp.value.trim())SETTINGS.popupImage=window._toEmbedURL(urlInp.value.trim());
   saveSettings();
   var t=el('toast');t.style.display='inline-block';t.textContent='✓ Popup saved!';
   setTimeout(function(){t.style.display='none';t.textContent='✓ Saved!';},2500);
@@ -2514,9 +2514,19 @@ window.deleteProduct=function(id){
   if(photos[id]!==undefined){delete photos[id];saveJ(LS_PHOTOS,photos);}
   saveProds();clearTimeout(_fbPushTimer);fbPushAll();renderAdmin();renderOrder();
 };
+window._toEmbedURL=function(url){
+  // Convert Google Drive share/view links to embeddable thumbnail URL
+  // Handles: /file/d/{id}/view, /open?id={id}, uc?export=view&id={id}, uc?id={id}
+  var m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m&&(url.indexOf('drive.google.com')!==-1||url.indexOf('docs.google.com')!==-1)){
+    return'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w800';
+  }
+  return url;
+};
 window.setPhotoURL=function(id){
   var inp=el('photo-url-'+id);if(!inp)return;
   var url=inp.value.trim();if(!url){alert('Please paste an image URL first.');return;}
+  url=window._toEmbedURL(url);
   photos[id]=url;saveJ(LS_PHOTOS,photos);
   var t=el('photo-thumb-'+id);if(t)t.innerHTML='<img src="'+url+'" alt="">';
   renderOrder();renderAdmin();
