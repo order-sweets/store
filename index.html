@@ -965,11 +965,11 @@ body{top:0!important;}
         <div class="form-field"><label>Weight per Piece</label><input type="text" id="add-weight" placeholder=""></div>
         <div class="form-field"><label>Discount % (both tiers)</label><input type="number" id="add-disc" placeholder="" min="0" max="100" inputmode="numeric"></div>
         <div class="form-field"><label>Opening Stock (Boxes)</label><input type="number" id="add-stock" placeholder="" min="0" inputmode="numeric"></div>
-        <div class="form-field"><label>Pieces per Box</label><input type="number" id="add-ppc" placeholder="" min="1" inputmode="numeric"></div>
-        <div class="form-field"><label>Retailers Piece Price ($)</label><input type="number" id="add-price" placeholder="" min="0" step="0.01" inputmode="decimal"></div>
-        <div class="form-field"><label>Retailers Box Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price" placeholder="" min="0" step="0.01" inputmode="decimal"></div>
-        <div class="form-field"><label>Distributor Piece Price ($)</label><input type="number" id="add-price-dist" placeholder="" min="0" step="0.01" inputmode="decimal"></div>
-        <div class="form-field"><label>Distributor Box Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price-dist" placeholder="" min="0" step="0.01" inputmode="decimal"></div>
+        <div class="form-field"><label>Pieces per Box</label><input type="number" id="add-ppc" placeholder="" min="1" inputmode="numeric" oninput="_calcPrices('add-price','add-case-price','add-price-dist','add-case-price-dist','add-ppc','ppc')"></div>
+        <div class="form-field"><label>Retailers Piece Price ($)</label><input type="number" id="add-price" placeholder="" min="0" step="0.01" inputmode="decimal" oninput="_calcPrices('add-price','add-case-price','add-price-dist','add-case-price-dist','add-ppc','rp')"></div>
+        <div class="form-field"><label>Retailers Box Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price" placeholder="" min="0" step="0.01" inputmode="decimal" oninput="_calcPrices('add-price','add-case-price','add-price-dist','add-case-price-dist','add-ppc','rcp')"></div>
+        <div class="form-field"><label>Distributor Piece Price ($)</label><input type="number" id="add-price-dist" placeholder="" min="0" step="0.01" inputmode="decimal" oninput="_calcPrices('add-price','add-case-price','add-price-dist','add-case-price-dist','add-ppc','dp')"></div>
+        <div class="form-field"><label>Distributor Box Price ($) <span style="font-weight:400;color:var(--text-hint)">(auto if blank)</span></label><input type="number" id="add-case-price-dist" placeholder="" min="0" step="0.01" inputmode="decimal" oninput="_calcPrices('add-price','add-case-price','add-price-dist','add-case-price-dist','add-ppc','dcp')"></div>
         <div class="form-field"><label>Visible to Retailers</label><select id="add-vis-retail"><option value="1">Yes</option><option value="0">No</option></select></div>
         <div class="form-field"><label>Visible to Distributors</label><select id="add-vis-dist"><option value="1">Yes</option><option value="0">No</option></select></div>
         <div class="form-field"><label style="color:var(--blue-text);font-weight:600">🏪 Retailers can order by</label><select id="add-units-retail"><option value="both">Piece &amp; Box</option><option value="piece">Piece only</option><option value="case">Box only</option></select></div>
@@ -2353,13 +2353,13 @@ function prodAdminCard(p){
         +'<div class="admin-field"><label>Discount % (all tiers)</label><input type="number" inputmode="numeric" min="0" max="100" id="edisc-'+p.id+'" value="'+disc+'"></div>'
         // Row 4 — Opening Stock (Boxes) | Pieces per Box
         +'<div class="admin-field"><label>Stock (Boxes)</label><input type="number" inputmode="numeric" min="0" id="estock-'+p.id+'" value="'+(p.ppc>0?Math.floor(stock/p.ppc):stock)+'" placeholder="0"></div>'
-        +'<div class="admin-field"><label>Pieces per Box</label><input type="number" inputmode="numeric" min="0" id="eppc-'+p.id+'" value="'+(p.ppc||'')+'" placeholder="e.g. 24"></div>'
+        +'<div class="admin-field"><label>Pieces per Box</label><input type="number" inputmode="numeric" min="0" id="eppc-'+p.id+'" value="'+(p.ppc||'')+'" placeholder="e.g. 24" oninput="_calcPrices(\'erp-'+p.id+'\',\'ercp-'+p.id+'\',\'edp-'+p.id+'\',\'edcp-'+p.id+'\',\'eppc-'+p.id+'\',\'ppc\')"></div>'
         // Row 5 — Retail Piece Price | Retail Box Price
-        +'<div class="admin-field"><label>Retailers Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="erp-'+p.id+'" value="'+rp.toFixed(2)+'"></div>'
-        +'<div class="admin-field"><label>Retailers Box Price ($) <small style="color:var(--text-hint)">(auto $'+autoRcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="ercp-'+p.id+'" value="'+(rcp>0?rcp:'')+'" placeholder="'+autoRcp+'"></div>'
+        +'<div class="admin-field"><label>Retailers Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="erp-'+p.id+'" value="'+rp.toFixed(2)+'" oninput="_calcPrices(\'erp-'+p.id+'\',\'ercp-'+p.id+'\',\'edp-'+p.id+'\',\'edcp-'+p.id+'\',\'eppc-'+p.id+'\',\'rp\')"></div>'
+        +'<div class="admin-field"><label>Retailers Box Price ($) <small style="color:var(--text-hint)">(auto $'+autoRcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="ercp-'+p.id+'" value="'+(rcp>0?rcp:'')+'" placeholder="'+autoRcp+'" oninput="_calcPrices(\'erp-'+p.id+'\',\'ercp-'+p.id+'\',\'edp-'+p.id+'\',\'edcp-'+p.id+'\',\'eppc-'+p.id+'\',\'rcp\')"></div>'
         // Row 6 — Distributor Piece Price | Distributor Box Price
-        +'<div class="admin-field"><label>Distributor Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="edp-'+p.id+'" value="'+dp.toFixed(2)+'"></div>'
-        +'<div class="admin-field"><label>Distributor Box Price ($) <small style="color:var(--text-hint)">(auto $'+autoDcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="edcp-'+p.id+'" value="'+(dcp>0?dcp:'')+'" placeholder="'+autoDcp+'"></div>'
+        +'<div class="admin-field"><label>Distributor Piece Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="edp-'+p.id+'" value="'+dp.toFixed(2)+'" oninput="_calcPrices(\'erp-'+p.id+'\',\'ercp-'+p.id+'\',\'edp-'+p.id+'\',\'edcp-'+p.id+'\',\'eppc-'+p.id+'\',\'dp\')"></div>'
+        +'<div class="admin-field"><label>Distributor Box Price ($) <small style="color:var(--text-hint)">(auto $'+autoDcp+')</small></label><input type="number" inputmode="decimal" min="0" step="0.01" id="edcp-'+p.id+'" value="'+(dcp>0?dcp:'')+'" placeholder="'+autoDcp+'" oninput="_calcPrices(\'erp-'+p.id+'\',\'ercp-'+p.id+'\',\'edp-'+p.id+'\',\'edcp-'+p.id+'\',\'eppc-'+p.id+'\',\'dcp\')"></div>'
         // Row 7 — Visible to Retail | Visible to Distributors
         +'<div class="admin-field"><div class="vis-toggle-row retail'+(hidden?' vis-disabled':'')+'" title="'+(hidden?'Unhide product to change visibility':'')+'"><span class="vis-toggle-label">🏪 Visible to Retailers</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisr-'+p.id+'" '+(visR&&!hidden?'checked':'')+' '+(hidden?'disabled':'')+' onchange="saveVisRetail(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
         +'<div class="admin-field"><div class="vis-toggle-row dist'+(hidden?' vis-disabled':'')+'" title="'+(hidden?'Unhide product to change visibility':'')+'"><span class="vis-toggle-label">\uD83D\uDCE6 Visible to Distributors</span><label class="vis-toggle-label-wrap"><input type="checkbox" class="vis-checkbox" id="evisd-'+p.id+'" '+(visD&&!hidden?'checked':'')+' '+(hidden?'disabled':'')+' onchange="saveVisDist(\''+p.id+'\',this.checked)"><span class="vis-toggle-track"><span class="vis-toggle-thumb"></span></span></label></div></div>'
@@ -2514,12 +2514,29 @@ window.deleteProduct=function(id){
   if(photos[id]!==undefined){delete photos[id];saveJ(LS_PHOTOS,photos);}
   saveProds();clearTimeout(_fbPushTimer);fbPushAll();renderAdmin();renderOrder();
 };
+// Bidirectional price calc: piece↔box, triggered by oninput on any price/ppc field
+window._calcPrices=function(rpId,rcpId,dpId,dcpId,ppcId,changed){
+  var g=function(id){var e=document.getElementById(id);return e&&e.value!==''?parseFloat(e.value):null;};
+  var s=function(id,val){var e=document.getElementById(id);if(e&&e.value==='')e.value=Math.round(val*100)/100;};
+  var rp=g(rpId),rcp=g(rcpId),dp=g(dpId),dcp=g(dcpId),ppc=g(ppcId);
+  if(!ppc)return;
+  if(changed==='rp'&&rp!==null&&rcp===null)s(rcpId,rp*ppc);
+  if(changed==='rcp'&&rcp!==null&&rp===null)s(rpId,rcp/ppc);
+  if(changed==='dp'&&dp!==null&&dcp===null)s(dcpId,dp*ppc);
+  if(changed==='dcp'&&dcp!==null&&dp===null)s(dpId,dcp/ppc);
+  if(changed==='ppc'){
+    if(rp!==null&&rcp===null)s(rcpId,rp*ppc);
+    else if(rcp!==null&&rp===null)s(rpId,rcp/ppc);
+    if(dp!==null&&dcp===null)s(dcpId,dp*ppc);
+    else if(dcp!==null&&dp===null)s(dpId,dcp/ppc);
+  }
+};
 window._toEmbedURL=function(url){
   // Convert Google Drive share/view links to embeddable thumbnail URL
   // Handles: /file/d/{id}/view, /open?id={id}, uc?export=view&id={id}, uc?id={id}
   var m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if(m&&(url.indexOf('drive.google.com')!==-1||url.indexOf('docs.google.com')!==-1)){
-    return'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w800';
+    return'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w1600';
   }
   return url;
 };
@@ -2810,7 +2827,7 @@ window.importProductsExcel=function(input){
           visDist:(r[13]||'Yes').toString().trim().toLowerCase()!=='no',
           unitsRetail:(r[14]||'Piece & Box').toString().trim(),
           unitsDist:(r[15]||'Piece & Box').toString().trim(),
-          img:(r[16]||'').toString().trim(),
+          img:window._toEmbedURL((r[16]||'').toString().trim()),
           desc:'',
           variations:[]
         };
@@ -2924,7 +2941,7 @@ window.addProduct=function(){
   var visDist=parseInt(el('add-vis-dist').value);if(isNaN(visDist))visDist=1;
   var unitsRetail=el('add-units-retail').value||'both';
   var unitsDist=el('add-units-dist').value||'both';
-  if(!name){alert('Please enter a product name.');return;}if(!price){alert('Please enter a retail price.');return;}
+  if(!name){alert('Please enter a product name.');return;}
   if(section==='catalog'&&!brand){alert('Please enter a brand name.');return;}
   var id='p_'+Date.now();
   var inv=getInv();
